@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Carnet IFSI</string>
+    <string name="title_activity_main">Carnet IFSI</string>
+    <string name="package_name">fr.carnetifsi.app</string>
+    <string name="custom_url_scheme">fr.carnetifsi.app</string>
+</resources>

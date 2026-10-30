@@ -1,0 +1,24 @@
+{
+  "appId": "fr.carnetifsi.app",
+  "appName": "Carnet IFSI",
+  "webDir": "www",
+  "backgroundColor": "#F6F4EF",
+  "android": {
+    "backgroundColor": "#F6F4EF"
+  },
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#F6F4EF"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "launchAutoHide": true,
+      "backgroundColor": "#F6F4EF",
+      "showSpinner": false
+    },
+    "SystemBars": {
+      "insetsHandling": "native"
+    }
+  }
+}
