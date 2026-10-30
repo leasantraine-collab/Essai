@@ -306,7 +306,7 @@ function vReglages(){
   <div class="set-group"><span class="eyebrow">Données</span><div class="list">
    <button class="li" data-act="reset" style="grid-template-columns:minmax(0,1fr)"><span class="t danger">Réinitialiser ma progression</span></button></div>
    <p class="muted" style="padding:0 4px">Votre progression reste sur cet appareil, rien n'est envoyé en ligne.</p></div>
-  <div class="set-group"><span class="eyebrow">À propos</span><div class="list"><div class="set-row"><span>Carnet IFSI</span><span class="muted">Version 1.0</span></div>
+  <div class="set-group"><span class="eyebrow">À propos</span><div class="list"><div class="set-row"><span>Carnet IFSI</span><span class="muted">Version 1.1</span></div>
    <div class="set-row" style="display:block"><span class="muted">${FICHES.length} fiches, ${FULL_COURS.length} cours complets, ${QUIZ.length} questions, ${Object.keys(GEN).length} types de calculs et ${Object.keys(SCH).length} schémas. Contenus pédagogiques : vérifiez toujours avec vos cours et les protocoles de votre établissement.</span></div></div></div></div>`;
 }
 

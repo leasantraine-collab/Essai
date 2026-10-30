@@ -2,14 +2,14 @@
 
 Application de révision pour les étudiants en soins infirmiers (IFSI), disponible sur **Android**, **iPhone** et en **web installable**.
 
-Elle reprend l'intégralité des contenus de l'artefact *Carnet IFSI* :
+Elle reprend l'intégralité des contenus de l'artefact *Carnet IFSI* et les complète pour couvrir toutes les UE des référentiels 2009 et 2026 :
 
-- **123 fiches** récap, dont 48 fiches complètes illustrées
-- **16 cours complets** (chapitres, analogies, pièges, questions de vérification)
-- **89 questions de quiz** expliquées
-- **8 générateurs de calculs de dose** (énoncés illimités, correction pas à pas)
+- **197 fiches** récap, dont 116 fiches complètes illustrées
+- **32 cours complets** (chapitres, analogies, pièges, questions de vérification)
+- **195 questions de quiz** expliquées et 15 cas cliniques
+- **11 générateurs de calculs de dose** (débits, PSE, insuline, mg/kg/h, dilutions…)
 - **35 schémas** dessinés
-- Préparation aux **stages** (check-list, posture, objectifs, 12 services)
+- Préparation aux **stages** : check-list, posture, objectifs, **18 services**
 - Programme par **UE** : référentiels 2026 (1re année) et 2009 (2e et 3e années), S1 à S6
 
 ## Ce qui change par rapport à l'artefact
@@ -27,7 +27,9 @@ Elle reprend l'intégralité des contenus de l'artefact *Carnet IFSI* :
 
 ```
 www/                 l'application (HTML/CSS/JS sans compilation)
-  js/data.js         tous les contenus pédagogiques
+  js/data.js         contenus d'origine de l'artefact
+  js/contenus/       contenus ajoutés (anatomie, pathologies, soins, médicaments,
+                     sciences humaines, quiz et cas, stages, calculs)
   js/render.js       rendu des fiches, cours et schémas
   js/app.js          navigation, vues, progression, réglages
   css/content.css    styles des contenus
@@ -72,7 +74,7 @@ Sans Mac, la version web s'installe sur l'iPhone : ouvrir le site dans Safari �
 
 ## Modifier les contenus
 
-Tout est dans `www/js/data.js` (fiches, cours, quiz, stages, UE) et `www/js/render.js` (schémas). Après une modification :
+Les contenus sont dans `www/js/data.js` et `www/js/contenus/*.js` (fiches, cours, quiz, stages, UE), les schémas dans `www/js/render.js`. Un nouveau fichier de contenus doit être ajouté dans `www/index.html` et `www/sw.js`. Après une modification :
 
 ```bash
 npx cap sync
