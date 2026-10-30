@@ -378,7 +378,9 @@ app.addEventListener("click",ev=>{
  else if(a==="ue-quiz"){const r=state.ueRef;launchQuiz(quizIdx(q=>(q.ue[r]||[]).includes(k)),"Quiz UE "+k);}
  else if(a==="suggest"){state.q=k;render();}
  else if(a==="set"){const s=settings();s[b.dataset.n]=k;store.set("settings",s);applyTheme();render();}
- else if(a==="reset"){if(confirm("Effacer les fiches révisées, cours étudiés, scores, erreurs et favoris ?")){["reviewed","studied","stats","wrong","favs","check","last"].forEach(x=>{try{localStorage.removeItem("ifsi_"+x)}catch(e){}});toast("Progression réinitialisée");render();}}
+ else if(a==="reset"){const t=b.querySelector(".t");
+  if(!b.dataset.armed){b.dataset.armed="1";t.textContent="Toucher à nouveau pour tout effacer";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;t.textContent="Réinitialiser ma progression";}},4000);return;}
+  ["reviewed","studied","stats","wrong","favs","check","last"].forEach(x=>{try{localStorage.removeItem("ifsi_"+x)}catch(e){}});haptic("MEDIUM");toast("Progression réinitialisée");render();}
 });
 app.addEventListener("change",ev=>{
  const t=ev.target;if(t.dataset.act!=="check")return;
