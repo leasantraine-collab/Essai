@@ -297,8 +297,81 @@ function feuilleAct(b,a){
 function fsPrintFields(fields,data,blank){
  return `<table class="pt">${fields.map(f=>{const v=blank?"":data[f.k];return `<tr><th>${esc(f.l)}${blank&&f.ph?`<br><small>${esc(f.ph)}</small>`:""}</th><td${blank?` style="height:${Math.max(1,f.r||1)*7}mm"`:""}>${v===true?"☑":v===false?"☐":pe(v)}</td></tr>`}).join("")}</table>`;
 }
+/* ---------- Feuilles vierges : mise en page dédiée à l'écriture à la main ---------- */
+const PV_LOGO=`<svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="9" fill="#123B4A"/><rect x="11" y="8" width="18" height="24" rx="2.5" fill="#F6F4EF"/><rect x="11" y="8" width="4" height="24" fill="#E3DCCB"/><rect x="18.5" y="13" width="4" height="12" rx="1" fill="#B55E3A"/><rect x="14.5" y="17" width="12" height="4" rx="1" fill="#B55E3A"/></svg>`;
+const pvL=n=>`<div class="pv-lines">${"<i></i>".repeat(n)}</div>`;
+const pvO=a=>a.map(x=>`<span class="pv-o">☐ ${x}</span>`).join("");
+const pvHead=(title,sub,metas)=>`<header class="pv-head"><div class="pv-brand">${PV_LOGO}<div><span class="pv-kick">Carnet IFSI · feuille de travail</span><h1>${title}</h1>${sub?`<p>${sub}</p>`:""}</div></div>
+ <div class="pv-meta">${metas.map(([l,w,x])=>`<div class="pv-m" style="flex:${w||1}"><span>${l}</span>${x||""}</div>`).join("")}</div></header>`;
+const pvSec=(n,t,hint)=>`<div class="pv-sec"><span class="pv-n">${n}</span><h2>${t}</h2>${hint?`<em>${hint}</em>`:""}</div>`;
+const pvBox=(l,lines,hint,extra)=>`<div class="pv-box"><div class="pv-lab">${l}${hint?` <em>${hint}</em>`:""}</div>${extra?`<div class="pv-opts">${extra}</div>`:""}${lines?pvL(lines):""}</div>`;
+const pvFoot=t=>`<footer class="pv-foot"><span>${t}</span><span>Initiales seulement · document à garder dans le service, à détruire après usage</span></footer>`;
+const PV={
+ planif(){
+  const rows=[["Isolement",pvO(["contact","goutt.","air"]),0],["Autonomie",pvO(["seul","aide","total"])+'<span class="pv-o">☐ chute</span>',0],["Alimentation",pvO(["normale","mixée","à jeun"]),0],["Motif, jour","",1],["ATCD, allergies","",1],["Dispositifs",pvO(["VVP","SU","O₂","redon"]),1],["Surveillances","",2],["Traitements","",2],["Soins, examens","",2],["Vigilance","",1]];
+  return `<section class="pp pv pv-planif">${pvHead("Ma journée de soins","",[["Date",1.1],["Poste",2.6,`<div class="pv-opts">${pvO(["matin","AM","12 h","nuit"])}</div>`],["Secteur",1.1],["Référent",1.2]])}
+   ${pvSec(1,"Mes patients","Cochez, puis complétez en quelques mots")}
+   <table class="pv-t pv-pat"><tr><th class="pv-rl"></th>${[1,2,3,4].map(i=>`<th><span class="pv-pn">${i}</span><span class="pv-who">Ch. …… · ……… · …… ans</span></th>`).join("")}</tr>
+    ${rows.map(([l,o,n])=>`<tr><th class="pv-rl">${l}</th>${[1,2,3,4].map(()=>`<td>${o?`<div class="pv-opts">${o}</div>`:""}${n?pvL(n):""}</td>`).join("")}</tr>`).join("")}</table>
+   ${pvSec(2,"Mon planning","Écrivez le soin dans la colonne du patient, cochez ☐ quand c'est fait")}
+   <table class="pv-t pv-grid"><tr><th class="pv-h">h</th><th>Patient 1</th><th>Patient 2</th><th>Patient 3</th><th>Patient 4</th></tr>${[6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21].map(h=>`<tr><th class="pv-h">${h}</th>${"<td><i></i></td>".repeat(4)}</tr>`).join("")}</table>
+   <div class="pv-box pv-trans"><div class="pv-lab">À transmettre en fin de poste</div>${pvL(2)}</div>
+   <div class="pv-priol"><b>Priorités</b>${["Urgences, dégradation","Soins à heure fixe","Douleur, sécurité","Soins prévus","Confort, éducation"].map((x,i)=>`<span><i>${i+1}</i>${x}</span>`).join("")}</div>
+   ${pvFoot("Planification de la journée")}</section>`;
+ },
+ recueil(){
+  return `<section class="pp pv">${pvHead("Recueil de données","Selon les 14 besoins fondamentaux de Virginia Henderson",[["Chambre",.8],["Initiales",1],["Âge",.6],["Sexe",.9,`<div class="pv-opts">${pvO(["F","M"])}</div>`],["Entrée le",1],["Recueil le",1]])}
+   <div class="pv-box pv-inline"><div class="pv-lab">Sources</div><div class="pv-opts">${pvO(["patient","dossier","famille, proches","équipe","transmissions"])}</div></div>
+   ${pvSec(1,"Motif et histoire")}
+   <div class="pv-grid2">${pvBox("Motif d'hospitalisation",2)}${pvBox("Diagnostic médical",2)}</div>${pvBox("Histoire de la maladie actuelle",5)}
+   ${pvSec(2,"Antécédents et traitements")}
+   <div class="pv-grid2">${pvBox("Antécédents médicaux",4)}${pvBox("Antécédents chirurgicaux",4)}</div>
+   <div class="pv-grid2">${pvBox("Allergies",2,"",pvO(["aucune connue"]))}${pvBox("Traitement habituel",3)}</div>
+   ${pvSec(3,"Mode de vie")}
+   <div class="pv-grid2">${pvBox("Entourage, personne de confiance",3)}${pvBox("Lieu de vie, aides en place",2,"",pvO(["domicile","EHPAD","IDE","aide à domicile"]))}</div>
+   <div class="pv-grid2">${pvBox("Profession, activités",2)}${pvBox("Habitudes",2,"",pvO(["tabac","alcool","activité physique"]))}</div>
+   ${pvFoot("Recueil de données · page 1")}</section>
+   <section class="pp pv">${pvSec(4,"Les 14 besoins fondamentaux","I = indépendant · D = dépendant (besoin d'aide)")}
+   <table class="pv-t pv-hend"><tr><th style="width:30%">Besoin</th><th>Données recueillies (observées, exprimées entre guillemets)</th><th class="pv-id">I / D</th></tr>
+    ${HENDERSON.map((b,i)=>`<tr><th><b>${i+1}. ${esc(b)}</b><em>${esc(HEND_AIDE[i])}</em></th><td>${pvL(2)}</td><td class="pv-id">☐ I<br>☐ D</td></tr>`).join("")}</table>
+   ${pvFoot("Recueil de données · page 2")}</section>
+   <section class="pp pv">${pvSec(5,"Paramètres, examens, traitements")}
+   <div class="pv-cst">${["TA","FC","FR","SpO₂","T°","Douleur","Poids","Taille","Glycémie"].map(x=>`<div><span>${x}</span></div>`).join("")}</div>
+   <div class="pv-cst pv-ech">${["Braden","Norton","EVA / EN","Algoplus","MNA","Glasgow"].map(x=>`<div><span>${x}</span></div>`).join("")}</div>
+   <div class="pv-grid2">${pvBox("Examens et résultats importants",6)}${pvBox("Traitements en cours",6)}</div>
+   ${pvSec(6,"Synthèse","Le pont vers le projet de soins")}
+   ${pvBox("Ressources et capacités du patient",4)}${pvBox("Problèmes identifiés (besoins perturbés, risques)",7)}${pvBox("Attentes et projet du patient",4)}
+   ${pvFoot("Recueil de données · page 3")}</section>`;
+ },
+ projet(){
+  return `<section class="pp pv">${pvHead("Projet de soins","",[["Chambre",.8],["Initiales",1],["Âge",.6],["Date",1]])}
+   ${pvBox("Synthèse de la situation",2,"qui, pourquoi, ce qui compte")}
+   ${pvSec(1,"Problèmes classés par priorité","Le n° 1 est le plus prioritaire")}
+   <table class="pv-t pv-pj"><tr><th style="width:27%">Problème</th><th style="width:21%">Objectif<em>Le patient… mesurable, daté</em></th><th style="width:30%">Actions infirmières<em>quoi, quand, comment</em></th><th style="width:22%">Évaluation<em>date, résultat</em></th></tr>
+    ${[1,2,3,4].map(i=>`<tr><td><div class="pv-pjn"><span class="pv-pn">${i}</span><div class="pv-opts">${pvO(["réel","risque","collab."])}</div></div>${pvL(5)}</td><td>${pvL(6)}</td><td>${pvL(6)}</td><td>${pvL(4)}<div class="pv-opts pv-ev">${pvO(["atteint","partiel","non atteint"])}</div></td></tr>`).join("")}</table>
+   <div class="pv-grid2">${pvBox("Projet de vie, souhaits",2)}${pvBox("Préparation de la sortie",2)}</div>
+   <div class="pv-aide"><b>Formuler</b> · Réel : <i>problème</i> lié à <i>cause</i> se manifestant par <i>signes</i> · Risque : risque de <i>…</i> lié à <i>facteurs</i> · Collaboration : complication surveillée par l'IDE, traitée sur prescription</div>
+   ${pvFoot("Projet de soins")}</section>`;
+ },
+ analyse(){
+  return `<section class="pp pv">${pvHead("Analyse de pratique","Une situation vécue, décrite au « je », sans nom",[["Titre de la situation",3],["Date",1],["Lieu, moment",1.4]])}
+   ${pvSec(1,"La situation")}
+   ${pvBox("Personnes présentes",1,"sans nom")}${pvBox("Description : les faits, dans l'ordre",13,"qui, quoi, où, quand · sans jugement")}
+   ${pvSec(2,"Mon vécu et mon questionnement")}
+   <div class="pv-grid2">${pvBox("Ce que j'ai ressenti",6)}${pvBox("Ce qui m'a questionné·e",6)}</div>
+   <div class="pv-box pv-key"><div class="pv-lab">Ma question centrale (problématique)</div>${pvL(3)}</div>
+   ${pvFoot("Analyse de pratique · page 1")}</section>
+   <section class="pp pv">${pvSec(3,"Analyse","Concepts, cours, législation, recommandations, auteurs")}
+   ${pvBox("Concepts mobilisés",3,"bientraitance, consentement, douleur…")}${pvBox("Liens avec mes cours, la loi, les recommandations, mes lectures",9)}${pvBox("Points de vue des acteurs",4,"patient, proches, équipe")}
+   ${pvSec(4,"Perspectives")}
+   <div class="pv-grid2">${pvBox("Ce que j'aurais pu faire autrement",7)}${pvBox("Ce que j'en retiens pour ma pratique",7)}</div>
+   ${pvBox("Références",3,"normes APA ou Vancouver")}
+   ${pvFoot("Analyse de pratique · page 2")}</section>`;
+ }
+};
 function fsPrintDoc(type,inst){
  const S=SHEETS[type],blank=!inst,d=blank?{}:(inst.data||{}),title=blank?S.titre:S.titre+" · "+fsTitle(type,inst);
+ if(blank&&PV[type])return PV[type]();
  if(type==="planif")return fsPrintPlanif(inst);
  if(type==="projet")return fsPrintProjet(inst);
  let h=`<section class="pp"><h1>${esc(title)}</h1><p class="psub">Carnet IFSI · initiales seulement, document à garder dans le service</p>`;

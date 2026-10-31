@@ -617,3 +617,74 @@ a.back{text-decoration:none}
 .pdoc .pctx .pc-l{width:32mm}
 .pdoc .pprojet .ppj tr{break-inside:avoid;page-break-inside:avoid}
 .pdoc .pprojet.blank-pj .ppj td{height:34mm}
+
+/* ---------- Feuilles vierges : style d'impression ---------- */
+.pdoc .pv{--pv-ink:#13222B;--pv-acc:#123B4A;--pv-soft:#EAF1F2;--pv-line:#A9B8BD;--pv-dot:#B9C4C8;--pv-ter:#B55E3A;color:var(--pv-ink);font-size:9pt;line-height:1.3;display:flex;flex-direction:column;gap:2.2mm;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pdoc .pv *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pdoc .pv-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:2mm 4mm;border-bottom:1.2pt solid var(--pv-acc);padding-bottom:2mm}
+.pdoc .pv-brand{display:flex;align-items:center;gap:3mm}
+.pdoc .pv-brand svg{width:10mm;height:10mm;flex:none}
+.pdoc .pv-kick{font-size:6.8pt;letter-spacing:.14em;text-transform:uppercase;color:var(--pv-ter);font-weight:700}
+.pdoc .pv-head h1{font-family:var(--f-display);font-size:17pt;font-weight:650;margin:0;color:var(--pv-acc);line-height:1.1}
+.pdoc .pv-head p{margin:.4mm 0 0;font-size:8pt;color:#5A6970}
+.pdoc .pv-meta{display:flex;gap:1.6mm;flex:1 1 100mm;min-width:0}
+.pdoc .pv-m{border:.7pt solid var(--pv-line);border-radius:1.6mm;padding:1mm 2mm;min-height:9mm;display:flex;flex-direction:column;gap:.6mm}
+.pdoc .pv-m>span{font-size:6.5pt;letter-spacing:.08em;text-transform:uppercase;color:#5A6970;font-weight:700}
+.pdoc .pv-sec{display:flex;align-items:center;gap:2mm;margin-top:1mm}
+.pdoc .pv-n{width:5.2mm;height:5.2mm;border-radius:50%;background:var(--pv-acc);color:#fff;font-size:7.5pt;font-weight:700;display:grid;place-items:center;flex:none}
+.pdoc .pv-sec h2{font-family:var(--f-display);font-size:11.5pt;font-weight:650;margin:0;color:var(--pv-acc)}
+.pdoc .pv-sec em{font-style:normal;font-size:7.5pt;color:#6A787E;margin-left:auto}
+.pdoc .pv-box{border:.7pt solid var(--pv-line);border-radius:1.8mm;padding:1.2mm 2.2mm 1.6mm;break-inside:avoid;page-break-inside:avoid}
+.pdoc .pv-lab{font-size:7pt;letter-spacing:.07em;text-transform:uppercase;font-weight:700;color:var(--pv-acc)}
+.pdoc .pv-lab em{font-style:normal;text-transform:none;letter-spacing:0;font-weight:400;color:#7A878C;font-size:7.3pt}
+.pdoc .pv-inline{display:flex;align-items:center;gap:3mm;padding:1.4mm 2.2mm}
+.pdoc .pv-lines i{display:block;height:6.2mm;border-bottom:.5pt dotted var(--pv-dot)}
+.pdoc .pv-opts{display:flex;flex-wrap:wrap;gap:.5mm 2.4mm;font-size:7.6pt;margin:.6mm 0 .2mm}
+.pdoc .pv-o{white-space:nowrap}
+.pdoc .pv-grid2{display:grid;grid-template-columns:1fr 1fr;gap:2mm}
+.pdoc .pv-t{width:100%;border-collapse:collapse;table-layout:fixed}
+.pdoc .pv-t th,.pdoc .pv-t td{border:.6pt solid var(--pv-line);padding:.8mm 1.4mm;vertical-align:top;text-align:left;font-size:7.8pt}
+.pdoc .pv-t tr:first-child th{background:var(--pv-acc);color:#fff;font-weight:700;font-size:7.6pt;letter-spacing:.02em}
+.pdoc .pv-t tr:first-child th em{display:block;font-style:normal;font-weight:400;font-size:6.6pt;opacity:.85}
+.pdoc .pv-t .pv-rl{width:24.5mm;font-size:6.6pt!important;background:var(--pv-soft);color:var(--pv-acc);font-size:7.2pt;text-transform:uppercase;letter-spacing:.04em}
+.pdoc .pv-t tr:first-child .pv-rl{background:var(--pv-acc)}
+.pdoc .pv-pn{display:inline-grid;place-items:center;width:4.4mm;height:4.4mm;border-radius:50%;background:var(--pv-ter);color:#fff;font-size:6.8pt;font-weight:700;margin-right:1mm;vertical-align:middle}
+.pdoc .pv-pat td{height:5.4mm;padding:.5mm 1.2mm}
+.pdoc .pv-pat .pv-lines i{height:4.3mm}
+.pdoc .pv-pat .pv-opts{font-size:7pt;gap:.3mm 1.6mm}
+.pdoc .pv-grid .pv-h{width:7mm;background:var(--pv-soft);color:var(--pv-acc);text-align:center;font-weight:700;font-size:8pt}
+.pdoc .pv-grid tr:first-child .pv-h{background:var(--pv-acc);color:#fff}
+.pdoc .pv-grid td{height:6.2mm;padding:0}
+.pdoc .pv-grid td i{display:block;height:3.1mm;border-bottom:.4pt dotted var(--pv-dot)}
+.pdoc .pv-row2{display:grid;grid-template-columns:1fr 46mm;gap:2mm}
+.pdoc .pv-prio{border:.7pt solid var(--pv-line);border-radius:1.8mm;padding:1.2mm 2.2mm;background:var(--pv-soft);font-size:7.2pt}
+.pdoc .pv-prio b{font-size:7pt;letter-spacing:.07em;text-transform:uppercase;color:var(--pv-acc)}
+.pdoc .pv-prio ol{margin:.6mm 0 0;padding-left:4mm}
+.pdoc .pv-prio li{margin:0}
+.pdoc .pv-foot{margin-top:auto;display:flex;justify-content:space-between;gap:4mm;border-top:.5pt solid var(--pv-line);padding-top:1.2mm;font-size:6.6pt;color:#6A787E}
+.pdoc .pv-hend th{background:var(--pv-soft);font-weight:400}
+.pdoc .pv-hend tr:first-child th{background:var(--pv-acc)}
+.pdoc .pv-hend th b{display:block;color:var(--pv-acc);font-size:8.2pt}
+.pdoc .pv-hend th em{display:block;font-style:normal;color:#5F6D73;font-size:7pt;margin-top:.4mm}
+.pdoc .pv-hend .pv-lines i{height:5.6mm}
+.pdoc .pv-hend tr{break-inside:avoid;page-break-inside:avoid}
+.pdoc .pv-id{width:12mm;text-align:center;font-size:7.6pt;line-height:1.6}
+.pdoc .pv-cst{display:grid;grid-template-columns:repeat(9,1fr);gap:1.4mm}
+.pdoc .pv-cst div{border:.7pt solid var(--pv-line);border-radius:1.6mm;height:13mm;padding:1mm 1.4mm}
+.pdoc .pv-cst span{font-size:6.6pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--pv-acc)}
+.pdoc .pv-pj td{padding:1mm 1.6mm}
+.pdoc .pv-pj tr{break-inside:avoid;page-break-inside:avoid}
+.pdoc .pv-pjn{display:flex;align-items:center;gap:1mm;flex-wrap:wrap}
+.pdoc .pv-pj .pv-lines i{height:6.6mm}
+.pdoc .pv-ev{margin-top:1.4mm;flex-direction:column;gap:.4mm}
+.pdoc .pv-aide{font-size:7.3pt;color:#40525A;background:var(--pv-soft);border-radius:1.6mm;padding:1.4mm 2.2mm}
+.pdoc .pv-key{border-width:1.1pt;border-color:var(--pv-ter)}
+.pdoc .pv-key .pv-lab{color:var(--pv-ter)}
+@media print{.print-doc .pv{min-height:265mm}}
+.pdoc .pv-who{font-size:7pt;font-weight:600;white-space:nowrap}
+.pdoc .pv-priol{display:flex;flex-wrap:wrap;align-items:center;gap:1mm 3mm;font-size:7.2pt;background:var(--pv-soft);border-radius:1.6mm;padding:1.2mm 2.2mm}
+.pdoc .pv-priol b{font-size:6.8pt;letter-spacing:.08em;text-transform:uppercase;color:var(--pv-acc)}
+.pdoc .pv-priol span{display:inline-flex;align-items:center;gap:1mm}
+.pdoc .pv-priol i{font-style:normal;display:inline-grid;place-items:center;width:3.8mm;height:3.8mm;border-radius:50%;background:var(--pv-acc);color:#fff;font-size:6.2pt;font-weight:700}
+.pdoc .pv-ech{grid-template-columns:repeat(6,1fr)}
+.pdoc .pv-ech div{height:11mm}
