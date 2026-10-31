@@ -447,3 +447,20 @@ a.list,a.list:visited{display:block;color:inherit;text-decoration:none}
   .print-doc .pp{page-break-after:always;break-after:page}
   .print-doc .pp:last-child{page-break-after:auto;break-after:auto}
 }
+
+/* ---------- Carnet : mon service, compétences ---------- */
+.cn-svc-row{display:flex;flex-direction:column;gap:8px;padding:11px 14px;border-top:1px solid var(--line)}
+.cn-svc-row:first-child{border-top:0}
+.cn-svc-row .t{font-size:.93rem;line-height:1.4}
+.cn-tog{display:flex;gap:6px;flex-wrap:wrap}
+.cn-tog .chip{font-size:.78rem;padding:5px 11px}
+.cn-tog .chip[aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:#fff}
+.cn-comp .t{font-weight:600;line-height:1.4;display:flex;gap:8px;align-items:baseline}
+.cn-comp .comp{flex:none}
+.cn-memo{gap:10px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+label.li{cursor:pointer}
+.pdoc .pck{font-size:8.5pt;color:#555;white-space:nowrap}
+.cn-top{grid-template-columns:repeat(4,minmax(0,1fr))}
+.cn-top span{padding:9px 8px;font-size:.72rem}
+.cn-top b{font-size:1.25rem}
