@@ -40,6 +40,8 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
+const APP_VERSION="1.3 · 31 octobre 2026";
+
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
   ueRef:store.get("ueRef","2026"),sem:store.get("sem",1),ue:null};
@@ -388,7 +390,8 @@ function vReglages(){
   <div class="set-group"><span class="eyebrow">Données</span><div class="list">
    <button class="li" data-act="reset" style="grid-template-columns:minmax(0,1fr)"><span class="t danger">Réinitialiser ma progression</span></button></div>
    <p class="muted" style="padding:0 4px">Votre progression reste sur cet appareil, rien n'est envoyé en ligne.</p></div>
-  <div class="set-group"><span class="eyebrow">À propos</span><div class="list"><div class="set-row"><span>Carnet IFSI</span><span class="muted">Version 1.1</span></div>
+  <div class="set-group"><span class="eyebrow">À propos</span><div class="list"><div class="set-row"><span>Carnet IFSI</span><span class="muted">Version ${APP_VERSION}</span></div>
+   ${!isNative?`<button class="li" data-act="force-update" style="grid-template-columns:minmax(0,1fr)"><span class="t" style="color:var(--brand)">Rechercher une mise à jour</span></button>`:""}
    <div class="set-row" style="display:block"><span class="muted">${FICHES.length} fiches, ${FULL_COURS.length} cours complets, ${QUIZ.length} questions, ${Object.keys(GEN).length} types de calculs et ${Object.keys(SCH).length} schémas. Contenus pédagogiques : vérifiez toujours avec vos cours et les protocoles de votre établissement.</span></div></div></div></div>`;
 }
 
@@ -472,6 +475,7 @@ app.addEventListener("click",ev=>{
   st.objectifs=(st.objectifs?st.objectifs.replace(/\s+$/,"")+"\n":"")+line;store.set("stage",st);
   const ta=document.getElementById("sf-objectifs");if(ta)ta.value=st.objectifs;
   b.setAttribute("aria-pressed","true");b.setAttribute("aria-label","Déjà dans mes objectifs");b.innerHTML=IC.check;haptic();toast("Ajouté à mes objectifs de stage");}
+ else if(a==="force-update"){b.querySelector(".t").textContent="Mise à jour en cours…";forceUpdate();}
  else if(a==="exam-edit"){state.examEdit=true;render();}
  else if(a==="exam-done"){state.examEdit=false;render();}
  else if(a==="exam-del"){store.set("exams",exams().filter(e=>e.id!==id));haptic();toast("Partiel supprimé");render();}
@@ -494,6 +498,18 @@ if(isNative){
   const r=route();if(r.v==="entrainer"&&state.quiz){state.quiz=null;render(true);return;}
   if(r.v==="accueil")A.exitApp();else if(ROOTS.includes(r.v))location.replace("#accueil");else goBack();});}catch(e){}
 }
-if(!isNative&&"serviceWorker" in navigator&&location.protocol==="https:"){navigator.serviceWorker.register("sw.js").catch(()=>{});}
+if(!isNative&&"serviceWorker" in navigator&&location.protocol==="https:"){
+ const sw=navigator.serviceWorker,hadController=!!sw.controller;let reloading=false;
+ sw.register("sw.js",{updateViaCache:"none"}).then(reg=>{
+  const check=()=>{if(document.visibilityState==="visible")reg.update().catch(()=>{});};
+  document.addEventListener("visibilitychange",check);setInterval(check,30*60*1000);}).catch(()=>{});
+ sw.addEventListener("controllerchange",()=>{if(!hadController||reloading)return;
+  if(document.activeElement&&document.activeElement.matches("input,textarea,select"))return;reloading=true;location.reload();});
+}
+async function forceUpdate(){
+ try{if("caches" in window){const k=await caches.keys();await Promise.all(k.map(x=>caches.delete(x)));}
+  if(navigator.serviceWorker){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.update().catch(()=>{})));}}catch(e){}
+ location.reload();
+}
 render(true);
 try{const sp=plug("SplashScreen");sp&&setTimeout(()=>sp.hide(),120);}catch(e){}
