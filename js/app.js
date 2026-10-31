@@ -18,7 +18,10 @@ const IC={
  book:I('<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5V5.5M20 18v3H6.5"/>'),
  sheet:I('<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>'),
  flask:I('<path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3"/><path d="M7.5 15h9"/>'),
- cap:I('<path d="M12 4L2 9l10 5 10-5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5"/>')
+ cap:I('<path d="M12 4L2 9l10 5 10-5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5"/>'),
+ cal:I('<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>'),
+ plus:I('<path d="M12 5v14M5 12h14"/>'),
+ x:I('<path d="M6 6l12 12M18 6L6 18"/>')
 };
 const CAT_IC={
  thera:I('<rect x="3" y="8.5" width="18" height="7" rx="3.5" transform="rotate(-35 12 12)"/><path d="M9.4 8.3l5.2 7.4"/>'),
@@ -78,6 +81,66 @@ let depth=0;
 function goBack(){const r=route();if(depth>0){history.back();}else{location.replace("#"+(PARENT[r.v]||"accueil"));}}
 window.addEventListener("hashchange",()=>{render(true);});
 
+/* ---------- Comptes à rebours (partiels, stage) ---------- */
+const exams=()=>store.get("exams",[]);
+const stageInfo=()=>store.get("stage",{});
+const at=(d,h)=>{if(!d)return null;const t=new Date(d+"T"+(h||"08:00"));return isNaN(t)?null:t.getTime();};
+const DAY=864e5;
+const fmtDay=ts=>new Date(ts).toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+const fmtFull=ts=>fmtDay(ts)+" à "+new Date(ts).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+const fmtShort=ts=>new Date(ts).toLocaleDateString("fr-FR",{day:"numeric",month:"short"});
+function cdInner(ts){const m=Math.max(0,Math.floor((ts-Date.now())/6e4)),j=Math.floor(m/1440),h=Math.floor(m%1440/60),mn=m%60,p=n=>String(n).padStart(2,"0");
+ return `<span><b>${j}</b><small>jour${j>1?"s":""}</small></span><span><b>${p(h)}</b><small>heure${h>1?"s":""}</small></span><span><b>${p(mn)}</b><small>min</small></span>`;}
+const cdBox=ts=>`<div class="cd" data-cd="${ts}" role="timer">${cdInner(ts)}</div>`;
+const day0=ts=>{const d=new Date(ts);d.setHours(0,0,0,0);return d.getTime();};
+const jMoins=ts=>{const d=Math.round((day0(ts)-day0(Date.now()))/DAY);return d<=0?"aujourd'hui":"J-"+d;};
+let cdTick=false;
+setInterval(()=>{const els=document.querySelectorAll("[data-cd]");if(!els.length)return;
+ let past=false;els.forEach(el=>{const ts=+el.dataset.cd;if(ts<=Date.now())past=true;else el.innerHTML=cdInner(ts);});
+ if(past&&!cdTick&&!document.activeElement.matches("input,textarea,select")){cdTick=true;render();cdTick=false;}},15000);
+
+function examCard(){
+ const now=Date.now(),list=exams().map(e=>({...e,ts:at(e.date,e.heure)})).filter(e=>e.ts).sort((a,b)=>a.ts-b.ts),up=list.filter(e=>e.ts>now);
+ if(state.examEdit) return `<section class="cd-card"><div class="cd-top"><span class="eyebrow">Mes partiels</span><button class="link" data-act="exam-done">Terminé</button></div>
+  ${list.length?`<div class="list">${list.map(e=>`<div class="li cd-li"><span><span class="t">${esc(e.nom)}</span><span class="s">${esc(fmtFull(e.ts))}${e.ts<now?" · passé":" · "+jMoins(e.ts)}</span></span><button class="del" data-act="exam-del" data-id="${esc(e.id)}" aria-label="Supprimer ${esc(e.nom)}">${IC.x}</button></div>`).join("")}</div>`:`<p class="muted">Ajoutez chaque partiel avec sa date : le plus proche s'affiche sur l'accueil.</p>`}
+  <form id="exam-form" class="cd-form"><label for="ex-nom">Intitulé<input id="ex-nom" required maxlength="80" placeholder="Ex. Partiels S1, UE 2.11 Pharmacologie" autocomplete="off"></label>
+   <div class="cd-row"><label for="ex-date">Date<input id="ex-date" type="date" required></label><label for="ex-heure">Heure<input id="ex-heure" type="time" value="08:00"></label></div>
+   <button class="btn block" type="submit">${IC.plus}Ajouter ce partiel</button></form></section>`;
+ if(!up.length) return `<button class="cd-card cd-empty" data-act="exam-edit"><span class="cd-ic">${IC.cal}</span><span><b>${list.length?"Plus de partiels à venir":"Compte à rebours des partiels"}</b><small>${list.length?"Ajoutez les dates de la prochaine session":"Ajoutez la date de vos prochains partiels"}</small></span>${IC.plus}</button>`;
+ const n=up[0];
+ return `<section class="cd-card"><div class="cd-top"><span class="eyebrow">Prochains partiels · ${jMoins(n.ts)}</span><button class="link" data-act="exam-edit">Modifier</button></div>
+  <h2>${esc(n.nom)}</h2>${cdBox(n.ts)}<p class="cd-date">${IC.cal}${esc(fmtFull(n.ts))}</p>
+  ${up.length>1?`<ul class="cd-next">${up.slice(1,4).map(e=>`<li><span>${esc(e.nom)}</span><span>${esc(fmtShort(e.ts))} · ${jMoins(e.ts)}</span></li>`).join("")}</ul>`:""}</section>`;
+}
+
+const STAGE_TYPES=["Soins de courte durée","Santé mentale et psychiatrie","Soins de longue durée et SMR","Soins sur des lieux de vie"];
+function stageCountdown(){
+ const s=stageInfo(),start=at(s.debut,s.arrivee||"07:00"),end=s.fin?at(s.fin,"23:59"):null,now=Date.now(),title=s.service?esc(s.service):"Mon prochain stage";
+ if(!start) return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Compte à rebours</span><h2>${title}</h2><p class="muted">Renseignez la date de début ci-dessous pour lancer le compte à rebours.</p></section>`;
+ if(now<start) return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Début du stage · ${jMoins(start)}</span><h2>${title}</h2>${cdBox(start)}<p class="cd-date">${IC.cal}${esc(fmtFull(start))}${end?` · jusqu'au ${esc(fmtShort(end))}`:""}</p></section>`;
+ if(end&&now>end) return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Stage terminé</span><h2>${title}</h2><p class="muted">Pensez à compléter votre portfolio. Quand vous connaissez votre prochain stage, effacez ces informations pour repartir de zéro.</p><button class="btn ghost block" data-act="stage-new">Préparer un nouveau stage</button></section>`;
+ const tot=end?Math.max(1,Math.round((day0(end)-day0(start))/DAY)+1):null,jour=Math.round((day0(now)-day0(start))/DAY)+1;
+ return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Stage en cours${tot?` · jour ${Math.min(jour,tot)} sur ${tot}`:""}</span><h2>${title}</h2>
+  ${tot?`<div class="progress"><i style="width:${Math.min(100,jour/tot*100)}%"></i></div>`:""}${end?`<p class="muted">Fin du stage dans</p>${cdBox(end)}`:`<p class="muted">Ajoutez la date de fin pour suivre l'avancée du stage.</p>`}</section>`;
+}
+function stageForm(){
+ const s=stageInfo(),f=(k,label,attrs="")=>`<label for="sf-${k}">${label}<input id="sf-${k}" data-sf="${k}" value="${esc(s[k]||"")}" ${attrs}></label>`,
+  t=(k,label,ph)=>`<label for="sf-${k}">${label}<textarea id="sf-${k}" data-sf="${k}" rows="3" placeholder="${ph}">${esc(s[k]||"")}</textarea></label>`;
+ return `<section class="stack-sm"><div class="section-title"><h2>Infos du stage</h2><span class="muted" id="sf-saved">Enregistré sur cet appareil</span></div>
+  <div class="cd-form sheet-body">
+   ${f("service","Service et établissement",'placeholder="Ex. Cardiologie, CH de Valence" maxlength="100" autocomplete="off"')}
+   <label for="sf-type">Type de stage<select id="sf-type" data-sf="type"><option value="">Choisir</option>${STAGE_TYPES.map(x=>`<option ${s.type===x?"selected":""}>${x}</option>`).join("")}</select></label>
+   <div class="cd-row">${f("debut","Début",'type="date"')}${f("fin","Fin",'type="date"')}</div>
+   <div class="cd-row">${f("arrivee","Arrivée le 1er jour",'type="time"')}${f("horaires","Horaires",'placeholder="Ex. 6h45-14h15" maxlength="60"')}</div>
+   ${f("adresse","Adresse, lieu de rendez-vous",'placeholder="Bâtiment, étage, accueil" maxlength="140"')}
+   <div class="cd-row">${f("tuteur","Tuteur ou tutrice",'placeholder="Nom" maxlength="60" autocomplete="off"')}${f("cadre","Cadre de santé",'placeholder="Nom" maxlength="60" autocomplete="off"')}</div>
+   <div class="cd-row">${f("tel","Téléphone du service",'type="tel" placeholder="04 00 00 00 00" maxlength="30"')}<label for="sf-sem">Semestre<select id="sf-sem" data-sf="sem"><option value="">–</option>${[1,2,3,4,5,6].map(n=>`<option ${s.sem==="S"+n?"selected":""}>S${n}</option>`).join("")}</select></label></div>
+   ${t("tenue","Tenue et matériel à prévoir","Tenues fournies ? Chaussures, montre, stylos, carnet…")}
+   ${t("objectifs","Mes objectifs de stage","Ex. réaliser une prise en charge globale de 2 patients")}
+   ${t("notes","Notes","Pathologies fréquentes du service, vocabulaire, questions à poser…")}
+  </div></section>`;
+}
+
 /* ---------- Accueil ---------- */
 function vAccueil(){
  const s=stats(),pct=totalItems?Math.round(doneItems()/totalItems*100):0,h=new Date().getHours();
@@ -90,6 +153,7 @@ function vAccueil(){
  return `<div class="stack-lg">
   <header class="vh-row"><div class="hello"><span class="date">${esc(date)}</span><h1>${h<5||h>=18?"Bonsoir":"Bonjour"}</h1></div>
    <button class="icon-btn" data-act="nav" data-h="reglages" aria-label="Réglages">${IC.gear}</button></header>
+  ${examCard()}
   <button class="search-pill" data-act="nav" data-h="recherche">${IC.search}Rechercher une fiche, un cours, une notion…</button>
   <section class="dash">${ring(pct)}
    <div class="dash-txt"><span class="k">Ma progression</span><h2>${doneItems()} sur ${totalItems} contenus révisés</h2>
@@ -230,7 +294,9 @@ function vEntrainer(arg){
 /* ---------- Stages ---------- */
 function vStages(){
  const done=store.get("check",[]);
- return `<div class="stack-lg">${vh("Stages","Arriver préparé·e dans chaque service","Check-list, posture, objectifs par semestre et repères pour 12 services.")}
+ return `<div class="stack-lg">${vh("Stages","Arriver préparé·e dans chaque service",`Compte à rebours, infos pratiques, check-list, posture et repères pour ${STAGES.length} services.`)}
+  ${stageCountdown()}
+  ${stageForm()}
   <section class="stack-sm"><div class="section-title"><h2>Avant le premier jour</h2><span class="muted">${done.length} / ${CHECKLIST.length}</span></div>
    <div class="progress"><i style="width:${done.length/CHECKLIST.length*100}%"></i></div>
    <div class="list" style="padding:4px 14px">${CHECKLIST.map((c,i)=>`<label class="chk"><input type="checkbox" data-act="check" data-i="${i}" ${done.includes(i)?"checked":""}><span>${esc(c)}</span></label>`).join("")}</div></section>
@@ -336,8 +402,15 @@ function checkCalc(show){
  const s=stats();s.exTot++;if(e.done==="ok")s.exOk++;store.set("stats",s);render();
 }
 function launchQuiz(list,label){if(!list.length){toast("Aucune question disponible");return;}startQuiz(list,label);state.train="quiz";nav("entrainer/quiz");}
-app.addEventListener("submit",ev=>{if(ev.target.id==="calc-form"){ev.preventDefault();checkCalc(false);}});
-app.addEventListener("input",ev=>{if(ev.target.id==="q"){state.q=ev.target.value;document.getElementById("res").innerHTML=results(state.q)||"";}});
+app.addEventListener("submit",ev=>{if(ev.target.id==="calc-form"){ev.preventDefault();checkCalc(false);}
+ else if(ev.target.id==="exam-form"){ev.preventDefault();const nom=document.getElementById("ex-nom").value.trim(),date=document.getElementById("ex-date").value,heure=document.getElementById("ex-heure").value||"08:00";
+  if(!nom||!date){toast("Indiquez un intitulé et une date");return;}
+  store.set("exams",[...exams(),{id:Date.now().toString(36),nom,date,heure}]);haptic();toast("Partiel ajouté");render();setTimeout(()=>{const i=document.getElementById("ex-nom");i&&i.focus()},0);}});
+function saveStageField(t){const s=stageInfo();s[t.dataset.sf]=t.value;store.set("stage",s);
+ if(["debut","fin","arrivee","service"].includes(t.dataset.sf)){const c=document.getElementById("stage-cd");if(c)c.outerHTML=stageCountdown();}
+ const m=document.getElementById("sf-saved");if(m){m.textContent="Enregistré ✓";clearTimeout(saveStageField.t);saveStageField.t=setTimeout(()=>{m.textContent="Enregistré sur cet appareil"},1500);}}
+app.addEventListener("input",ev=>{const t=ev.target;if(t.id==="q"){state.q=t.value;document.getElementById("res").innerHTML=results(state.q)||"";}
+ else if(t.dataset.sf)saveStageField(t);});
 app.addEventListener("click",ev=>{
  const b=ev.target.closest("[data-act]");if(!b)return;
  const a=b.dataset.act,k=b.dataset.k,id=b.dataset.id;
@@ -378,12 +451,17 @@ app.addEventListener("click",ev=>{
  else if(a==="ue-quiz"){const r=state.ueRef;launchQuiz(quizIdx(q=>(q.ue[r]||[]).includes(k)),"Quiz UE "+k);}
  else if(a==="suggest"){state.q=k;render();}
  else if(a==="set"){const s=settings();s[b.dataset.n]=k;store.set("settings",s);applyTheme();render();}
+ else if(a==="exam-edit"){state.examEdit=true;render();}
+ else if(a==="exam-done"){state.examEdit=false;render();}
+ else if(a==="exam-del"){store.set("exams",exams().filter(e=>e.id!==id));haptic();toast("Partiel supprimé");render();}
+ else if(a==="stage-new"){if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Toucher à nouveau pour effacer les infos";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent="Préparer un nouveau stage";}},4000);return;}
+  try{localStorage.removeItem("ifsi_stage");localStorage.removeItem("ifsi_check")}catch(e){}haptic("MEDIUM");toast("Prêt pour le prochain stage");render();}
  else if(a==="reset"){const t=b.querySelector(".t");
   if(!b.dataset.armed){b.dataset.armed="1";t.textContent="Toucher à nouveau pour tout effacer";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;t.textContent="Réinitialiser ma progression";}},4000);return;}
   ["reviewed","studied","stats","wrong","favs","check","last"].forEach(x=>{try{localStorage.removeItem("ifsi_"+x)}catch(e){}});haptic("MEDIUM");toast("Progression réinitialisée");render();}
 });
 app.addEventListener("change",ev=>{
- const t=ev.target;if(t.dataset.act!=="check")return;
+ const t=ev.target;if(t.dataset.sf){saveStageField(t);return;}if(t.dataset.act!=="check")return;
  let d=store.get("check",[]);const i=+t.dataset.i;
  d=t.checked?[...new Set([...d,i])]:d.filter(x=>x!==i);store.set("check",d);haptic();render();
 });
