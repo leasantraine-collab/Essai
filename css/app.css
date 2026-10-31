@@ -326,3 +326,27 @@ a.list,a.list:visited{display:block;color:inherit;text-decoration:none}
 .cd-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 @media (max-width:360px){.cd-row{grid-template-columns:1fr}.cd b{font-size:1.6rem}}
 .cd-stage .progress{margin-top:-2px}
+
+/* ---------- Guide des lieux de stage ---------- */
+.svc summary{align-items:center}
+.svc-t{font-family:var(--f-display);font-weight:650;font-size:1.05rem}
+.svc[open]{box-shadow:var(--shadow-lg)}
+.svc .det-body{gap:14px}
+.svc-intro{color:var(--ink-2);font-size:.95rem;line-height:1.55}
+.svc-blk{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:14px;background:var(--bg);border-left:4px solid var(--tc,var(--line-2))}
+.svc-lab{font-size:.7rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--tk,var(--muted))}
+.t-patho{--tc:var(--fx-coral-bar);--tk:var(--fx-coral)}
+.t-thera{--tc:var(--fx-green-bar);--tk:var(--fx-green)}
+.t-soins{--tc:var(--fx-blue-bar);--tk:var(--fx-blue)}
+.t-obj{--tc:var(--gold);--tk:var(--fx-amber-ink)}
+.t-fiches{--tc:var(--brand);--tk:var(--brand)}
+.svc-list{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:5px;font-size:.93rem;line-height:1.45}
+.svc-list li::marker{color:var(--tc)}
+.svc-obj{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.svc-obj li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 10px;font-size:.92rem;line-height:1.4}
+.svc-obj li:not(:has(.comp)){grid-template-columns:minmax(0,1fr) auto}
+.comp{font-family:var(--f-mono);font-size:.72rem;font-weight:700;color:var(--fx-amber-ink);background:color-mix(in srgb,var(--gold) 22%,var(--surface));border-radius:7px;padding:3px 6px;cursor:help}
+.del.add{color:var(--brand)}
+.del.add[aria-pressed="true"]{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.t-fiches .chip{text-decoration:none;font-size:.8rem;padding:6px 11px}
+.svc .callout.warn ul{margin-top:6px}

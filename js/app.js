@@ -21,7 +21,8 @@ const IC={
  cap:I('<path d="M12 4L2 9l10 5 10-5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5"/>'),
  cal:I('<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>'),
  plus:I('<path d="M12 5v14M5 12h14"/>'),
- x:I('<path d="M6 6l12 12M18 6L6 18"/>')
+ x:I('<path d="M6 6l12 12M18 6L6 18"/>'),
+ check:I('<path d="M5 12.5l4.5 4.5L19 7.5"/>')
 };
 const CAT_IC={
  thera:I('<rect x="3" y="8.5" width="18" height="7" rx="3.5" transform="rotate(-35 12 12)"/><path d="M9.4 8.3l5.2 7.4"/>'),
@@ -303,12 +304,27 @@ function vStages(){
   <section class="stack-sm"><h2>Posture professionnelle</h2><div class="sheet-body"><ul class="fv-list" style="--c:${CAT.stage.c}">${POSTURE.map(p=>`<li>${esc(p)}</li>`).join("")}</ul></div></section>
   <section class="stack-sm"><h2>Objectifs selon le semestre</h2><div class="sheet-body"><div class="fv-tbl">${OBJECTIFS.map(o=>{const [a,b]=o.split(" : ");return `<div><span>${esc(a)}</span><span>${esc(b)}</span></div>`}).join("")}</div><span class="muted">Repères indicatifs : vos objectifs se construisent avec votre formateur et votre tuteur.</span></div></section>
   ${FICHES.some(f=>f.cat==="stage")?`<section class="stack-sm"><h2>Fiches méthode</h2><div class="list">${FICHES.filter(f=>f.cat==="stage").map(f=>itemRow(f,"f")).join("")}</div></section>`:""}
-  <section class="stack-sm"><h2>Par service</h2>
-  ${STAGES.map(s=>`<details><summary>${esc(s.nom)}</summary><div class="det-body">
-    <div class="stack-sm"><span class="eyebrow">Soins fréquents</span><ul class="clean">${s.soins.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
-    <div class="stack-sm"><span class="eyebrow">À réviser avant</span><ul class="clean">${s.reviser.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
-    <div class="callout warn"><span class="eyebrow">Pièges classiques</span><ul class="clean">${s.pieges.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
-  </div></details>`).join("")}</section></div>`;
+  <section class="stack-sm"><div class="section-title"><h2>Par lieu de stage</h2><span class="muted">${STAGES.length} services</span></div>
+   <p class="muted">Pour chaque service : ce qu'il faut réviser, les soins que vous rencontrerez, des objectifs prêts à reprendre dans votre portfolio et les erreurs fréquentes.</p>
+   ${STAGES.map(svcCard).join("")}</section></div>`;
+}
+const COMP={1:"Évaluer une situation clinique et établir un diagnostic infirmier",2:"Concevoir et conduire un projet de soins infirmiers",3:"Accompagner une personne dans la réalisation de ses soins quotidiens",4:"Mettre en œuvre des actions à visée diagnostique et thérapeutique",5:"Initier et mettre en œuvre des soins éducatifs et préventifs",6:"Communiquer et conduire une relation dans un contexte de soins",7:"Analyser la qualité des soins et améliorer sa pratique professionnelle",8:"Rechercher et traiter des données professionnelles et scientifiques",9:"Organiser et coordonner des interventions soignantes",10:"Informer et former des professionnels et des personnes en formation"};
+const objText=t=>"• "+t.replace(/\*\*/g,"");
+function svcCard(sv,i){
+ const mine=stageInfo().objectifs||"",with09=state.ueRef==="2009";
+ const blk=(lab,cls,items)=>items&&items.length?`<div class="svc-blk ${cls}"><span class="svc-lab">${lab}</span><ul class="svc-list">${items.map(x=>`<li>${md(x)}</li>`).join("")}</ul></div>`:"";
+ const links=(sv.fiches||[]).map(id=>{const f=FICHES.find(x=>x.id===id),c=f?null:COURS.find(x=>x.id===id&&!x.pro);const it=f||c;return it?`<a class="chip" href="#${f?"fiche":"cours"}/${id}">${esc(it.titre)}</a>`:"";}).join("");
+ return `<details class="svc"><summary><span class="svc-t">${esc(sv.nom)}</span></summary><div class="det-body">
+  ${sv.intro?`<p class="svc-intro">${md(sv.intro)}</p>`:""}
+  ${blk("Pathologies à connaître","t-patho",sv.patho)}
+  ${blk("Thérapeutiques à connaître","t-thera",sv.thera)}
+  ${blk("Soins rencontrés","t-soins",sv.soins)}
+  ${sv.obj&&sv.obj.length?`<div class="svc-blk t-obj"><span class="svc-lab">Objectifs de stage possibles</span><ul class="svc-obj">${sv.obj.map((o,j)=>{const on=mine.includes(objText(o[1]));
+    return `<li>${with09?`<span class="comp" title="${esc(COMP[o[0]])}">C${o[0]}</span>`:""}<span>${md(o[1])}</span><button class="del add" data-act="obj-add" data-s="${i}" data-i="${j}" aria-pressed="${on}" aria-label="${on?"Déjà dans mes objectifs":"Ajouter à mes objectifs de stage"}">${on?IC.check:IC.plus}</button></li>`}).join("")}</ul>
+   <small class="muted">Touchez + pour ajouter l'objectif à « Mes objectifs de stage » ci-dessus. ${with09?"C1 à C10 : compétences du référentiel 2009.":"À relier aux compétences de votre portfolio."} Reformulez-les avec votre tuteur.</small></div>`:""}
+  ${links?`<div class="svc-blk t-fiches"><span class="svc-lab">À réviser dans l'appli</span><div class="chips wrapchips">${links}</div></div>`:""}
+  ${sv.pieges&&sv.pieges.length?`<div class="callout warn"><span class="eyebrow">Erreurs fréquentes</span><ul class="clean">${sv.pieges.map(x=>`<li>${md(x)}</li>`).join("")}</ul></div>`:""}
+ </div></details>`;
 }
 
 /* ---------- Programme (UE) ---------- */
@@ -451,6 +467,11 @@ app.addEventListener("click",ev=>{
  else if(a==="ue-quiz"){const r=state.ueRef;launchQuiz(quizIdx(q=>(q.ue[r]||[]).includes(k)),"Quiz UE "+k);}
  else if(a==="suggest"){state.q=k;render();}
  else if(a==="set"){const s=settings();s[b.dataset.n]=k;store.set("settings",s);applyTheme();render();}
+ else if(a==="obj-add"){const sv=STAGES[+b.dataset.s],o=sv&&sv.obj[+b.dataset.i];if(!o)return;const st=stageInfo(),line=objText(o[1]);
+  if((st.objectifs||"").includes(line)){toast("Déjà dans vos objectifs");return;}
+  st.objectifs=(st.objectifs?st.objectifs.replace(/\s+$/,"")+"\n":"")+line;store.set("stage",st);
+  const ta=document.getElementById("sf-objectifs");if(ta)ta.value=st.objectifs;
+  b.setAttribute("aria-pressed","true");b.setAttribute("aria-label","Déjà dans mes objectifs");b.innerHTML=IC.check;haptic();toast("Ajouté à mes objectifs de stage");}
  else if(a==="exam-edit"){state.examEdit=true;render();}
  else if(a==="exam-done"){state.examEdit=false;render();}
  else if(a==="exam-del"){store.set("exams",exams().filter(e=>e.id!==id));haptic();toast("Partiel supprimé");render();}
