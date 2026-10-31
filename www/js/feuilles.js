@@ -300,11 +300,23 @@ function fsPrintFields(fields,data,blank){
 function fsPrintDoc(type,inst){
  const S=SHEETS[type],blank=!inst,d=blank?{}:(inst.data||{}),title=blank?S.titre:S.titre+" · "+fsTitle(type,inst);
  if(type==="planif")return fsPrintPlanif(inst);
+ if(type==="projet")return fsPrintProjet(inst);
  let h=`<section class="pp"><h1>${esc(title)}</h1><p class="psub">Carnet IFSI · initiales seulement, document à garder dans le service</p>`;
  S.sections.forEach(sec=>{h+=`<h2>${esc(sec.h)}</h2>`;
   if(sec.g){const items=blank?Array.from({length:sec.g.vide||2},()=>({})):(d[sec.g.k]||[]);items.forEach((it,i)=>{h+=`<div class="pj"><p><b>${esc(sec.g.label)} ${i+1}</b></p>${fsPrintFields(sec.g.f,it,blank)}</div>`;});}
   else h+=fsPrintFields(sec.f,d,blank);});
  return h+`</section>`;
+}
+function fsPrintProjet(inst){
+ const blank=!inst,d=blank?{}:(inst.data||{}),pbs=blank?Array.from({length:5},()=>({})):(d.pb||[]).filter(x=>x.probleme||x.objectif||x.actions||x.evaluation);
+ const who=blank?"Chambre ……  Initiales ……………  Âge ……  Date ……………":[d.chambre?"Ch. "+d.chambre:"",d.initiales||"",d.age?d.age+" ans":"",d.date?fmtISO(d.date):""].filter(Boolean).map(esc).join(" · ");
+ let h=`<section class="pp pcompact pprojet ${blank?"blank-pj":""}"><div class="pc-head"><b>Projet de soins</b><span>${who}</span></div>
+  <table class="pt pc pctx"><tr><th class="pc-l">Synthèse de la situation</th><td${blank?' style="height:16mm"':""}>${blank?"":pe(d.contexte)}</td></tr></table>
+  <table class="pt pc ppj"><thead><tr><th style="width:27%">Problème</th><th style="width:21%">Objectif</th><th style="width:30%">Actions infirmières</th><th style="width:22%">Évaluation, résultats</th></tr></thead><tbody>
+  ${pbs.length?pbs.map((x,i)=>`<tr><td><span class="ppn">${i+1}</span>${blank?`<small>☐ réel ☐ risque ☐ collaboration</small>`:pe(x.probleme)}${!blank&&x.type?`<br><small>${esc(x.type)}</small>`:""}</td><td>${blank?"":pe(x.objectif)}</td><td>${blank?"":pe(x.actions)}</td><td>${blank?"":pe(x.evaluation)}</td></tr>`).join(""):`<tr><td colspan="4">Aucun problème saisi.</td></tr>`}</tbody></table>
+  <table class="pt pc pctx"><tr><th class="pc-l">Projet de vie, souhaits</th><td${blank?' style="height:10mm"':""}>${blank?"":pe(d.vie)}</td></tr><tr><th class="pc-l">Préparation de la sortie</th><td${blank?' style="height:10mm"':""}>${blank?"":pe(d.sortie)}</td></tr></table>
+  <p class="psub">Problèmes classés par priorité (n° 1 le plus prioritaire). Types : diagnostic infirmier réel (problème lié à… se manifestant par…), de risque (risque de… lié à…), problème en collaboration. Objectif : « Le patient… », mesurable et daté.</p></section>`;
+ return h;
 }
 function fsPrintPlanif(inst){
  const blank=!inst,d=blank?{}:(inst.data||{});
