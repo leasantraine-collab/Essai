@@ -40,7 +40,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.7 · 31 octobre 2026";
+const APP_VERSION="1.8 · 31 octobre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -77,7 +77,7 @@ applyTheme();
 
 /* ---------- Routage ---------- */
 const ROOTS=["accueil","reviser","entrainer","stages","programme"];
-const PARENT={carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const PARENT={feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 function route(){const [v,...rest]=decodeURIComponent(location.hash.slice(1)).split("/");return {v:VIEWS[v]?v:"accueil",arg:rest.join("/")};}
 function nav(h){if(location.hash==="#"+h)render(true);else location.hash=h;}
 let depth=0;
@@ -301,13 +301,14 @@ function vStages(){
  return `<div class="stack-lg">${vh("Stages","Arriver préparé·e dans chaque service",`Compte à rebours, infos pratiques, check-list, posture et repères pour ${STAGES.length} services.`)}
   ${stageCountdown()}
   ${carnetCard()}
+  ${feuillesCard()}
   ${stageForm()}
   <section class="stack-sm"><div class="section-title"><h2>Avant le premier jour</h2><span class="muted">${done.length} / ${CHECKLIST.length}</span></div>
    <div class="progress"><i style="width:${done.length/CHECKLIST.length*100}%"></i></div>
    <div class="list" style="padding:4px 14px">${CHECKLIST.map((c,i)=>`<label class="chk"><input type="checkbox" data-act="check" data-i="${i}" ${done.includes(i)?"checked":""}><span>${esc(c)}</span></label>`).join("")}</div></section>
   <section class="stack-sm"><h2>Posture professionnelle</h2><div class="sheet-body"><ul class="fv-list" style="--c:${CAT.stage.c}">${POSTURE.map(p=>`<li>${esc(p)}</li>`).join("")}</ul></div></section>
   <section class="stack-sm"><h2>Objectifs selon le semestre</h2><div class="sheet-body"><div class="fv-tbl">${OBJECTIFS.map(o=>{const [a,b]=o.split(" : ");return `<div><span>${esc(a)}</span><span>${esc(b)}</span></div>`}).join("")}</div><span class="muted">Repères indicatifs : vos objectifs se construisent avec votre formateur et votre tuteur.</span></div></section>
-  ${FICHES.some(f=>f.cat==="stage")?`<section class="stack-sm"><h2>Fiches méthode</h2><div class="list">${FICHES.filter(f=>f.cat==="stage").map(f=>itemRow(f,"f")).join("")}</div></section>`:""}
+  ${FICHES.some(f=>f.cat==="stage"&&!f.id.startsWith("guide-"))?`<section class="stack-sm"><h2>Fiches méthode</h2><div class="list">${FICHES.filter(f=>f.cat==="stage"&&!f.id.startsWith("guide-")).map(f=>itemRow(f,"f")).join("")}</div></section>`:""}
   <section class="stack-sm"><div class="section-title"><h2>Par lieu de stage</h2><span class="muted">${STAGES.length} services</span></div>
    <p class="muted">Pour chaque service : ce qu'il faut réviser, les soins que vous rencontrerez, des objectifs prêts à reprendre dans votre portfolio et les erreurs fréquentes.</p>
    ${STAGES.map(svcCard).join("")}</section></div>`;
@@ -402,8 +403,8 @@ function vReglages(){
 }
 
 /* ---------- Rendu ---------- */
-const VIEWS={carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
-const TAB={carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const VIEWS={feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
+const TAB={feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 let lastKey=null;
 function render(top){
  const r=route(),key=r.v+"/"+r.arg;
@@ -437,11 +438,13 @@ function saveStageField(t){const s=stageInfo();s[t.dataset.sf]=t.value;store.set
  const m=document.getElementById("sf-saved");if(m){m.textContent="Enregistré ✓";clearTimeout(saveStageField.t);saveStageField.t=setTimeout(()=>{m.textContent="Enregistré sur cet appareil"},1500);}}
 app.addEventListener("input",ev=>{const t=ev.target;if(t.id==="q"){state.q=t.value;document.getElementById("res").innerHTML=results(state.q)||"";}
  else if(t.dataset.sf)saveStageField(t);
- else if(t.dataset.cn)carnetInput(t);});
+ else if(t.dataset.cn)carnetInput(t);
+ else if(t.dataset.fs)feuilleInput(t);});
 app.addEventListener("click",ev=>{
  const b=ev.target.closest("[data-act]");if(!b)return;
  const a=b.dataset.act,k=b.dataset.k,id=b.dataset.id;
  if(a.startsWith("cn-")){carnetAct(b,a);return;}
+ if(a.startsWith("fs-")){feuilleAct(b,a);return;}
  if(a==="nav"){nav(b.dataset.h);}
  else if(a==="back"||a==="fiche-back"||a==="cours-back"){goBack();}
  else if(a==="go-cat"){ev.preventDefault();
@@ -496,7 +499,7 @@ app.addEventListener("click",ev=>{
   ["reviewed","studied","stats","wrong","favs","check","last"].forEach(x=>{try{localStorage.removeItem("ifsi_"+x)}catch(e){}});haptic("MEDIUM");toast("Progression réinitialisée");render();}
 });
 app.addEventListener("change",ev=>{
- const t=ev.target;if(t.id==="restore-file"){if(t.files&&t.files[0])restoreData(t.files[0]);t.value="";return;}if(t.dataset.sf){saveStageField(t);return;}if(t.dataset.cn){carnetInput(t);return;}if(t.dataset.act!=="check")return;
+ const t=ev.target;if(t.id==="restore-file"){if(t.files&&t.files[0])restoreData(t.files[0]);t.value="";return;}if(t.dataset.sf){saveStageField(t);return;}if(t.dataset.cn){carnetInput(t);return;}if(t.dataset.fs){feuilleInput(t);return;}if(t.dataset.act!=="check")return;
  let d=store.get("check",[]);const i=+t.dataset.i;
  d=t.checked?[...new Set([...d,i])]:d.filter(x=>x!==i);store.set("check",d);haptic();render();
 });

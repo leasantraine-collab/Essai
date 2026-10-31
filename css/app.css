@@ -464,3 +464,32 @@ label.li{cursor:pointer}
 .cn-top{grid-template-columns:repeat(4,minmax(0,1fr))}
 .cn-top span{padding:9px 8px;font-size:.72rem}
 .cn-top b{font-size:1.25rem}
+
+/* ---------- Feuilles de travail ---------- */
+.fs-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:400px){.fs-grid{grid-template-columns:1fr}}
+.fs-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
+.fs-main{display:flex;flex-direction:column;gap:6px;padding:14px;text-decoration:none;color:inherit;flex:1}
+.fs-main b{font-family:var(--f-display);font-size:1.05rem;font-weight:650;line-height:1.2}
+.fs-main small{color:var(--muted);font-size:.82rem;line-height:1.35}
+.fs-main .tag{align-self:flex-start}
+.fs-links{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
+.fs-links a,.fs-links button{font:inherit;font-size:.8rem;font-weight:650;color:var(--brand);background:none;border:0;padding:10px 6px;text-align:center;text-decoration:none;cursor:pointer}
+.fs-links>*+*{border-left:1px solid var(--line)}
+.fs-tasks{overflow:visible}
+.fs-task{display:grid;grid-template-columns:118px minmax(0,1fr) 34px;grid-template-areas:"h p ok" "t t del";gap:6px 8px;padding:10px 12px;border-top:1px solid var(--line);align-items:center}
+.fs-task:first-child{border-top:0}
+.fs-task input[type=time]{grid-area:h}
+.fs-task select{grid-area:p}
+.fs-task .fs-ok{grid-area:ok;display:grid;place-items:center}
+.fs-task .fs-t{grid-area:t}
+.fs-task .del{grid-area:del}
+.fs-task input[type=time],.fs-task select,.fs-task .fs-t{font:inherit;font-size:1rem;color:var(--ink);background:var(--bg);border:1.5px solid var(--line-2);border-radius:10px;padding:8px 10px;min-width:0;width:100%;-webkit-appearance:none;appearance:none}
+.fs-task .fs-ok input{width:24px;height:24px;accent-color:var(--ok)}
+.fs-task.done .fs-t{text-decoration:line-through;color:var(--muted)}
+.fs-task.done{background:color-mix(in srgb,var(--ok-soft) 50%,transparent)}
+@media (min-width:700px){.fs-task{grid-template-columns:118px 170px minmax(0,1fr) 34px 34px;grid-template-areas:"h p t ok del"}}
+.pdoc .fs-pt td{font-size:9pt;height:13mm}
+.pdoc .fs-pt th{font-size:8.5pt}
+.pdoc .fs-grid-p td{height:10.5mm}
+.pdoc .pt th small{font-weight:400;color:#555;font-size:8pt}

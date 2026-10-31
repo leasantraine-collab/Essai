@@ -170,7 +170,7 @@ function cnImprimer(){
  return `${card("rempli",cnSvc()?"Mon carnet · "+esc(cnSvc().nom):"Mon carnet rempli","Infos du stage, objectifs et avancée, journal de bord, soins réalisés, situations, questions, bilans et feuille d'heures, avec un emplacement pour les signatures.")}
  ${card("vierge",cnSvc()?"Carnet vierge · "+esc(cnSvc().nom):"Un carnet vierge",cnSvc()?"La même structure à remplir à la main, avec les soins, objectifs et repères de ce service : pratique dans la poche de sa tenue.":"La même structure à remplir à la main : pratique pour garder un carnet papier dans la poche de sa tenue.")}
  <div class="sheet-body cn-print"><h3>Sauvegarder mon carnet</h3><p class="muted">Vos données restent sur cet iPad. Gardez une copie dans Fichiers ou iCloud : elle permet de tout récupérer si vous supprimez l'appli ou changez d'appareil.</p><button class="btn ghost" data-act="backup">Sauvegarder mes données</button></div>
- ${card("patient","Des fiches patient","Une fiche de recueil de données par patient : identité, constantes, traitements, 14 besoins de Virginia Henderson, planification et transmissions.")}
+ <div class="sheet-body cn-print"><h3>Feuilles de travail</h3><p class="muted">Recueil de données, projet de soins, analyse de pratique et planification de la journée : à remplir ou imprimer, avec leur mode d'emploi.</p><div class="chips wrapchips">${SHEET_ORDER.map(t=>`<a class="chip" href="#feuille/${t}">${esc(SHEETS[t].titre)}</a>`).join("")}</div></div>
  <p class="muted">Sur iPad, le bouton ouvre la fenêtre d'impression. Vous pouvez imprimer ou enregistrer en PDF (bouton Partager de l'aperçu). Si rien ne s'ouvre, ouvrez l'appli dans Safari et utilisez Partager → Imprimer. Ne notez pas de nom de patient sur un document qui sort du service.</p>`;
 }
 
@@ -226,7 +226,7 @@ function carnetAct(b,a){
   const S=cnStats(c);document.querySelectorAll("[data-kpi]").forEach(el=>{if(S[el.dataset.kpi]!=null)el.textContent=S[el.dataset.kpi];});return;}
  if(a==="cn-statut"){c.obj[k]=c.obj[k]||{};c.obj[k].statut=b.dataset.f;saveCarnet(c);haptic();if(b.dataset.f==="ok")toast("Objectif atteint, bravo");render();return;}
  if(a==="cn-qdone"){const q=c.questions.find(x=>x.id===id);if(q){q.done=b.checked;saveCarnet(c);const l=b.parentNode.querySelector("label");l&&l.classList.toggle("done",q.done);}return;}
- if(a==="cn-print"){cnPrint(k);return;}
+ if(a==="cn-print"){if(k==="patient"){printHTML(fsPrintDoc("recueil",null));return;}cnPrint(k);return;}
  if(a==="cn-svc"){const v=c.svc[k]||{};v[b.dataset.f]=!v[b.dataset.f];c.svc[k]=v;saveCarnet(c);haptic();b.setAttribute("aria-pressed",v[b.dataset.f]);
   const sv=cnSvc();if(sv){const all=[...sv.patho,...sv.thera].map(x=>c.svc[cnHash(plainMd(x))]||{});const e1=document.querySelector('[data-kpi="svcVu"]'),e2=document.querySelector('[data-kpi="svcRevu"]');
    if(e1)e1.textContent=all.filter(x=>x.vu).length+"/"+all.length;if(e2)e2.textContent=all.filter(x=>x.revu).length+"/"+all.length;}return;}
