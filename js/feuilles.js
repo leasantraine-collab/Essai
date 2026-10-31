@@ -123,7 +123,7 @@ function plRefresh(inst,what){
 function plEditor(inst){
  const d=inst.data,base=`planif|${inst.id}`,S=SHEETS.planif,pats=d.patients||[];
  return `<div class="stack-lg"><a class="back" href="#feuille/planif">${IC.back}${esc(S.titre)}</a>
-  ${vh("Feuille de travail",esc(fsTitle("planif",inst)),`<a class="link" href="#fiche/${S.guide}">Mode d'emploi de cette feuille</a>`)}
+  ${vh("Feuille de travail",esc(fsTitle("planif",inst)),`<a class="link" href="#cours/${S.guide}">Mode d'emploi de cette feuille</a>`)}
   <div class="sheet-body cd-form"><div class="cd-row">${fsField({k:"date",l:"Date",t:"date"},base+"|date",d.date)}${fsField({k:"poste",l:"Poste",t:"select",o:Object.keys(PL_POSTES)},base+"|poste",d.poste||"Matin")}</div></div>
   <section class="stack-sm"><div class="section-title"><h2>Mes patients</h2><span class="muted" id="fs-saved">Enregistré sur cet appareil</span></div>
    <form id="pl-pat" class="pl-pat" data-id="${inst.id}"><input id="pl-ch" placeholder="Chambre" maxlength="8" inputmode="numeric" autocomplete="off" aria-label="Chambre"><input id="pl-in" placeholder="Initiales" maxlength="12" autocomplete="off" aria-label="Initiales"><button class="btn" type="submit">${IC.plus}Ajouter</button></form>
@@ -168,7 +168,7 @@ function fsEditor(type,inst){
   else body=`<div class="sheet-body cd-form">${fsFields(sec.f,base,d)}</div>`;
   return `<section class="stack-sm"><h3 class="cn-g">${esc(sec.h)}</h3>${body}</section>`;}).join("");
  return `<div class="stack-lg"><a class="back" href="#feuille/${type}">${IC.back}${esc(S.titre)}</a>
-  ${vh("Feuille de travail",esc(fsTitle(type,inst)),`<a class="link" href="#fiche/${S.guide}">Mode d'emploi de cette feuille</a>`)}
+  ${vh("Feuille de travail",esc(fsTitle(type,inst)),`<a class="link" href="#cours/${S.guide}">Mode d'emploi de cette feuille</a>`)}
   <div class="section-title"><span class="muted" id="fs-saved">Enregistré sur cet appareil</span></div>
   ${secs}
   <div class="btn-row"><button class="btn" data-act="fs-print" data-k="${type}" data-id="${inst.id}">${IC.sheet}Imprimer cette feuille</button><button class="btn ghost" data-act="fs-print" data-k="${type}">Imprimer une feuille vierge</button></div>
@@ -190,7 +190,7 @@ function fsList(type){
    <a class="li sw-main" href="#feuille/${type}/${x.id}" draggable="false"><span class="bar" style="--c:${CAT.stage.c}"></span><span><span class="t">${t}</span><span class="s">${sub}</span></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a></div>`;};
  return `<div class="stack-lg">${backBtn("Stages")}${vh("Feuille de travail",esc(S.titre),esc(S.desc))}
   <div class="btn-row"><button class="btn" data-act="fs-new" data-k="${type}">${IC.plus}Nouvelle feuille</button><button class="btn ghost" data-act="fs-print" data-k="${type}">${IC.sheet}Imprimer vierge</button></div>
-  <a class="cd-card cn-entry" href="#fiche/${S.guide}"><span class="cd-ic">${IC.book}</span><span><b>Mode d'emploi</b><small>Comment utiliser et remplir cette feuille, avec un exemple</small></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
+  <a class="cd-card cn-entry" href="#cours/${S.guide}"><span class="cd-ic">${IC.book}</span><span><b>Mode d'emploi</b><small>Le cours pas à pas : but, étapes, exemples, astuces</small></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
   <section class="stack-sm"><div class="section-title"><h2>Mes feuilles</h2>${re?`<button class="btn" data-act="fs-ord-done" data-k="${type}">Terminé</button>`:`<span class="muted">${list.length}</span>`}</div>
   ${list.length?`<p class="muted fs-hint">${re?"Utilisez les flèches pour classer vos feuilles par ordre d'importance.":"Glissez une feuille vers la gauche pour la modifier, la hiérarchiser ou la supprimer."}</p><div class="list fs-list">${list.map(row).join("")}</div>`:`<div class="empty">Aucune feuille. Créez-en une pour la remplir ici, ou imprimez une feuille vierge à remplir à la main.</div>`}</section></div>`;
 }
@@ -221,7 +221,7 @@ function feuillesCard(){
  return `<section class="stack-sm"><div class="section-title"><h2>Feuilles de travail</h2></div>
   <p class="muted">À remplir dans l'appli ou à imprimer, chacune avec son mode d'emploi.</p>
   <div class="fs-grid">${SHEET_ORDER.map(t=>{const S=SHEETS[t],n=(F[t]||[]).length;return `<div class="fs-card"><a class="fs-main" href="#feuille/${t}"><span class="cd-ic">${ic[t]}</span><b>${esc(S.titre)}</b><small>${esc(S.desc)}</small>${n?`<span class="tag">${plural(n,"feuille")}</span>`:""}</a>
-   <div class="fs-links"><a href="#fiche/${S.guide}">Mode d'emploi</a><button data-act="fs-print" data-k="${t}">Imprimer vierge</button></div></div>`}).join("")}</div></section>`;
+   <div class="fs-links"><a href="#cours/${S.guide}">Mode d'emploi</a><button data-act="fs-print" data-k="${t}">Imprimer vierge</button></div></div>`}).join("")}</div></section>`;
 }
 
 /* ---------- Saisie et actions ---------- */
