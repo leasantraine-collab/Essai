@@ -10,6 +10,8 @@ Elle reprend l'intégralité des contenus de l'artefact *Carnet IFSI* et les com
 - **11 générateurs de calculs de dose** (débits, PSE, insuline, mg/kg/h, dilutions…)
 - **35 schémas** dessinés
 - Préparation aux **stages** : check-list, posture, objectifs, **18 services**
+- **Carnet de suivi de stage** personnalisé selon le lieu : journal de bord, pathologies et traitements du service à cocher, mémo (médicaments, sigles), soins réalisés (observé, avec aide, seul), objectifs, auto-évaluation des compétences, points d'étape, bilans, situations, feuille d'heures, impression (carnet rempli ou vierge, fiches patient)
+- **Comptes à rebours** des partiels et du stage, **sauvegarde et restauration** des données
 - Programme par **UE** : référentiels 2026 (1re année) et 2009 (2e et 3e années), S1 à S6
 
 ## Ce qui change par rapport à l'artefact

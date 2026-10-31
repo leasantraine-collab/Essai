@@ -40,7 +40,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.6 · 31 octobre 2026";
+const APP_VERSION="1.7 · 31 octobre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -392,6 +392,8 @@ function vReglages(){
    <div class="set-row"><span>Référentiel</span><div class="seg">${Object.entries(UE).map(([k,v])=>`<button data-act="ue-ref" data-k="${k}" aria-pressed="${state.ueRef===k}">${v.sub.replace("Référentiel ","")}</button>`).join("")}</div></div>
    <div class="set-row"><span>Semestre en cours</span><span class="muted">S${state.sem} · modifiable dans Programme</span></div></div></div>
   <div class="set-group"><span class="eyebrow">Données</span><div class="list">
+   <button class="li" data-act="backup" style="grid-template-columns:minmax(0,1fr)"><span><span class="t" style="color:var(--brand)">Sauvegarder mes données</span><span class="s">Partiels, stage, carnet de suivi, progression : un fichier à garder dans Fichiers ou iCloud</span></span></button>
+   <label class="li" for="restore-file" style="grid-template-columns:minmax(0,1fr)"><span><span class="t" style="color:var(--brand)">Restaurer une sauvegarde</span><span class="s">Remplace les données actuelles de cet appareil</span></span></label><input type="file" id="restore-file" class="sr-only" accept="application/json,.json">
    <button class="li" data-act="reset" style="grid-template-columns:minmax(0,1fr)"><span class="t danger">Réinitialiser ma progression</span></button></div>
    <p class="muted" style="padding:0 4px">Votre progression reste sur cet appareil, rien n'est envoyé en ligne.</p></div>
   <div class="set-group"><span class="eyebrow">À propos</span><div class="list"><div class="set-row"><span>Carnet IFSI</span><span class="muted">Version ${APP_VERSION}</span></div>
@@ -482,6 +484,7 @@ app.addEventListener("click",ev=>{
   st.objectifs=(st.objectifs?st.objectifs.replace(/\s+$/,"")+"\n":"")+line;store.set("stage",st);
   const ta=document.getElementById("sf-objectifs");if(ta)ta.value=st.objectifs;
   b.setAttribute("aria-pressed","true");b.setAttribute("aria-label","Déjà dans mes objectifs");b.innerHTML=IC.check;haptic();toast("Ajouté à mes objectifs de stage");if(route().v==="carnet")render();}
+ else if(a==="backup"){backupData();}
  else if(a==="force-update"){b.querySelector(".t").textContent="Mise à jour en cours…";forceUpdate();}
  else if(a==="exam-edit"){state.examEdit=true;render();}
  else if(a==="exam-done"){state.examEdit=false;render();}
@@ -493,7 +496,7 @@ app.addEventListener("click",ev=>{
   ["reviewed","studied","stats","wrong","favs","check","last"].forEach(x=>{try{localStorage.removeItem("ifsi_"+x)}catch(e){}});haptic("MEDIUM");toast("Progression réinitialisée");render();}
 });
 app.addEventListener("change",ev=>{
- const t=ev.target;if(t.dataset.sf){saveStageField(t);return;}if(t.dataset.cn){carnetInput(t);return;}if(t.dataset.act!=="check")return;
+ const t=ev.target;if(t.id==="restore-file"){if(t.files&&t.files[0])restoreData(t.files[0]);t.value="";return;}if(t.dataset.sf){saveStageField(t);return;}if(t.dataset.cn){carnetInput(t);return;}if(t.dataset.act!=="check")return;
  let d=store.get("check",[]);const i=+t.dataset.i;
  d=t.checked?[...new Set([...d,i])]:d.filter(x=>x!==i);store.set("check",d);haptic();render();
 });
@@ -512,6 +515,23 @@ if(!isNative&&"serviceWorker" in navigator&&location.protocol==="https:"){
   document.addEventListener("visibilitychange",check);setInterval(check,30*60*1000);}).catch(()=>{});
  sw.addEventListener("controllerchange",()=>{if(!hadController||reloading)return;
   if(document.activeElement&&document.activeElement.matches("input,textarea,select"))return;reloading=true;location.reload();});
+}
+async function backupData(){
+ const data={app:"carnet-ifsi",version:APP_VERSION,date:new Date().toISOString(),donnees:{}};
+ try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith("ifsi_"))data.donnees[k]=localStorage.getItem(k);}}catch(e){}
+ const name=`carnet-ifsi-sauvegarde-${todayISO()}.json`,blob=new Blob([JSON.stringify(data)],{type:"application/json"});
+ try{const file=new File([blob],name,{type:"application/json"});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"Sauvegarde Carnet IFSI"});toast("Sauvegarde enregistrée");return;}}
+ catch(e){if(e&&e.name==="AbortError")return;}
+ try{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);toast("Sauvegarde téléchargée");}
+ catch(e){toast("Sauvegarde impossible sur cet appareil");}
+}
+function restoreData(file){
+ const r=new FileReader();
+ r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||d.app!=="carnet-ifsi"||!d.donnees||typeof d.donnees!=="object")throw 0;
+  let n=0;Object.entries(d.donnees).forEach(([k,v])=>{if(k.startsWith("ifsi_")&&typeof v==="string"){localStorage.setItem(k,v);n++;}});
+  state.ueRef=store.get("ueRef","2026");state.sem=store.get("sem",1);applyTheme();toast(n?"Données restaurées":"Sauvegarde vide");render();}
+  catch(e){toast("Ce fichier n'est pas une sauvegarde Carnet IFSI");}};
+ r.onerror=()=>toast("Lecture du fichier impossible");r.readAsText(file);
 }
 async function forceUpdate(){
  try{if("caches" in window){const k=await caches.keys();await Promise.all(k.map(x=>caches.delete(x)));}
