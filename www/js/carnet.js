@@ -19,7 +19,9 @@ const cnHash=t=>{let h=0;for(const ch of t)h=(h*31+ch.charCodeAt(0))|0;return "o
 const todayISO=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10);};
 const fmtISO=d=>d?new Date(d+"T12:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"}):"Sans date";
 const cnObjectifs=()=>(stageInfo().objectifs||"").split("\n").map(l=>l.replace(/^[\s•\-–*]+/,"").trim()).filter(Boolean);
-const cnAllSoins=c=>[...CN_SOINS,...(c.soinsPerso.length?[["Autres soins",c.soinsPerso]]:[])];
+const cnSvc=()=>{const l=stageInfo().lieu;return l?STAGES.find(s=>s.nom===l)||null:null;};
+const plainMd=t=>String(t).replace(/\*\*/g,"");
+const cnAllSoins=c=>{const sv=cnSvc();return [...(sv?[["Soins du service · "+sv.nom,sv.soins.map(plainMd)]]:[]),...CN_SOINS,...(c.soinsPerso.length?[["Autres soins",c.soinsPerso]]:[])];};
 const cnMinutes=h=>{if(!h.debut||!h.fin)return 0;const [a,b]=h.debut.split(":").map(Number),[x,y]=h.fin.split(":").map(Number);let m=(x*60+y)-(a*60+b);if(m<0)m+=1440;return Math.max(0,m-(+h.pause||0));};
 const fmtH=m=>`${Math.floor(m/60)} h ${String(m%60).padStart(2,"0")}`;
 function cnStats(c){
@@ -35,6 +37,7 @@ const cnField=(path,label,val,type="textarea",extra="")=>{const id="cn-"+path.re
  return `<label for="${id}">${label}<input id="${id}" data-cn="${path}" type="${type}" value="${esc(val||"")}" ${extra}></label>`;};
 const cnSelect=(path,label,val,opts)=>{const id="cn-"+path.replace(/\|/g,"-");return `<label for="${id}">${label}<select id="${id}" data-cn="${path}">${opts.map(o=>`<option ${o===val?"selected":""}>${esc(o)}</option>`).join("")}</select></label>`;};
 function carnetInput(t){
+ if(t.dataset.cn==="lieu"){const s=stageInfo();s.lieu=t.value;store.set("stage",s);haptic();toast(t.value?"Carnet personnalisé : "+t.value:"Lieu de stage retiré");render();return;}
  const c=carnet(),[list,id,field]=t.dataset.cn.split("|"),v=t.value;
  if(list==="bilans"){c.bilans[id]=c.bilans[id]||{};c.bilans[id][field]=v;}
  else if(list==="obj"){c.obj[id]=c.obj[id]||{};c.obj[id][field]=v;}
@@ -76,6 +79,8 @@ function cnObjectifsSec(c){
  ${objs.length?`<div class="stack-sm">${objs.map(o=>{const k=cnHash(o),v=c.obj[k]||{};return `<div class="cn-obj sheet-body"><p class="t">${esc(o)}</p>
   <div class="seg three" role="group" aria-label="Avancée">${CN_STATUTS.map(([s,l])=>`<button data-act="cn-statut" data-k="${k}" data-f="${s}" aria-pressed="${(v.statut||"todo")===s}">${l}</button>`).join("")}</div>
   <div class="cd-form">${cnField(`obj|${k}|note`,"Actions menées, exemples, remarques du tuteur",v.note)}</div></div>`}).join("")}</div>`:`<div class="empty">Aucun objectif pour l'instant. Ajoutez-en ci-dessous ou depuis le guide des lieux de stage.</div>`}
+ ${(()=>{const sv=cnSvc();if(!sv)return "";const i=STAGES.indexOf(sv),mine=stageInfo().objectifs||"";
+  return `<section class="stack-sm"><h3 class="cn-g">Objectifs proposés · ${esc(sv.nom)}</h3><ul class="svc-obj">${sv.obj.map((o,j)=>{const on=mine.includes(objText(o[1]));return `<li>${state.ueRef==="2009"?`<span class="comp" title="${esc(COMP[o[0]])}">C${o[0]}</span>`:""}<span>${md(o[1])}</span><button class="del add" data-act="obj-add" data-s="${i}" data-i="${j}" aria-pressed="${on}" aria-label="${on?"Déjà dans mes objectifs":"Ajouter à mes objectifs"}">${on?IC.check:IC.plus}</button></li>`}).join("")}</ul></section>`;})()}
  <form id="cn-obj-form" class="cd-form cn-inline"><label for="cn-obj-new">Nouvel objectif<input id="cn-obj-new" maxlength="160" placeholder="Ex. Réaliser une prise en charge globale de 3 patients" autocomplete="off"></label><button class="btn" type="submit">${IC.plus}Ajouter</button></form>`;
 }
 function cnBilans(c){
@@ -123,26 +128,45 @@ function cnHeures(c){
 }
 function cnImprimer(){
  const card=(k,titre,txt)=>`<div class="sheet-body cn-print"><h3>${titre}</h3><p class="muted">${txt}</p><button class="btn" data-act="cn-print" data-k="${k}">${IC.sheet}Imprimer</button></div>`;
- return `${card("rempli","Mon carnet rempli","Infos du stage, objectifs et avancée, journal de bord, soins réalisés, situations, questions, bilans et feuille d'heures, avec un emplacement pour les signatures.")}
- ${card("vierge","Un carnet vierge","La même structure à remplir à la main : pratique pour garder un carnet papier dans la poche de sa tenue.")}
+ return `${card("rempli",cnSvc()?"Mon carnet · "+esc(cnSvc().nom):"Mon carnet rempli","Infos du stage, objectifs et avancée, journal de bord, soins réalisés, situations, questions, bilans et feuille d'heures, avec un emplacement pour les signatures.")}
+ ${card("vierge",cnSvc()?"Carnet vierge · "+esc(cnSvc().nom):"Un carnet vierge",cnSvc()?"La même structure à remplir à la main, avec les soins, objectifs et repères de ce service : pratique dans la poche de sa tenue.":"La même structure à remplir à la main : pratique pour garder un carnet papier dans la poche de sa tenue.")}
  ${card("patient","Des fiches patient","Une fiche de recueil de données par patient : identité, constantes, traitements, 14 besoins de Virginia Henderson, planification et transmissions.")}
  <p class="muted">Sur iPad, le bouton ouvre la fenêtre d'impression. Vous pouvez imprimer ou enregistrer en PDF (bouton Partager de l'aperçu). Si rien ne s'ouvre, ouvrez l'appli dans Safari et utilisez Partager → Imprimer. Ne notez pas de nom de patient sur un document qui sort du service.</p>`;
 }
 
+function cnLieuCard(){
+ const sv=cnSvc(),lieu=stageInfo().lieu||"";
+ const sel=`<label for="cn-lieu-sel" class="cn-lieu-pick"><span class="eyebrow">Mon lieu de stage</span><select id="cn-lieu-sel" data-cn="lieu"><option value="">Choisir le service…</option>${STAGES.map(x=>`<option ${x.nom===lieu?"selected":""}>${esc(x.nom)}</option>`).join("")}</select></label>`;
+ if(!sv)return `<section class="cd-card cn-lieu cd-form">${sel}<p class="muted">Choisissez le service parmi les ${STAGES.length} lieux du guide : le carnet ajoute ses soins au suivi, vous propose ses objectifs et prépare un carnet personnalisé à imprimer.</p></section>`;
+ return `<section class="cd-card cn-lieu cd-form">${sel}<p class="svc-intro">${md(sv.intro||"")}</p>
+  <p class="muted">${plural(sv.soins.length,"soin")} du service ajouté${sv.soins.length>1?"s":""} au suivi · ${plural(sv.obj.length,"objectif")} proposé${sv.obj.length>1?"s":""} · ${plural(sv.patho.length,"pathologie")} à connaître</p></section>`;
+}
+function cnApercu(){
+ const sv=cnSvc();
+ return `<div class="stack-lg">${backBtn("Carnet de suivi")}
+  ${vh("Mon carnet",sv?"Carnet de suivi · "+esc(sv.nom):"Carnet de suivi de stage",sv?"Votre carnet complet, personnalisé pour ce lieu de stage. Il se met à jour à chaque saisie.":"Choisissez votre lieu de stage dans le carnet pour le personnaliser.")}
+  <div class="btn-row"><button class="btn" data-act="cn-print" data-k="rempli">${IC.sheet}Imprimer mon carnet</button><button class="btn ghost" data-act="cn-print" data-k="vierge">Imprimer la version vierge</button></div>
+  <div class="pdoc paper">${cnPrintDoc("rempli")}</div>
+  <button class="btn ghost block" data-act="back">Retour au carnet</button></div>`;
+}
+
 /* ---------- Vue ---------- */
 function vCarnet(arg){
+ if(arg==="apercu")return cnApercu();
  const sec=CN_SECS.some(s=>s[0]===arg)?arg:"journal",c=carnet(),S=cnStats(c),st=stageInfo();
  const body={journal:cnJournal,soins:cnSoins,objectifs:cnObjectifsSec,bilans:cnBilans,situations:cnSituations,heures:cnHeures,imprimer:cnImprimer}[sec](c);
  return `<div class="stack-lg">${backBtn("Stages")}
   ${vh("Stage","Carnet de suivi de stage",st.service?esc(st.service)+(st.debut?" · du "+esc(fmtShort(at(st.debut,"12:00")))+(st.fin?" au "+esc(fmtShort(at(st.fin,"12:00"))):""):""):"Renseignez le service et les dates dans les infos du stage.")}
+  ${cnLieuCard()}
   <div class="cn-kpi cn-top"><span><b>${S.jours}</b>jours notés</span><span><b>${S.soinsSeul}</b>soins seul·e</span><span><b>${S.atteints}/${S.objs}</b>objectifs</span><span><b>${Math.floor(S.minutes/60)} h</b>de stage</span></div>
   <div class="chips cn-tabs" role="tablist" aria-label="Sections du carnet">${CN_SECS.map(([k,l])=>`<button class="chip" role="tab" data-act="cn-sec" data-k="${k}" aria-pressed="${k===sec}">${l}</button>`).join("")}</div>
   <div class="section-title"><h2>${CN_SECS.find(s=>s[0]===sec)[1]}</h2>${sec!=="imprimer"?`<span class="muted" id="cn-saved">Enregistré sur cet appareil</span>`:""}</div>
-  <div class="stack">${body}</div></div>`;
+  <div class="stack">${body}</div>
+  <a class="btn block cn-final" href="#carnet/apercu">${IC.sheet}Voir mon carnet de suivi${cnSvc()?" · "+esc(cnSvc().nom):" personnalisé"}</a></div>`;
 }
 function carnetCard(){
  const c=carnet(),S=cnStats(c);
- return `<a class="cd-card cn-entry" href="#carnet"><span class="cd-ic">${IC.sheet}</span><span><b>Carnet de suivi de stage</b><small>${S.jours||S.actes?`${S.jours} jour${S.jours>1?"s":""} notés · ${S.soinsSeul} soins faits seul·e · ${S.atteints}/${S.objs} objectifs`:"Journal de bord, soins réalisés, objectifs, bilans, heures. À remplir ou à imprimer."}</small></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>`;
+ return `<a class="cd-card cn-entry" href="#carnet"><span class="cd-ic">${IC.sheet}</span><span><b>Carnet de suivi de stage</b><small>${stageInfo().lieu?esc(stageInfo().lieu)+" · ":""}${S.jours||S.actes?`${S.jours} jour${S.jours>1?"s":""} notés · ${S.soinsSeul} soins faits seul·e · ${S.atteints}/${S.objs} objectifs`:"Journal de bord, soins réalisés, objectifs, bilans, heures. À remplir ou à imprimer."}</small></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>`;
 }
 
 /* ---------- Actions ---------- */
@@ -161,6 +185,7 @@ function carnetAct(b,a){
  if(a==="cn-statut"){c.obj[k]=c.obj[k]||{};c.obj[k].statut=b.dataset.f;saveCarnet(c);haptic();if(b.dataset.f==="ok")toast("Objectif atteint, bravo");render();return;}
  if(a==="cn-qdone"){const q=c.questions.find(x=>x.id===id);if(q){q.done=b.checked;saveCarnet(c);const l=b.parentNode.querySelector("label");l&&l.classList.toggle("done",q.done);}return;}
  if(a==="cn-print"){cnPrint(k);return;}
+ if(a==="cn-lieu-set"){const s=stageInfo();s.lieu=k;store.set("stage",s);haptic();toast("Lieu de stage : "+k);render();return;}
 }
 function carnetSubmit(f){
  const c=carnet();
@@ -173,11 +198,18 @@ function carnetSubmit(f){
 const pe=s=>esc(s||"").replace(/\n/g,"<br>");
 const lines=n=>`<div class="pl">${"<i></i>".repeat(n)}</div>`;
 function cnPrintInfos(blank){
- const s=blank?{}:stageInfo(),row=(l,v)=>`<tr><th>${l}</th><td>${blank?"":pe(v)}</td></tr>`;
- return `<table class="pt">${row("Étudiant·e","")}${row("Service, établissement",s.service)}${row("Type de stage",s.type)}${row("Semestre",s.sem)}${row("Dates",s.debut?`du ${fmtISO(s.debut)}${s.fin?" au "+fmtISO(s.fin):""}`:"")}${row("Horaires",s.horaires)}${row("Lieu de rendez-vous",s.adresse)}${row("Tuteur ou tutrice",s.tuteur)}${row("Cadre de santé",s.cadre)}${row("Téléphone du service",s.tel)}</table>`;
+ const s=blank?{}:stageInfo(),row=(l,v,k)=>`<tr><th>${l}</th><td>${blank&&!k?"":pe(v)}</td></tr>`;
+ return `<table class="pt">${row("Étudiant·e","")}${row("Lieu de stage",(cnSvc()||{}).nom,true)}${row("Service, établissement",s.service)}${row("Type de stage",s.type)}${row("Semestre",s.sem)}${row("Dates",s.debut?`du ${fmtISO(s.debut)}${s.fin?" au "+fmtISO(s.fin):""}`:"")}${row("Horaires",s.horaires)}${row("Lieu de rendez-vous",s.adresse)}${row("Tuteur ou tutrice",s.tuteur)}${row("Cadre de santé",s.cadre)}${row("Téléphone du service",s.tel)}</table>`;
+}
+function cnSvcPage(sv){
+ const L=(t,a)=>a&&a.length?`<div><h3>${t}</h3><ul>${a.map(x=>`<li>${md(x)}</li>`).join("")}</ul></div>`:"";
+ const fiches=(sv.fiches||[]).map(id=>{const it=FICHES.find(x=>x.id===id)||COURS.find(x=>x.id===id&&!x.pro);return it?esc(it.titre):"";}).filter(Boolean);
+ return `<section class="pp"><h1>Mon service · ${esc(sv.nom)}</h1><p class="psub">${md(sv.intro||"")}</p>
+  <div class="psvc">${L("Pathologies à connaître",sv.patho)}${L("Thérapeutiques à connaître",sv.thera)}${L("Soins rencontrés",sv.soins)}${fiches.length?`<div><h3>À réviser dans Carnet IFSI</h3><ul>${fiches.map(f=>`<li>${f}</li>`).join("")}</ul></div>`:""}
+  ${sv.pieges&&sv.pieges.length?`<div class="pwarn"><h3>Erreurs fréquentes dans ce service</h3><ul>${sv.pieges.map(x=>`<li>${md(x)}</li>`).join("")}</ul></div>`:""}</div></section>`;
 }
 function cnPrintDoc(kind){
- const c=carnet(),st=stageInfo(),soins=cnAllSoins(c);
+ const c=carnet(),st=stageInfo(),soins=cnAllSoins(c),sv=cnSvc();
  if(kind==="patient")return `<section class="pp"><h1>Fiche patient · recueil de données</h1>
   <table class="pt"><tr><th>Chambre</th><td></td><th>Initiales, âge</th><td></td></tr><tr><th>Date d'entrée</th><td></td><th>Motif d'hospitalisation</th><td></td></tr><tr><th>Antécédents</th><td colspan="3"></td></tr><tr><th>Allergies</th><td colspan="3"></td></tr><tr><th>Mode de vie, entourage</th><td colspan="3"></td></tr></table>
   <h2>Constantes</h2><table class="pt pg"><tr><th>Heure</th>${"<td></td>".repeat(6)}</tr>${["TA","FC","FR","SpO₂","T°","Douleur","Glycémie","Diurèse"].map(x=>`<tr><th>${x}</th>${"<td></td>".repeat(6)}</tr>`).join("")}</table>
@@ -186,10 +218,11 @@ function cnPrintDoc(kind){
   <h2>Soins à réaliser</h2><table class="pt pg"><tr><th>Heure</th><th>Soin</th><th>Fait</th></tr>${"<tr><td></td><td></td><td></td></tr>".repeat(6)}</table>
   <h2>Transmissions ciblées</h2><table class="pt pg"><tr><th>Cible</th><th>Données</th><th>Actions</th><th>Résultats</th></tr>${"<tr><td></td><td></td><td></td><td></td></tr>".repeat(4)}</table></section>`;
  const blank=kind==="vierge",objs=blank?[]:cnObjectifs(),S=cnStats(c);
- let h=`<section class="pp"><h1>Carnet de suivi de stage</h1><p class="psub">Carnet IFSI${!blank&&st.service?" · "+esc(st.service):""}</p>${cnPrintInfos(blank)}
+ let h=`<section class="pp"><h1>Carnet de suivi de stage${sv?" · "+esc(sv.nom):""}</h1><p class="psub">Carnet IFSI${!blank&&st.service?" · "+esc(st.service):""}</p>${cnPrintInfos(blank)}
   <h2>Mes objectifs de stage</h2><table class="pt pg"><tr><th>Objectif</th><th style="width:22%">Avancée</th><th style="width:34%">Exemples, remarques</th></tr>
-  ${blank?"<tr><td></td><td></td><td></td></tr>".repeat(7):objs.length?objs.map(o=>{const v=c.obj[cnHash(o)]||{};return `<tr><td>${pe(o)}</td><td>${CN_STATUTS.find(x=>x[0]===(v.statut||"todo"))[1]}</td><td>${pe(v.note)}</td></tr>`}).join(""):"<tr><td colspan=3>Aucun objectif saisi</td></tr>"}</table>
+  ${blank?(sv?sv.obj.map(o=>`<tr><td>${esc(plainMd(o[1]))}</td><td class="pst">☐ À travailler<br>☐ En cours<br>☐ Atteint</td><td></td></tr>`).join(""):"")+"<tr><td></td><td></td><td></td></tr>".repeat(sv?2:7):objs.length?objs.map(o=>{const v=c.obj[cnHash(o)]||{};return `<tr><td>${pe(o)}</td><td>${CN_STATUTS.find(x=>x[0]===(v.statut||"todo"))[1]}</td><td>${pe(v.note)}</td></tr>`}).join(""):"<tr><td colspan=3>Aucun objectif saisi</td></tr>"}</table>
   ${blank?"":`<p class="psub">Bilan chiffré : ${plural(S.jours,"jour")} noté${S.jours>1?"s":""} · ${plural(S.soinsSeul,"soin")} réalisé${S.soinsSeul>1?"s":""} seul·e · ${S.atteints} objectif${S.atteints>1?"s":""} atteint${S.atteints>1?"s":""} sur ${S.objs} · ${fmtH(S.minutes)} de présence · ${plural(S.abs,"absence")}</p>`}</section>`;
+ if(sv)h+=cnSvcPage(sv);
  h+=`<section class="pp"><h1>Journal de bord</h1>`;
  if(blank)h+=Array.from({length:4},()=>`<div class="pj"><p><b>Date :</b> ................................ <b>Horaire :</b> .....................</p><p><b>Patients pris en charge</b></p>${lines(2)}<p><b>Soins et activités réalisés</b></p>${lines(3)}<p><b>Ce que j'ai appris</b></p>${lines(2)}<p><b>Difficultés, questions</b></p>${lines(2)}</div>`).join("");
  else{const L=c.journal.slice().sort((a,b)=>(a.date||"").localeCompare(b.date||""));h+=L.length?L.map(j=>`<div class="pj"><p><b>${esc(fmtISO(j.date))} · ${esc(j.moment||"Journée")}</b>${j.ressenti?` · ressenti : ${esc(j.ressenti)}`:""}</p>${[["Patients","patients"],["Soins et activités","activites"],["Appris","appris"],["Difficultés","difficultes"],["À rechercher","recherches"]].filter(([,f])=>j[f]).map(([l,f])=>`<p><i>${l} :</i> ${pe(j[f])}</p>`).join("")}</div>`).join(""):"<p>Aucune journée notée.</p>";}
@@ -207,7 +240,7 @@ function cnPrintDoc(kind){
 }
 function cnPrint(kind){
  let doc=document.getElementById("print-doc");if(doc)doc.remove();
- doc=document.createElement("div");doc.id="print-doc";doc.className="print-doc";doc.innerHTML=cnPrintDoc(kind);document.body.appendChild(doc);
+ doc=document.createElement("div");doc.id="print-doc";doc.className="pdoc print-doc";doc.innerHTML=cnPrintDoc(kind);document.body.appendChild(doc);
  document.body.classList.add("printing");
  const done=()=>{document.body.classList.remove("printing");const d=document.getElementById("print-doc");d&&d.remove();};
  window.addEventListener("afterprint",done,{once:true});

@@ -40,7 +40,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.4 · 31 octobre 2026";
+const APP_VERSION="1.5 · 31 octobre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -132,6 +132,7 @@ function stageForm(){
  return `<section class="stack-sm"><div class="section-title"><h2>Infos du stage</h2><span class="muted" id="sf-saved">Enregistré sur cet appareil</span></div>
   <div class="cd-form sheet-body">
    ${f("service","Service et établissement",'placeholder="Ex. Cardiologie, CH de Valence" maxlength="100" autocomplete="off"')}
+   <label for="sf-lieu">Lieu de stage (guide)<select id="sf-lieu" data-cn="lieu"><option value="">Choisir le service…</option>${STAGES.map(x=>`<option ${x.nom===s.lieu?"selected":""}>${esc(x.nom)}</option>`).join("")}</select></label>
    <label for="sf-type">Type de stage<select id="sf-type" data-sf="type"><option value="">Choisir</option>${STAGE_TYPES.map(x=>`<option ${s.type===x?"selected":""}>${x}</option>`).join("")}</select></label>
    <div class="cd-row">${f("debut","Début",'type="date"')}${f("fin","Fin",'type="date"')}</div>
    <div class="cd-row">${f("arrivee","Arrivée le 1er jour",'type="time"')}${f("horaires","Horaires",'placeholder="Ex. 6h45-14h15" maxlength="60"')}</div>
@@ -317,7 +318,8 @@ function svcCard(sv,i){
  const mine=stageInfo().objectifs||"",with09=state.ueRef==="2009";
  const blk=(lab,cls,items)=>items&&items.length?`<div class="svc-blk ${cls}"><span class="svc-lab">${lab}</span><ul class="svc-list">${items.map(x=>`<li>${md(x)}</li>`).join("")}</ul></div>`:"";
  const links=(sv.fiches||[]).map(id=>{const f=FICHES.find(x=>x.id===id),c=f?null:COURS.find(x=>x.id===id&&!x.pro);const it=f||c;return it?`<a class="chip" href="#${f?"fiche":"cours"}/${id}">${esc(it.titre)}</a>`:"";}).join("");
- return `<details class="svc"><summary><span class="svc-t">${esc(sv.nom)}</span></summary><div class="det-body">
+ const isMine=stageInfo().lieu===sv.nom;
+ return `<details class="svc" ${isMine?"open":""}><summary><span class="svc-t">${esc(sv.nom)}${isMine?'<span class="svc-mine">Mon stage</span>':""}</span></summary><div class="det-body">
   ${sv.intro?`<p class="svc-intro">${md(sv.intro)}</p>`:""}
   ${blk("Pathologies à connaître","t-patho",sv.patho)}
   ${blk("Thérapeutiques à connaître","t-thera",sv.thera)}
@@ -327,6 +329,7 @@ function svcCard(sv,i){
    <small class="muted">Touchez + pour ajouter l'objectif à « Mes objectifs de stage » ci-dessus. ${with09?"C1 à C10 : compétences du référentiel 2009.":"À relier aux compétences de votre portfolio."} Reformulez-les avec votre tuteur.</small></div>`:""}
   ${links?`<div class="svc-blk t-fiches"><span class="svc-lab">À réviser dans l'appli</span><div class="chips wrapchips">${links}</div></div>`:""}
   ${sv.pieges&&sv.pieges.length?`<div class="callout warn"><span class="eyebrow">Erreurs fréquentes</span><ul class="clean">${sv.pieges.map(x=>`<li>${md(x)}</li>`).join("")}</ul></div>`:""}
+  ${isMine?`<a class="btn ghost" href="#carnet">Ouvrir mon carnet de suivi</a>`:`<button class="btn ghost" data-act="cn-lieu-set" data-k="${esc(sv.nom)}">C'est mon lieu de stage</button>`}
  </div></details>`;
 }
 
@@ -478,7 +481,7 @@ app.addEventListener("click",ev=>{
   if((st.objectifs||"").includes(line)){toast("Déjà dans vos objectifs");return;}
   st.objectifs=(st.objectifs?st.objectifs.replace(/\s+$/,"")+"\n":"")+line;store.set("stage",st);
   const ta=document.getElementById("sf-objectifs");if(ta)ta.value=st.objectifs;
-  b.setAttribute("aria-pressed","true");b.setAttribute("aria-label","Déjà dans mes objectifs");b.innerHTML=IC.check;haptic();toast("Ajouté à mes objectifs de stage");}
+  b.setAttribute("aria-pressed","true");b.setAttribute("aria-label","Déjà dans mes objectifs");b.innerHTML=IC.check;haptic();toast("Ajouté à mes objectifs de stage");if(route().v==="carnet")render();}
  else if(a==="force-update"){b.querySelector(".t").textContent="Mise à jour en cours…";forceUpdate();}
  else if(a==="exam-edit"){state.examEdit=true;render();}
  else if(a==="exam-done"){state.examEdit=false;render();}
