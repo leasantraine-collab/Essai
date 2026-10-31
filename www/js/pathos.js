@@ -93,7 +93,8 @@ function pxNames(p){const ab=(p.n.match(/\(([^)]+)\)/)||[])[1],base=p.n.replace(
 /* Retire le nom de la pathologie de son propre texte pour ne pas souffler la réponse. */
 function pxMask(txt,p){let t=plainTxt(txt);pxNames(p).forEach(nm=>{t=t.replace(new RegExp(`(^|[^\\p{L}])${pxRe(nm)}(?=[^\\p{L}]|$)`,"giu"),"$1cette maladie");});return t;}
 function pxMakeQuiz(){
- PATHOS.forEach(p=>{const pool=PATHOS.filter(x=>x.s===p.s&&x.i!==p.i),r=pxRand(p.i);if(pool.length<3)return;
+ PATHOS.forEach(p=>{let pool=PATHOS.filter(x=>x.s===p.s&&x.i!==p.i);const r=pxRand(p.i);
+  if(pool.length<3)pool=[...new Map([...pool,...pathosOf(p.s)].map(x=>[x.i,x])).values()].filter(x=>x.i!==p.i);if(pool.length<3)return;
   const mk=(q,good,bads,e)=>{bads=[...new Set(bads)].filter(b=>b&&b!==good);if(bads.length<3)return;const opts=pxShuffle([good,...bads.slice(0,3)],r);const o=norm(Q("patho",SPE[p.s].u,q,opts,opts.indexOf(good),e));o.spe=p.s;o.pid=p.i;QUIZ.push(o);};
   const others=pxShuffle(pool,r),m1=x=>x.m.split("\n")[0];
   mk(`À quelle pathologie correspond cette définition : « ${pxMask(p.d.replace(/^\*\*[^*]+\*\*\s*:\s*/,""),p)} »`,p.n,others.map(x=>x.n),`${p.n} : ${plainTxt(p.d)}`);
