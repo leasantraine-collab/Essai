@@ -138,5 +138,57 @@ Object.assign(PMAPS,{
     `<path d="M96 148 l -6 14 M100 149 l -2 15 M105 149 l 2 15 M109 148 l 5 13 M224 148 l 6 14 M220 149 l 2 15 M215 149 l -2 15 M211 148 l -5 13" ${pmT(on("mains"),on("mains")?3:2)}/>`+
     `<path d="M130 226 L 114 234 M190 226 L 206 234" ${pmT(on("pied"),on("pied")?5:4)}/>`+`<circle cx="114" cy="234" r="4" class="${on("pied")?"f-acc":"f-soft"}" ${PM_OL}/><circle cx="206" cy="234" r="4" class="${on("pied")?"f-acc":"f-soft"}" ${PM_OL}/>`+
     (lb?PM_LAB(186,34,"Rachis",on("rachis"))+PM_LAB(4,50,"Épaule",on("epaule"))+PM_LAB(4,140,"Poignet",on("poignet"))+PM_LAB(316,168,"Mains",on("mains"),"end")+PM_LAB(316,118,"Bassin",on("bassin"),"end")+PM_LAB(316,146,"Hanche",on("hanche"),"end")+PM_LAB(316,198,"Genou",on("genou"),"end")+PM_LAB(4,232,"Gros orteil",on("pied")):"")+
-    (num?pmNums(this,num):""),"Schéma du squelette");}}
+    (num?pmNums(this,num):""),"Schéma du squelette");}},
+ sang:{titre:"Le sang et ses usines",zones:{moelle:"Moelle osseuse",gr:"Globules rouges",gb:"Globules blancs",plaquettes:"Plaquettes",coag:"Coagulation (caillot)",ganglions:"Ganglions lymphatiques",rate:"Rate"},
+  pts:{moelle:[64,116],gr:[160,80],gb:[128,150],plaquettes:[188,146],coag:[208,166],ganglions:[272,72],rate:[268,172]},
+  draw(h,num){const on=k=>h.includes(k),lb=!num;
+   return sv(232,
+    `<path d="M48 20 C 36 20, 32 36, 44 42 L 46 188 C 34 194, 38 214, 52 210 C 58 218, 72 218, 76 208 C 90 212, 92 192, 80 188 L 78 42 C 90 36, 86 20, 72 22 C 64 14, 56 14, 48 20 Z" class="f-box"/>`+
+    `<rect x="53" y="48" width="20" height="136" rx="9" class="${on("moelle")?"f-coral":"f-amber"}" opacity="${on("moelle")?1:.55}"/>`+
+    `<rect x="100" y="60" width="122" height="112" rx="22" class="f-soft" ${PM_OL}/>`+
+    [[124,86],[160,80],[196,90],[140,114],[184,118]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="13" ry="7.5" class="${on("gr")?"f-acc":"f-coral"}" opacity="${on("gr")?1:.6}"/>`).join("")+
+    `<circle cx="128" cy="150" r="12" class="${on("gb")?"f-acc":"f-blue"}" opacity="${on("gb")?1:.7}"/><path d="M122 148 C 126 142, 132 146, 130 150 C 136 152, 132 158, 126 155" class="s-ln" style="stroke-width:1.6;fill:none"/>`+
+    [[172,146],[182,153],[192,141],[203,150]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="3.4" class="${on("plaquettes")?"f-acc":"f-amber"}"/>`).join("")+
+    `<path d="M174 166 L 216 140 M184 170 L 220 154 M170 156 L 212 172" ${pmT(on("coag"),on("coag")?2.2:1)} opacity="${on("coag")?1:.5}"/>`+
+    `<path d="M244 30 L 262 50 L 282 70 L 268 92 L 252 120" class="s-ln" style="stroke-width:1.2;fill:none;opacity:.6"/>`+
+    [[262,50],[282,70],[268,92]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="8" ry="6" class="${pmCls(on("ganglions"))}" ${PM_OL}/>`).join("")+
+    `<path d="M252 160 C 262 146, 290 150, 290 170 C 290 190, 262 196, 252 182 C 258 176, 258 166, 252 160 Z" class="${pmCls(on("rate"))}" ${PM_OL}/>`+
+    (lb?PM_LAB(62,228,"Moelle osseuse",on("moelle"),"middle")+PM_LAB(160,52,"Globules rouges",on("gr"),"middle")+PM_LAB(128,182,"Globules\nblancs",on("gb"),"middle")+PM_LAB(196,184,"Plaquettes",on("plaquettes"),"middle")+PM_LAB(316,120,"Ganglions",on("ganglions"),"end")+PM_LAB(316,212,"Rate",on("rate"),"end")
+     +(on("coag")?PM_LAB(196,218,"Caillot",1,"middle"):""):"")+
+    (num?pmNums(this,num):""),"Schéma du sang, de la moelle et des organes lymphoïdes");}},
+ peau:{titre:"La peau en coupe",zones:{epiderme:"Épiderme",derme:"Derme",hypoderme:"Hypoderme",follicule:"Poil et glande sébacée",sudoripare:"Glande sudoripare",vaisseaux:"Vaisseaux de la peau"},
+  pts:{epiderme:[46,46],derme:[46,92],hypoderme:[46,162],follicule:[104,94],sudoripare:[186,138],vaisseaux:[150,106]},
+  draw(h,num){const on=k=>h.includes(k),lb=!num;
+   return sv(224,
+    `<rect x="16" y="128" width="210" height="64" class="${on("hypoderme")?"f-coral":"f-amber"}" opacity="${on("hypoderme")?.9:.35}" ${PM_OL}/>`+
+    [[44,150],[74,164],[110,150],[150,166],[186,152],[208,172],[60,180],[130,182]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="10" class="f-box" opacity=".6"/>`).join("")+
+    `<rect x="16" y="56" width="210" height="72" class="${on("derme")?"f-coral":"f-soft"}" ${PM_OL}/>`+
+    `<path d="M16 40 C 44 32, 72 48, 100 40 C 128 32, 156 48, 184 40 C 204 34, 218 40, 226 40 L 226 56 L 16 56 Z" class="${on("epiderme")?"f-acc":"f-coral"}" opacity="${on("epiderme")?1:.55}"/>`+
+    `<path d="M16 104 C 60 96, 110 112, 160 102 C 190 96, 210 106, 226 102" class="${on("vaisseaux")?"s-acc":"s-ln"}" style="stroke-width:${on("vaisseaux")?3:1.6};fill:none"/><path d="M16 114 C 60 108, 110 122, 160 112 C 190 106, 210 116, 226 112" class="${on("vaisseaux")?"s-acc":"s-blue"}" style="stroke-width:${on("vaisseaux")?3:1.4};fill:none;opacity:.8"/>`+
+    `<path d="M104 6 L 106 112" ${pmT(on("follicule"),on("follicule")?3:2)}/><ellipse cx="106" cy="114" rx="7" ry="9" class="${pmCls(on("follicule"))}" ${PM_OL}/><ellipse cx="120" cy="76" rx="7" ry="5" class="${on("follicule")?"f-coral":"f-amber"}" opacity=".9"/>`+
+    `<path d="M184 40 L 184 70 C 178 82, 192 92, 184 104 C 176 116, 196 124, 186 134 C 178 142, 196 146, 190 138" ${pmT(on("sudoripare"),on("sudoripare")?2.6:1.6)}/>`+
+    (lb?PM_LAB(236,46,"Épiderme",on("epiderme"))+PM_LAB(236,92,"Derme",on("derme"))+PM_LAB(236,162,"Hypoderme",on("hypoderme"))+PM_LAB(96,218,"Graisse de l'hypoderme",0,"middle")
+     +(on("follicule")?PM_LAB(236,20,"Poil",1):"")+(on("sudoripare")?PM_LAB(236,128,"Glande\nsudoripare",1):"")+(on("vaisseaux")?PM_LAB(236,112,"Vaisseaux",1):""):"")+
+    (num?pmNums(this,num):""),"Schéma de la peau en coupe");}},
+ corps:{titre:"Le corps entier",zones:{tete:"Cerveau et méninges",orl:"Nez, gorge, oreilles",poumons:"Poumons",coeur:"Cœur",abdomen:"Appareil digestif",urinaire:"Voies urinaires",genital:"Organes génitaux",os:"Os",articulations:"Articulations",sang:"Sang (circulation)",peau:"Peau"},
+  pts:{tete:[160,22],orl:[180,40],poumons:[138,86],coeur:[170,100],abdomen:[160,132],urinaire:[160,155],genital:[160,178],os:[124,192],articulations:[192,206],sang:[234,124],peau:[106,112]},
+  draw(h,num){const on=k=>h.includes(k),lb=!num;
+   return sv(240,
+    `<path d="M120 54 C 110 56, 104 66, 104 80 L 106 150 C 108 160, 116 166, 126 168 L 194 168 C 204 166, 212 160, 214 150 L 216 80 C 216 66, 210 56, 200 54 Z" class="f-box" ${on("peau")?'style="stroke:var(--fx-coral);stroke-width:3"':""}/>`+
+    `<circle cx="160" cy="26" r="17" class="f-box" ${on("peau")?'style="stroke:var(--fx-coral);stroke-width:3"':""}/><rect x="152" y="42" width="16" height="12" class="f-box"/>`+
+    `<path d="M112 62 L 90 120 L 82 162 M208 62 L 230 120 L 238 162" class="s-ln" style="stroke-width:9;stroke-linecap:round;fill:none;opacity:.35"/>`+
+    `<path d="M134 168 L 130 234 M186 168 L 190 234" class="s-ln" style="stroke-width:11;stroke-linecap:round;fill:none;opacity:.35"/>`+
+    `<path d="M208 62 L 230 120 L 238 162" ${pmT(on("sang"),on("sang")?3.5:2,"s-ln")} opacity="${on("sang")?1:.7}"/>`+
+    `<circle cx="160" cy="24" r="10" class="${pmCls(on("tete"))}" ${PM_OL}/>`+
+    `<circle cx="160" cy="40" r="4.5" class="${pmCls(on("orl"))}" ${PM_OL}/><circle cx="143" cy="27" r="3.5" class="${pmCls(on("orl"))}" ${PM_OL}/><circle cx="177" cy="27" r="3.5" class="${pmCls(on("orl"))}" ${PM_OL}/>`+
+    `<ellipse cx="140" cy="86" rx="13" ry="21" class="${pmCls(on("poumons"))}" ${PM_OL}/><ellipse cx="180" cy="86" rx="13" ry="21" class="${pmCls(on("poumons"))}" ${PM_OL}/>`+
+    `<path d="M166 92 C 160 84, 150 92, 158 102 L 166 110 L 174 102 C 182 92, 172 84, 166 92 Z" class="${pmCls(on("coeur"))}" ${PM_OL}/>`+
+    `<ellipse cx="160" cy="131" rx="30" ry="15" class="${pmCls(on("abdomen"))}" ${PM_OL}/>`+
+    `<ellipse cx="160" cy="156" rx="10" ry="6" class="${pmCls(on("urinaire"))}" ${PM_OL}/>`+
+    `<circle cx="160" cy="174" r="5" class="${pmCls(on("genital"))}" ${PM_OL}/>`+
+    `<path d="M133 172 L 131 200" ${pmT(on("os"),on("os")?6:4)} opacity="${on("os")?1:.6}"/>`+
+    `<circle cx="131" cy="204" r="5.5" class="${pmCls(on("articulations"))}" ${PM_OL}/><circle cx="189" cy="204" r="5.5" class="${pmCls(on("articulations"))}" ${PM_OL}/>`+
+    (lb?PM_LAB(4,22,"Cerveau,\nméninges",on("tete"))+PM_LAB(4,54,"Nez, gorge,\noreilles",on("orl"))+PM_LAB(4,90,"Poumons",on("poumons"))+PM_LAB(316,98,"Cœur",on("coeur"),"end")+PM_LAB(4,130,"Appareil\ndigestif",on("abdomen"))+PM_LAB(316,148,"Voies\nurinaires",on("urinaire"),"end")+PM_LAB(316,180,"Organes\ngénitaux",on("genital"),"end")+PM_LAB(4,196,"Os",on("os"))+PM_LAB(316,214,"Articulations",on("articulations"),"end")+PM_LAB(316,62,"Sang",on("sang"),"end")
+     +(on("peau")?PM_LAB(316,126,"Peau",1,"end"):""):"")+
+    (num?pmNums(this,num):""),"Schéma du corps entier");}}
 });
