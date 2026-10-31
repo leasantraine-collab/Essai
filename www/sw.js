@@ -23,6 +23,7 @@ const FILES=[
  "js/contenus/pathos-infectio.js",
  "js/contenus/pathos-rhumato.js",
  "js/contenus/pathos-dermato.js",
+ "js/contenus/pathos-gyneco.js",
  "js/pathos-maps.js",
  "js/pathos.js",
  "js/data.js",

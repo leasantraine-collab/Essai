@@ -190,5 +190,66 @@ Object.assign(PMAPS,{
     `<circle cx="131" cy="204" r="5.5" class="${pmCls(on("articulations"))}" ${PM_OL}/><circle cx="189" cy="204" r="5.5" class="${pmCls(on("articulations"))}" ${PM_OL}/>`+
     (lb?PM_LAB(4,22,"Cerveau,\nméninges",on("tete"))+PM_LAB(4,54,"Nez, gorge,\noreilles",on("orl"))+PM_LAB(4,90,"Poumons",on("poumons"))+PM_LAB(316,98,"Cœur",on("coeur"),"end")+PM_LAB(4,130,"Appareil\ndigestif",on("abdomen"))+PM_LAB(316,148,"Voies\nurinaires",on("urinaire"),"end")+PM_LAB(316,180,"Organes\ngénitaux",on("genital"),"end")+PM_LAB(4,196,"Os",on("os"))+PM_LAB(316,214,"Articulations",on("articulations"),"end")+PM_LAB(316,62,"Sang",on("sang"),"end")
      +(on("peau")?PM_LAB(316,126,"Peau",1,"end"):""):"")+
-    (num?pmNums(this,num):""),"Schéma du corps entier");}}
+    (num?pmNums(this,num):""),"Schéma du corps entier");}},
+ femme:{titre:"L'appareil génital féminin",zones:{uterus:"Utérus (muscle)",endometre:"Endomètre",col:"Col de l'utérus",vagin:"Vagin",trompes:"Trompes",ovaires:"Ovaires",sein:"Sein"},
+  pts:{uterus:[184,94],endometre:[160,102],col:[160,160],vagin:[160,198],trompes:[100,60],ovaires:[86,106],sein:[62,182]},
+  draw(h,num){const on=k=>h.includes(k),lb=!num;
+   return sv(232,
+    `<path d="M132 78 C 110 64, 90 56, 72 64 C 58 70, 60 92, 70 96 M188 78 C 210 64, 230 56, 248 64 C 262 70, 260 92, 250 96" ${pmT(on("trompes"),on("trompes")?4:3)}/>`+
+    `<ellipse cx="86" cy="106" rx="16" ry="10" class="${pmCls(on("ovaires"))}" ${PM_OL}/><ellipse cx="234" cy="106" rx="16" ry="10" class="${pmCls(on("ovaires"))}" ${PM_OL}/>`+
+    `<path d="M130 80 C 128 58, 192 58, 190 80 C 190 110, 178 136, 168 150 L 152 150 C 142 136, 130 110, 130 80 Z" class="${pmCls(on("uterus"))}" ${PM_OL}/>`+
+    `<path d="M144 82 L 176 82 L 163 128 L 157 128 Z" class="${on("endometre")?"f-acc":"f-coral"}" opacity="${on("endometre")?1:.5}"/>`+
+    `<path d="M151 150 L 169 150 L 167 172 L 153 172 Z" class="${pmCls(on("col"))}" ${PM_OL}/>`+
+    `<path d="M153 172 L 167 172 L 172 214 L 148 214 Z" class="${pmCls(on("vagin"))}" ${PM_OL}/>`+
+    `<circle cx="62" cy="182" r="26" class="${pmCls(on("sein"))}" ${PM_OL}/><circle cx="62" cy="182" r="5" class="${on("sein")?"f-acc":"f-coral"}" opacity=".7"/>`+
+    (lb?PM_LAB(4,58,"Trompe",on("trompes"))+PM_LAB(4,110,"Ovaire",on("ovaires"))+PM_LAB(316,80,"Utérus",on("uterus"),"end")+PM_LAB(316,108,"Endomètre",on("endometre"),"end")+PM_LAB(316,160,"Col de l'utérus",on("col"),"end")+PM_LAB(316,204,"Vagin",on("vagin"),"end")+PM_LAB(62,226,"Sein",on("sein"),"middle"):"")+
+    (num?pmNums(this,num):""),"Schéma de l'appareil génital féminin");}},
+ grossesse:{titre:"La grossesse",zones:{uterus:"Utérus",placenta:"Placenta",foetus:"Fœtus",cordon:"Cordon ombilical",liquide:"Liquide amniotique et membranes",col:"Col de l'utérus"},
+  pts:{uterus:[230,64],placenta:[104,76],foetus:[170,98],cordon:[130,122],liquide:[206,156],col:[160,206]},
+  draw(h,num){const on=k=>h.includes(k),lb=!num;
+   return sv(232,
+    `<ellipse cx="160" cy="106" rx="80" ry="92" class="${on("uterus")?"f-coral":"f-box"}" ${PM_OL}/>`+
+    `<ellipse cx="160" cy="108" rx="68" ry="80" class="${on("liquide")?"f-acc":"f-blue"}" opacity="${on("liquide")?.55:.3}"/>`+
+    `<path d="M96 56 C 108 34, 136 24, 156 28 C 130 40, 112 60, 104 90 C 96 80, 92 68, 96 56 Z" class="${on("placenta")?"f-acc":"f-coral"}" opacity="${on("placenta")?1:.75}"/>`+
+    `<path d="M112 70 C 120 92, 120 110, 132 122 C 142 132, 150 120, 156 118" ${pmT(on("cordon"),on("cordon")?3.5:2.5)}/>`+
+    `<ellipse cx="168" cy="98" rx="26" ry="36" class="${on("foetus")?"f-coral":"f-soft"}" ${PM_OL}/><circle cx="174" cy="152" r="22" class="${on("foetus")?"f-coral":"f-soft"}" ${PM_OL}/>`+
+    `<path d="M150 196 L 170 196 L 168 222 L 152 222 Z" class="${pmCls(on("col"))}" ${PM_OL}/>`+
+    (lb?PM_LAB(4,60,"Placenta",on("placenta"))+PM_LAB(4,126,"Cordon",on("cordon"))+PM_LAB(316,34,"Utérus",on("uterus"),"end")+PM_LAB(316,100,"Fœtus",on("foetus"),"end")+PM_LAB(316,176,"Liquide\namniotique",on("liquide"),"end")+PM_LAB(184,218,"Col",on("col")):"")+
+    (num?pmNums(this,num):""),"Schéma de l'utérus pendant la grossesse");}},
+ oeil:{titre:"L'œil en coupe",zones:{cornee:"Cornée",chambre:"Chambre antérieure (humeur aqueuse)",iris:"Iris",cristallin:"Cristallin",vitre:"Vitré",retine:"Rétine",macula:"Macula",nerf:"Nerf optique",vaisseaux:"Vaisseaux de la rétine",conjonctive:"Conjonctive",paupieres:"Paupières"},
+  pts:{cornee:[88,70],chambre:[100,100],iris:[112,72],cristallin:[128,122],vitre:[182,100],retine:[246,50],macula:[255,100],nerf:[292,120],vaisseaux:[226,152],conjonctive:[126,38],paupieres:[90,22]},
+  draw(h,num){const on=k=>h.includes(k),lb=!num;
+   return sv(204,
+    `<circle cx="182" cy="100" r="76" class="f-box"/>`+
+    `<circle cx="182" cy="100" r="70" class="${on("vitre")?"f-coral":"f-soft"}" opacity="${on("vitre")?.6:1}"/>`+
+    `<path d="M210 34 C 250 46, 262 90, 256 124 C 250 152, 230 168, 208 172" ${pmT(on("retine"),on("retine")?5:3,"s-ln")} opacity="${on("retine")?1:.7}"/>`+
+    `<path d="M214 46 C 236 62, 244 84, 244 100 M214 154 C 234 140, 244 120, 246 108" ${pmT(on("vaisseaux"),on("vaisseaux")?2:1)} opacity="${on("vaisseaux")?1:.6}"/>`+
+    `<circle cx="255" cy="100" r="5" class="${on("macula")?"f-acc":"f-amber"}"/>`+
+    `<path d="M256 112 L 304 122" class="${on("nerf")?"s-acc":"s-ln"}" style="stroke-width:12;stroke-linecap:round;fill:none;opacity:${on("nerf")?1:.45}"/>`+
+    `<path d="M110 60 C 84 72, 80 128, 110 140 Z" class="${on("chambre")?"f-acc":"f-blue"}" opacity="${on("chambre")?.6:.35}"/>`+
+    `<path d="M110 58 C 80 70, 78 130, 110 142" ${pmT(on("cornee"),on("cornee")?4:2.5)}/>`+
+    `<path d="M112 70 L 112 88 M112 112 L 112 130" ${pmT(on("iris"),on("iris")?5:4,"s-blue")}/>`+
+    `<ellipse cx="126" cy="100" rx="9" ry="22" class="${on("cristallin")?"f-coral":"f-box"}" ${PM_OL}/>`+
+    `<path d="M112 40 C 140 26, 180 22, 214 32 M112 160 C 140 174, 180 178, 214 168" ${pmT(on("conjonctive"),on("conjonctive")?2.5:1)} opacity="${on("conjonctive")?1:.5}"/>`+
+    `<path d="M70 56 C 80 30, 108 20, 130 30 M70 144 C 80 170, 108 180, 130 170" ${pmT(on("paupieres"),on("paupieres")?4:3)} opacity="${on("paupieres")?1:.55}"/>`+
+    (lb?PM_LAB(4,74,"Cornée",on("cornee"))+PM_LAB(4,104,"Iris",on("iris"))+PM_LAB(4,134,"Cristallin",on("cristallin"))+PM_LAB(316,40,"Rétine",on("retine"),"end")+PM_LAB(316,94,"Macula",on("macula"),"end")+PM_LAB(316,150,"Nerf optique",on("nerf"),"end")+PM_LAB(182,198,"Vitré",on("vitre"),"middle")
+     +(on("chambre")?PM_LAB(4,164,"Humeur aqueuse",1):"")+(on("conjonctive")?PM_LAB(4,190,"Conjonctive",1):"")+(on("paupieres")?PM_LAB(4,20,"Paupières",1):"")+(on("vaisseaux")?PM_LAB(316,190,"Vaisseaux",1,"end"):""):"")+
+    (num?pmNums(this,num):""),"Schéma de l'œil en coupe");}},
+ orl:{titre:"La sphère ORL",zones:{sinus:"Sinus",nez:"Fosses nasales",bouche:"Bouche et langue",amygdales:"Pharynx et amygdales",larynx:"Larynx",oreille_ext:"Oreille externe",tympan:"Tympan et oreille moyenne",oreille_int:"Oreille interne",mastoide:"Mastoïde"},
+  pts:{sinus:[128,50],nez:[102,92],bouche:[122,142],amygdales:[164,124],larynx:[175,182],tympan:[234,84],oreille_int:[208,124],oreille_ext:[276,92],mastoide:[290,146]},
+  draw(h,num){const on=k=>h.includes(k),lb=!num;
+   return sv(232,
+    `<path d="M120 14 C 170 6, 230 20, 250 60 C 262 90, 262 120, 252 150 C 246 170, 230 182, 200 186 L 170 186 L 168 226 L 118 226 L 116 196 C 100 190, 90 182, 86 172 C 70 172, 62 164, 64 156 C 56 152, 60 144, 62 140 C 52 136, 54 126, 60 122 C 54 118, 50 112, 56 104 C 44 98, 42 90, 50 86 C 56 74, 64 60, 70 46 C 82 24, 100 16, 120 14 Z" class="f-box" transform="translate(36 0)"/>`+
+    `<ellipse cx="132" cy="44" rx="10" ry="7" class="${pmCls(on("sinus"))}" ${PM_OL}/><ellipse cx="128" cy="72" rx="12" ry="9" class="${pmCls(on("sinus"))}" ${PM_OL}/>`+
+    `<path d="M92 92 C 110 84, 140 84, 160 92 C 140 100, 110 100, 92 92 Z" class="${pmCls(on("nez"))}" ${PM_OL}/>`+
+    `<path d="M156 94 C 170 100, 174 112, 172 128 L 175 176 L 177 224" class="s-tube" style="stroke-width:9;fill:none;opacity:.6"/>`+
+    `<path d="M100 140 C 118 128, 150 128, 160 140 C 150 150, 116 152, 100 140 Z" class="${pmCls(on("bouche"))}" ${PM_OL}/>`+
+    `<ellipse cx="164" cy="124" rx="7" ry="10" class="${pmCls(on("amygdales"))}" ${PM_OL}/>`+
+    `<rect x="166" y="170" width="18" height="22" rx="6" class="${pmCls(on("larynx"))}" ${PM_OL}/>`+
+    `<path d="M268 72 C 292 70, 298 100, 288 116 C 282 126, 272 128, 268 120 C 276 110, 278 92, 268 72 Z" class="${pmCls(on("oreille_ext"))}" ${PM_OL}/><path d="M268 98 L 238 98" ${pmT(on("oreille_ext"),on("oreille_ext")?4:3)}/>`+
+    `<path d="M235 88 L 235 108" ${pmT(on("tympan"),on("tympan")?4:2.5)}/><rect x="222" y="92" width="11" height="12" rx="3" class="${on("tympan")?"f-coral":"f-soft"}" ${PM_OL}/>`+
+    `<path d="M200 116 a 9 9 0 1 0 18 0 a 6 6 0 1 0 -12 0 a 3 3 0 1 0 6 0 M214 104 C 220 92, 230 96, 222 104" ${pmT(on("oreille_int"),on("oreille_int")?2.6:1.8)}/>`+
+    `<circle cx="290" cy="146" r="10" class="${pmCls(on("mastoide"))}" ${PM_OL}/>`+
+    (lb?PM_LAB(4,50,"Sinus",on("sinus"))+PM_LAB(4,92,"Fosses\nnasales",on("nez"))+PM_LAB(4,142,"Bouche,\nlangue",on("bouche"))+PM_LAB(4,184,"Pharynx,\namygdales",on("amygdales"))+PM_LAB(190,206,"Larynx",on("larynx"))+PM_LAB(276,50,"Oreille\nexterne",on("oreille_ext"),"middle")+PM_LAB(232,72,"Tympan",on("tympan"),"middle")+PM_LAB(208,152,"Oreille\ninterne",on("oreille_int"),"middle")+PM_LAB(290,174,"Mastoïde",on("mastoide"),"middle"):"")+
+    (num?pmNums(this,num):""),"Schéma de la sphère ORL");}}
 });

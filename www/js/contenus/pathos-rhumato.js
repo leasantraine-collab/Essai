@@ -98,7 +98,7 @@ PA(
  r:"Chute de la personne âgée : impossible de se relever, jambe raccourcie, pied tourné en dehors. Opérer en 24-48 h, lever dès le lendemain. Prévenir escarres, confusion, phlébite, luxation.",
  z:["squelette","hanche"],f:["fracture","chutes","escarres"]},
 
-{i:"fractures-vertebrales",s:"rhumato",n:"Fractures vertébrales",
+{i:"fractures-vertebrales",s:"rhumato",n:"Fractures vertébrales",nn:["Fracture du rachis"],
  d:"**Fractures d'une ou plusieurs vertèbres** : tassements **ostéoporotiques** chez la personne âgée, fractures **traumatiques** après un choc violent, ou fractures sur métastase.",
  m:"Chez la personne ostéoporotique, une vertèbre peut s'écraser (**tassement**) pour un effort minime : soulever un objet, éternuer, parfois sans rien. La personne perd de la taille et son dos se voûte.\nAprès un traumatisme violent (chute de hauteur, accident), la fracture peut être **instable** et menacer la moelle épinière : il faut immobiliser.\nUne fracture sur une vertèbre envahie par un cancer (métastase, myélome) est aussi possible.",
  a:"Une pile de boîtes : une boîte fragile s'écrase sous le poids des autres.",

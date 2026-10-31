@@ -210,7 +210,7 @@ PA(
  r:"Douleur thoracique déchirante qui migre dans le dos + TA différente entre les deux bras. Angioscanner, contrôle de la TA, chirurgie si type A. Jamais d'anticoagulant.",
  z:["coeur","aorte"],f:["hta"]},
 
-{i:"tvp",s:"cardio",n:"Thrombose veineuse profonde (TVP)",
+{i:"tvp",s:"cardio",n:"Thrombose veineuse profonde (TVP)",nn:["Phlébite postopératoire"],
  d:"Formation d'un **caillot (thrombus)** dans une **veine profonde**, le plus souvent du mollet ou de la cuisse. Danger : le caillot peut migrer vers le poumon (embolie pulmonaire).",
  m:"Trois conditions favorisent le caillot (**triade de Virchow**) : le sang **stagne** (immobilité), la paroi de la veine est **abîmée** (chirurgie, traumatisme, cathéter), le sang **coagule trop** facilement (cancer, grossesse, pilule).\nLe caillot se forme souvent derrière une valvule du mollet, puis grossit vers le haut. Il gêne le retour du sang : la jambe gonfle et fait mal.\nUn morceau peut se détacher, remonter par la veine cave, traverser le cœur droit et bloquer une artère pulmonaire : c'est l'**embolie pulmonaire**.",
  a:"Une rivière qui ralentit derrière un barrage : les feuilles et branches s'accumulent et forment un amas qui peut se détacher et partir avec le courant.",
@@ -224,7 +224,7 @@ PA(
  r:"Caillot dans une veine profonde : stase + paroi abîmée + sang trop coagulable. Douleur et œdème d'un mollet. Anticoagulant + contention + lever. Le danger, c'est l'embolie pulmonaire.",
  z:["jambe","veinesp","mollet"],f:["tvp-ep","anticoag","injections"]},
 
-{i:"ep",s:"cardio",n:"Embolie pulmonaire (EP)",
+{i:"ep",s:"cardio",n:"Embolie pulmonaire (EP)",nn:["Embolie pulmonaire grave","Embolie pulmonaire postopératoire"],
  d:"**Obstruction d'une ou plusieurs artères pulmonaires** par un caillot, le plus souvent venu d'une thrombose des veines des jambes.",
  m:"Le caillot détaché d'une veine de la jambe remonte par la veine cave, traverse l'oreillette et le ventricule droits, puis se bloque dans une artère pulmonaire.\nLa zone de poumon en aval reçoit toujours de l'air mais plus de sang : l'oxygène n'est plus capté, d'où **l'essoufflement et la baisse de la saturation**.\nSi le caillot est gros, le ventricule droit doit pousser contre un barrage : il se dilate et peut lâcher (insuffisance cardiaque droite aiguë, choc, arrêt cardiaque).",
  a:"Un bouchon dans le tuyau qui mène au filtre (les poumons) : l'eau n'est plus purifiée et la pompe force jusqu'à s'épuiser.",
