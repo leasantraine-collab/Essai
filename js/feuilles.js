@@ -53,25 +53,100 @@ function fsFields(fields,base,data){
  let h="",row=[];const flush=()=>{if(row.length){h+=row.length>1?`<div class="cd-row">${row.join("")}</div>`:row[0];row=[];}};
  fields.forEach(f=>{const html=fsField(f,base+"|"+f.k,data[f.k]);if(f.half){row.push(html);if(row.length===2)flush();}else{flush();h+=html;}});flush();return h;
 }
-function fsPlanning(type,inst){
- const d=inst.data,pats=d.patients||[],tasks=(d.taches||[]).slice().sort((a,b)=>(a.heure||"99").localeCompare(b.heure||"99"));
- const opts=v=>`<option value="" ${!v?"selected":""}>Tous / général</option>`+pats.map((p,i)=>{const l=fsPatLabel(p,i);return `<option ${v===l?"selected":""}>${esc(l)}</option>`}).join("");
- const done=tasks.filter(t=>t.fait).length;
- return `<div class="cn-help"><p>Ajoutez la trame de votre poste, puis complétez avec les soins de chaque patient : traitements, glycémies, pansements, examens. Cochez au fur et à mesure.</p>
-  <div class="chips wrapchips">${Object.keys(TRAMES).map(k=>`<button class="chip" data-act="fs-trame" data-k="${type}" data-id="${inst.id}" data-t="${esc(k)}">${IC.plus.replace("<svg",'<svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4"')} Trame ${esc(k.toLowerCase())}</button>`).join("")}</div></div>
- ${tasks.length?`<div class="cn-kpi"><span><b id="fs-done">${done}/${tasks.length}</b>tâches faites</span></div><div class="list fs-tasks">${tasks.map(t=>{const p=`${type}|${inst.id}|taches|${t.id}`;return `<div class="fs-task ${t.fait?"done":""}">
-   <input type="time" data-fs="${p}|heure" value="${esc(t.heure||"")}" aria-label="Heure">
-   <select data-fs="${p}|patient" aria-label="Patient">${opts(t.patient||"")}</select>
-   <label class="fs-ok"><input type="checkbox" data-fs="${p}|fait" ${t.fait?"checked":""}><span class="sr-only">Fait</span></label>
-   <input type="text" class="fs-t" data-fs="${p}|tache" value="${esc(t.tache||"")}" placeholder="Soin ou tâche" aria-label="Tâche" autocomplete="off">
-   <button class="del" data-act="fs-gdel" data-k="taches" data-type="${type}" data-id="${inst.id}" data-item="${t.id}" aria-label="Supprimer la tâche">${IC.x}</button></div>`}).join("")}</div>`:`<div class="empty">Aucune tâche pour l'instant. Commencez par une trame ou ajoutez une tâche.</div>`}
- <button class="btn ghost block" data-act="fs-gadd" data-k="taches" data-type="${type}" data-id="${inst.id}">${IC.plus}Ajouter une tâche</button>`;
+/* ---------- Planification rapide ---------- */
+const PL_POSTES={"Matin":{h:[6,7,8,9,10,11,12,13,14],start:6,repas:["08:00","12:00"]},"Après-midi":{h:[13,14,15,16,17,18,19,20,21],start:13,repas:["18:00"]},"Journée (12 h)":{h:[7,8,9,10,11,12,13,14,15,16,17,18,19],start:7,repas:["08:00","12:00","18:00"]},"Nuit":{h:[21,22,23,0,1,2,3,4,5,6,7],start:21,repas:["22:00"]}};
+const PL_SOINS=[
+ ["Surveillance",["Constantes","Glycémie capillaire","Évaluation de la douleur","Diurèse, bilan entrées-sorties","Poids","Surveillance neurologique","Surveillance du pansement","Surveillance de la perfusion"]],
+ ["Médicaments",["Traitements per os","Injection SC (HBPM)","Insuline","Antibiotique IV","Antalgique","Poser ou changer la perfusion","Aérosol","Oxygène"]],
+ ["Soins",["Toilette","Aide au repas","Pansement","Prise de sang","Hémocultures","ECG","Changement de position","Soins de bouche","Lever, mobilisation","Sonde urinaire","Retrait VVP ou redon"]],
+ ["Organisation",["Transmissions écrites","Transmissions orales","Préparer départ bloc ou examen","Entrée d'un patient","Sortie d'un patient","Signaler au médecin","Préparer le matériel","Éducation du patient"]]
+];
+const PL_TOURS=[["Tour de constantes","Constantes"],["Tour des traitements","Traitements"],["Tour glycémies","Glycémie capillaire"],["Tour douleur","Évaluation de la douleur"],["Changements de position","Changement de position"],["Tour de sécurité","Tour de sécurité (installation, sonnette, barrières)"]];
+const PL_REP=[["1","1 fois"],["2","Toutes les 2 h"],["4","Toutes les 4 h"],["6","Toutes les 6 h"],["repas","Aux repas"]];
+const plPoste=d=>PL_POSTES[d.poste]||PL_POSTES["Matin"];
+const plMin=t=>{const [h,m]=(t||"").split(":").map(Number);return isNaN(h)?null:h*60+(m||0);};
+const plKey=(t,d)=>{const m=plMin(t);return m==null?99999:(m-plPoste(d).start*60+1440)%1440;};
+const plHM=m=>String(Math.floor(m/60)%24).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
+function plState(d){
+ const P=plPoste(d);state.pl=state.pl||{pat:"",m:"00",rep:"1",filter:"all"};
+ if(state.pl.h==null||!P.h.includes(state.pl.h)){const now=new Date().getHours();state.pl.h=P.h.find(x=>x===((now+1)%24))!=null?(now+1)%24:P.h.includes(now)?now:P.h[0];}
+ return state.pl;
 }
+function plTimes(d,st){
+ const P=plPoste(d),t0=st.h*60+(+st.m);
+ if(st.rep==="repas")return P.repas.slice();
+ if(st.rep==="1")return [plHM(t0)];
+ const step=+st.rep*60,end=(P.h[P.h.length-1]-P.start+24)%24*60+30,out=[];
+ for(let k=(t0-P.start*60+1440)%1440;k<=end;k+=step)out.push(plHM(P.start*60+k));
+ return out;
+}
+function plAddTasks(inst,label,pats,times){
+ const d=inst.data;d.taches=d.taches||[];let n=0;
+ pats.forEach(p=>times.forEach(h=>{if(!d.taches.some(t=>t.heure===h&&(t.patient||"")===p&&t.tache===label)){d.taches.push({id:cnId(),heure:h,patient:p,tache:label,fait:false});n++;}}));
+ return n;
+}
+function plAddHTML(inst){
+ const d=inst.data,st=plState(d),P=plPoste(d),pats=(d.patients||[]).map(fsPatLabel);
+ const chip=(act,v,on,l)=>`<button class="chip" data-act="${act}" data-type="planif" data-id="${inst.id}" data-v="${esc(v)}" aria-pressed="${on}">${l}</button>`;
+ return `<div class="pl-row"><span class="pl-lab">Pour</span><div class="chips">${chip("fs-plpat","",st.pat==="","Tous")}${pats.map(p=>chip("fs-plpat",p,st.pat===p,esc(p))).join("")}</div></div>
+  <div class="pl-row"><span class="pl-lab">À</span><div class="chips">${P.h.map(h=>chip("fs-plh",h,st.h===h,h+" h")).join("")}</div></div>
+  <div class="pl-row"><span class="pl-lab"></span><div class="chips">${["00","15","30","45"].map(m=>chip("fs-plm",m,st.m===m,st.h+" h "+m)).join("")}</div></div>
+  <div class="pl-row"><span class="pl-lab">Répéter</span><div class="chips">${PL_REP.map(([v,l])=>chip("fs-plrep",v,st.rep===v,l)).join("")}</div></div>
+  <p class="pl-sum">Touchez un soin : il s'ajoute ${st.rep==="repas"?"aux repas ("+P.repas.join(", ")+")":st.rep==="1"?"à "+plHM(st.h*60+(+st.m)):"de "+plHM(st.h*60+(+st.m))+" toutes les "+st.rep+" h"} pour ${st.pat?esc(st.pat):"tous"}.</p>
+  ${PL_SOINS.map(([g,items])=>`<div class="pl-g"><span class="pl-gl">${g}</span><div class="pl-btns">${items.map(x=>`<button class="pl-btn" data-act="fs-pladd" data-type="planif" data-id="${inst.id}" data-v="${esc(x)}">${esc(x)}</button>`).join("")}</div></div>`).join("")}
+  <form id="pl-free" class="pl-free" data-id="${inst.id}"><input id="pl-free-in" placeholder="Autre soin…" maxlength="80" autocomplete="off" aria-label="Autre soin"><button class="btn" type="submit">${IC.plus}Ajouter</button></form>
+  <div class="pl-g"><span class="pl-gl">Tours pour ${pats.length?"chaque patient":"tout le secteur"} à ${plHM(st.h*60+(+st.m))}</span><div class="pl-btns">${PL_TOURS.map(([l,t])=>`<button class="pl-btn tour" data-act="fs-pltour" data-type="planif" data-id="${inst.id}" data-v="${esc(t)}">${esc(l)}</button>`).join("")}</div></div>
+  <button class="link" data-act="fs-trame" data-k="planif" data-id="${inst.id}" data-t="${esc(d.poste||"Matin")}">Ajouter la trame type du poste (${esc((d.poste||"Matin").toLowerCase())})</button>`;
+}
+function plListHTML(inst){
+ const d=inst.data,st=plState(d),all=(d.taches||[]).slice().sort((a,b)=>plKey(a.heure,d)-plKey(b.heure,d)||(a.patient||"").localeCompare(b.patient||""));
+ const pats=[...new Set(all.map(t=>t.patient||""))];
+ let list=all;if(st.filter==="todo")list=all.filter(t=>!t.fait);else if(st.filter!=="all")list=all.filter(t=>(t.patient||"")===st.filter);
+ const isToday=d.date===todayISO(),nowK=plKey(plHM(new Date().getHours()*60+new Date().getMinutes()),d),done=all.filter(t=>t.fait).length;
+ const groups=new Map();list.forEach(t=>{const h=(t.heure||"--").slice(0,2);if(!groups.has(h))groups.set(h,[]);groups.get(h).push(t);});
+ const fchip=(v,l)=>`<button class="chip" data-act="fs-plfilter" data-type="planif" data-id="${inst.id}" data-v="${esc(v)}" aria-pressed="${st.filter===v}">${l}</button>`;
+ return `<div class="pl-head"><div class="progress"><i style="width:${all.length?done/all.length*100:0}%"></i></div><span><b>${done}/${all.length}</b> faits</span></div>
+  ${all.length?`<div class="chips">${fchip("all","Tout")}${fchip("todo","À faire")}${pats.filter(Boolean).map(p=>fchip(p,esc(p))).join("")}</div>`:""}
+  ${list.length?[...groups].map(([h,ts])=>`<div class="pl-hour"><span class="pl-h">${h==="--"?"Sans heure":(+h)+" h"}</span><div class="pl-items">${ts.map(t=>{const late=isToday&&!t.fait&&plKey(t.heure,d)<nowK;
+   return `<div class="pl-item ${t.fait?"done":""} ${late?"late":""}"><button class="pl-tog" data-act="fs-pltoggle" data-type="planif" data-id="${inst.id}" data-item="${t.id}" aria-pressed="${!!t.fait}"><span class="pl-box">${t.fait?IC.check:""}</span><span class="pl-txt"><span class="pl-meta">${esc(t.heure||"")}${t.patient?` · <b>${esc(t.patient)}</b>`:""}${late?' · <em>en retard</em>':""}</span><span class="pl-name">${esc(t.tache||"")}</span></span></button><button class="del" data-act="fs-pldel" data-type="planif" data-id="${inst.id}" data-item="${t.id}" aria-label="Supprimer ${esc(t.tache||"")}">${IC.x}</button></div>`}).join("")}</div></div>`).join("")
+   :`<div class="empty">${all.length?"Rien à afficher avec ce filtre.":"Votre planning est vide. Choisissez un patient et une heure, puis touchez les soins à faire ci-dessus."}</div>`}`;
+}
+function plRefresh(inst,what){
+ const a=document.getElementById("pl-add"),l=document.getElementById("pl-list");
+ if(a&&(what==="add"||what==="all"))a.innerHTML=plAddHTML(inst);
+ if(l&&(what==="list"||what==="all"))l.innerHTML=plListHTML(inst);
+ const n=document.getElementById("pl-n");if(n)n.textContent=(inst.data.taches||[]).length;
+}
+function plEditor(inst){
+ const d=inst.data,base=`planif|${inst.id}`,S=SHEETS.planif,pats=d.patients||[];
+ return `<div class="stack-lg"><a class="back" href="#feuille/planif">${IC.back}${esc(S.titre)}</a>
+  ${vh("Feuille de travail",esc(fsTitle("planif",inst)),`<a class="link" href="#fiche/${S.guide}">Mode d'emploi de cette feuille</a>`)}
+  <div class="sheet-body cd-form"><div class="cd-row">${fsField({k:"date",l:"Date",t:"date"},base+"|date",d.date)}${fsField({k:"poste",l:"Poste",t:"select",o:Object.keys(PL_POSTES)},base+"|poste",d.poste||"Matin")}</div></div>
+  <section class="stack-sm"><div class="section-title"><h2>Mes patients</h2><span class="muted" id="fs-saved">Enregistré sur cet appareil</span></div>
+   <form id="pl-pat" class="pl-pat" data-id="${inst.id}"><input id="pl-ch" placeholder="Chambre" maxlength="8" inputmode="numeric" autocomplete="off" aria-label="Chambre"><input id="pl-in" placeholder="Initiales" maxlength="12" autocomplete="off" aria-label="Initiales"><button class="btn" type="submit">${IC.plus}Ajouter</button></form>
+   ${pats.length?`<details class="cn-item"><summary><span><span class="cn-sum-t">Infos des patients (facultatif)</span><small class="muted">${pats.map(fsPatLabel).map(esc).join(" · ")}</small></span></summary><div class="det-body">${pats.map((p,i)=>`<div class="sheet-body cd-form"><h3>${esc(fsPatLabel(p,i))}</h3>${fsFields(S.sections[1].g.f,`${base}|patients|${p.id}`,p)}<button class="link danger" data-act="fs-gdel" data-k="patients" data-type="planif" data-id="${inst.id}" data-item="${p.id}">Retirer ce patient</button></div>`).join("")}</div></details>`:""}</section>
+  ${(()=>{const st=plState(d),n=(d.taches||[]).length;if(!st.view)st.view=n?"plan":"add";return `<div class="seg pl-seg" role="tablist"><button data-act="fs-plview" data-type="planif" data-id="${inst.id}" data-v="plan" aria-pressed="${st.view==="plan"}">Mon planning · <span id="pl-n">${n}</span></button><button data-act="fs-plview" data-type="planif" data-id="${inst.id}" data-v="add" aria-pressed="${st.view==="add"}">${IC.plus.replace("<svg",'<svg style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.4;vertical-align:-2px"')} Ajouter des soins</button></div>
+  <div id="pl-addwrap" ${st.view!=="add"?"hidden":""}><div class="sheet-body pl-add" id="pl-add">${plAddHTML(inst)}</div></div>
+  <div id="pl-planwrap" ${st.view!=="plan"?"hidden":""}><div id="pl-list" class="stack-sm">${plListHTML(inst)}</div><button class="btn ghost block pl-goadd" data-act="fs-plview" data-type="planif" data-id="${inst.id}" data-v="add">${IC.plus}Ajouter des soins</button></div>`;})()}
+  <section class="stack-sm"><h2>À transmettre en fin de poste</h2><div class="sheet-body cd-form">${fsField({k:"transmissions",l:"Transmissions, soins non réalisés, points de vigilance",t:"textarea",r:4},base+"|transmissions",d.transmissions)}</div></section>
+  <div class="btn-row"><button class="btn" data-act="fs-print" data-k="planif" data-id="${inst.id}">${IC.sheet}Imprimer ma feuille</button><button class="btn ghost" data-act="fs-print" data-k="planif">Imprimer une feuille vierge</button></div>
+  <button class="link danger" data-act="fs-del" data-k="planif" data-id="${inst.id}">Supprimer cette feuille</button>
+  <p class="disclaimer">Initiales seulement. Chaque soin réalisé est aussi tracé dans le dossier du patient.</p></div>`;
+}
+function plSubmit(f){
+ const F=feuilles(),inst=(F.planif||[]).find(x=>x.id===f.dataset.id);if(!inst)return;const d=inst.data;
+ if(f.id==="pl-pat"){const ch=document.getElementById("pl-ch").value.trim(),ini=document.getElementById("pl-in").value.trim();if(!ch&&!ini){toast("Indiquez la chambre ou les initiales");return;}
+  d.patients=(d.patients||[]).filter(p=>p.chambre||p.initiales);d.patients.push({id:cnId(),chambre:ch,initiales:ini});inst.updated=todayISO();saveFeuilles(F);
+  state.pl=state.pl||{};state.pl.pat=fsPatLabel(d.patients[d.patients.length-1],d.patients.length-1);haptic();render();setTimeout(()=>{const i=document.getElementById("pl-ch");i&&i.focus();},40);}
+ else if(f.id==="pl-free"){const v=document.getElementById("pl-free-in").value.trim();if(!v)return;const st=plState(d),n=plAddTasks(inst,v,[st.pat],plTimes(d,st));inst.updated=todayISO();saveFeuilles(F);haptic();
+  toast(n?`Ajouté : ${v}`:"Déjà dans le planning");document.getElementById("pl-free-in").value="";plRefresh(inst,"list");}
+}
+
 function fsEditor(type,inst){
+ if(type==="planif")return plEditor(inst);
  const S=SHEETS[type],d=inst.data||{},base=`${type}|${inst.id}`;
  const secs=S.sections.map(sec=>{let body;
-  if(sec.planning)body=fsPlanning(type,inst);
-  else if(sec.g){const g=sec.g,items=d[g.k]||[];
+  if(sec.g){const g=sec.g,items=d[g.k]||[];
    body=items.map((it,i)=>`<details class="cn-item" ${state.fsOpen===it.id||items.length===1?"open":""}><summary><span><span class="cn-sum-t">${esc(g.label)} ${i+1}${type==="planif"?" · "+esc(fsPatLabel(it,i)):it.probleme?" · "+esc(it.probleme.slice(0,50)):""}</span></span></summary><div class="det-body cd-form">${fsFields(g.f,`${base}|${g.k}|${it.id}`,it)}
      <button class="link danger" data-act="fs-gdel" data-k="${g.k}" data-type="${type}" data-id="${inst.id}" data-item="${it.id}">Supprimer</button></div></details>`).join("")+
     `<button class="btn ghost block" data-act="fs-gadd" data-k="${g.k}" data-type="${type}" data-id="${inst.id}">${IC.plus}${esc(g.add)}</button>`;}
@@ -113,13 +188,14 @@ function feuilleInput(t){
  if(parts.length===3)inst.data[parts[2]]=v;
  else{const arr=inst.data[parts[2]]=inst.data[parts[2]]||[],it=arr.find(x=>x.id===parts[3]);if(!it)return;it[parts[4]]=v;}
  inst.updated=todayISO();saveFeuilles(F);
+ if(type==="planif"&&parts.length===3&&(parts[2]==="poste"||parts[2]==="date")){state.pl&&(state.pl.h=null);render();return;}
  if(t.type==="checkbox"){const row=t.closest(".fs-task");row&&row.classList.toggle("done",v);const k=document.getElementById("fs-done");if(k){const all=document.querySelectorAll(".fs-task .fs-ok input");k.textContent=[...all].filter(x=>x.checked).length+"/"+all.length;}haptic();}
  const m=document.getElementById("fs-saved");if(m){m.textContent="Enregistré ✓";clearTimeout(feuilleInput.t);feuilleInput.t=setTimeout(()=>{m.textContent="Enregistré sur cet appareil"},1400);}
 }
 function feuilleAct(b,a){
  const F=feuilles(),type=b.dataset.type||b.dataset.k,id=b.dataset.id,inst=id?(F[type]||[]).find(x=>x.id===id):null;
  if(a==="fs-new"){const it={id:cnId(),created:todayISO(),updated:todayISO(),data:{date:todayISO()}};
-  if(type==="planif"){const s=stageInfo();it.data.poste="Matin";it.data.horaires=s.horaires||"";it.data.patients=[{id:cnId()}];}
+  if(type==="planif"){const s=stageInfo(),hh=new Date().getHours();if(hh>=19){const t=new Date();t.setDate(t.getDate()+1);t.setMinutes(t.getMinutes()-t.getTimezoneOffset());it.data.date=t.toISOString().slice(0,10);}it.data.poste=hh>=12&&hh<19?"Après-midi":"Matin";it.data.horaires=s.horaires||"";it.data.patients=[];state.pl=null;}
   if(type==="projet")it.data.pb=[{id:cnId()}];
   F[type].push(it);saveFeuilles(F);haptic();nav("feuille/"+type+"/"+it.id);return;}
  if(a==="fs-del"){if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Toucher à nouveau pour supprimer la feuille";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent="Supprimer cette feuille";}},3500);return;}
@@ -131,8 +207,22 @@ function feuilleAct(b,a){
   inst.data[k]=(inst.data[k]||[]).filter(x=>x.id!==item);saveFeuilles(F);haptic();render();return;}
  if(a==="fs-trame"&&inst){const tr=TRAMES[b.dataset.t]||[],ex=(inst.data.taches||[]).map(x=>x.heure+x.tache);
   inst.data.taches=inst.data.taches||[];tr.forEach(([h,t])=>{if(!ex.includes(h+t))inst.data.taches.push({id:cnId(),heure:h,tache:t,patient:"",fait:false});});
-  if(!inst.data.poste||inst.data.poste==="Matin")inst.data.poste=b.dataset.t;saveFeuilles(F);haptic();toast("Trame ajoutée : adaptez-la au service");render();return;}
+  if(!inst.data.poste)inst.data.poste=b.dataset.t;saveFeuilles(F);haptic();toast("Trame ajoutée : adaptez-la au service");if(document.getElementById("pl-list"))plRefresh(inst,"list");else render();return;}
  if(a==="fs-print"){printHTML(fsPrintDoc(type,inst));return;}
+ if(type==="planif"&&inst){const d=inst.data,st=plState(d),v=b.dataset.v;
+  if(a==="fs-plpat"){st.pat=v;plRefresh(inst,"add");return;}
+  if(a==="fs-plh"){st.h=+v;plRefresh(inst,"add");return;}
+  if(a==="fs-plm"){st.m=v;plRefresh(inst,"add");return;}
+  if(a==="fs-plrep"){st.rep=v;plRefresh(inst,"add");return;}
+  if(a==="fs-plfilter"){st.filter=v;plRefresh(inst,"list");return;}
+  if(a==="fs-plview"){st.view=v;const aw=document.getElementById("pl-addwrap"),pw=document.getElementById("pl-planwrap");if(aw)aw.hidden=v!=="add";if(pw)pw.hidden=v!=="plan";
+   document.querySelectorAll(".pl-seg button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.v===v));const sg=document.querySelector(".pl-seg");if(sg){const y=sg.getBoundingClientRect().top+window.scrollY-8;if(window.scrollY>y||v==="plan")window.scrollTo(0,Math.max(0,y));}return;}
+  if(a==="fs-pladd"||a==="fs-pltour"){const pats=a==="fs-pltour"?((d.patients||[]).filter(p=>p.chambre||p.initiales).map(fsPatLabel)):[st.pat];
+   const times=a==="fs-pltour"?[plHM(st.h*60+(+st.m))]:plTimes(d,st),n=plAddTasks(inst,v,pats.length?pats:[""],times);inst.updated=todayISO();saveFeuilles(F);haptic();
+   toast(n?`${v} · ${n>1?n+" ajouts":"ajouté à "+times[0]}`:"Déjà dans le planning");b.classList.add("ok");setTimeout(()=>b.classList.remove("ok"),500);plRefresh(inst,"list");return;}
+  if(a==="fs-pltoggle"){const t=(d.taches||[]).find(x=>x.id===b.dataset.item);if(!t)return;t.fait=!t.fait;inst.updated=todayISO();saveFeuilles(F);haptic(t.fait?"LIGHT":"MEDIUM");plRefresh(inst,"list");return;}
+  if(a==="fs-pldel"){d.taches=(d.taches||[]).filter(x=>x.id!==b.dataset.item);saveFeuilles(F);haptic();plRefresh(inst,"list");return;}
+ }
 }
 
 /* ---------- Impression ---------- */
@@ -159,7 +249,7 @@ function fsPrintPlanif(inst){
  h+=`</section><section class="pp"><h1>Mon planning heure par heure</h1>`;
  if(blank){const hours=[6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21];
   h+=`<table class="pt pg fs-grid-p"><tr><th style="width:16mm">Heure</th><th>Patient 1</th><th>Patient 2</th><th>Patient 3</th><th>Patient 4</th><th style="width:9mm">✓</th></tr>${hours.map(x=>`<tr><th style="white-space:nowrap">${x} h</th><td></td><td></td><td></td><td></td><td></td></tr>`).join("")}</table>`;}
- else{const tasks=(d.taches||[]).slice().sort((a,b)=>(a.heure||"99").localeCompare(b.heure||"99"));
+ else{const tasks=(d.taches||[]).slice().sort((a,b)=>plKey(a.heure,d)-plKey(b.heure,d));
   h+=`<table class="pt pg"><tr><th style="width:16mm">Heure</th><th style="width:28%">Patient</th><th>Soin ou tâche</th><th style="width:9mm">✓</th></tr>${tasks.length?tasks.map(t=>`<tr><td>${esc(t.heure||"")}</td><td>${esc(t.patient||"Tous")}</td><td>${esc(t.tache||"")}</td><td>${t.fait?"☑":"☐"}</td></tr>`).join(""):""}${"<tr><td></td><td></td><td></td><td></td></tr>".repeat(4)}</table>`;}
  h+=`<h2>À transmettre en fin de poste</h2>${blank||!d.transmissions?lines(5):`<p>${pe(d.transmissions)}</p>`}
   <p class="psub">Priorités : 1. urgences et dégradation · 2. soins à heure fixe · 3. douleur, sécurité · 4. soins prévus · 5. confort, éducation. Tout soin réalisé est tracé dans le dossier. Feuille détruite en fin de poste.</p></section>`;

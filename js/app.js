@@ -40,7 +40,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.8 · 31 octobre 2026";
+const APP_VERSION="1.9 · 31 octobre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -430,6 +430,7 @@ function checkCalc(show){
 function launchQuiz(list,label){if(!list.length){toast("Aucune question disponible");return;}startQuiz(list,label);state.train="quiz";nav("entrainer/quiz");}
 app.addEventListener("submit",ev=>{if(ev.target.id==="calc-form"){ev.preventDefault();checkCalc(false);}
  else if(ev.target.id.startsWith("cn-")){ev.preventDefault();carnetSubmit(ev.target);}
+ else if(ev.target.id.startsWith("pl-")){ev.preventDefault();plSubmit(ev.target);}
  else if(ev.target.id==="exam-form"){ev.preventDefault();const nom=document.getElementById("ex-nom").value.trim(),date=document.getElementById("ex-date").value,heure=document.getElementById("ex-heure").value||"08:00";
   if(!nom||!date){toast("Indiquez un intitulé et une date");return;}
   store.set("exams",[...exams(),{id:Date.now().toString(36),nom,date,heure}]);haptic();toast("Partiel ajouté");render();setTimeout(()=>{const i=document.getElementById("ex-nom");i&&i.focus()},0);}});
