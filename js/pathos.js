@@ -9,7 +9,7 @@ const pathosOf=s=>{const l=progOf(s).map(n=>PNAME[n]).filter(Boolean);PATHOS.for
 const PROG_ALL=[...new Set(SPES.flatMap(([s])=>progOf(s)))];
 const pxSpeQ=s=>{const ids=new Set(pathosOf(s).map(p=>p.i));return QUIZ.map((q,i)=>i).filter(i=>ids.has(QUIZ[i].pid));};
 const pxDone=()=>store.get("pxdone",[]);
-const SPE_ICO={cardio:"heart",pneumo:"lungs",neuro:"brain",rhumato:"bone",pedia:"baby",ophtalmo:"eye",nephro:"kidney",hemato:"drop",infectio:"thermo",endoc:"gland",nutri:"scale",urg:"alert",onco:"tube",geria:"face",psy:"brain",gastro:"gut",chir:"tube"};
+const SPE_ICO={cardio:"heart",pneumo:"lungs",neuro:"brain",rhumato:"bone",pedia:"baby",ophtalmo:"eye",nephro:"kidney",hemato:"drop",infectio:"thermo",dermato:"peau",endoc:"gland",nutri:"scale",urg:"alert",onco:"tube",geria:"face",psy:"brain",gastro:"gut",chir:"tube"};
 
 /* ---------- Vues ---------- */
 const pmd=s=>md(String(s||""));
@@ -124,9 +124,19 @@ const PEXOS=[
  {id:"glandes",map:"glandes",spe:["endoc"],titre:"Les glandes endocrines",keys:["hypophyse","thyroide","parathyroides","surrenales","pancreas","gonades"]},
  {id:"glycemie",spe:["endoc"],titre:"La régulation de la glycémie",q:"Remettez dans l'ordre ce qui se passe après un repas.",steps:["Repas : la glycémie monte","Le pancréas libère de l'insuline","Le glucose entre dans les cellules","La glycémie redescend","L'excédent est stocké dans le foie et les muscles"]},
  {id:"resucrage",spe:["endoc"],titre:"Le resucrage d'une hypoglycémie",q:"Remettez dans l'ordre la conduite à tenir chez un patient conscient.",steps:["Reconnaître les signes : sueurs, tremblements, faim","Contrôler la glycémie capillaire","Donner 15 g de sucre rapide","Recontrôler la glycémie 15 minutes après","Donner une collation de sucres lents"]},
- {id:"squelette",map:"squelette",spe:["endoc"],titre:"Le squelette et les articulations",keys:["rachis","epaule","poignet","mains","bassin","hanche","genou","pied"]},
+ {id:"squelette",map:"squelette",spe:["rhumato","endoc"],titre:"Le squelette et les articulations",keys:["rachis","epaule","poignet","mains","bassin","hanche","genou","pied"]},
  {id:"rein",map:"rein",spe:["nephro"],titre:"L'appareil urinaire",keys:["reins","surrenales","ureteres","vessie","uretre","prostate"]},
- {id:"urine",spe:["nephro"],titre:"La fabrication de l'urine",q:"Remettez dans l'ordre le trajet du sang à l'urine.",steps:["Le sang arrive au rein par l'artère rénale","Filtration dans les glomérules","Ajustement dans les tubules (eau, sel, potassium)","L'urine se collecte dans le bassinet","Elle descend par l'uretère","Stockage dans la vessie","Évacuation par l'urètre"]}
+ {id:"urine",spe:["nephro"],titre:"La fabrication de l'urine",q:"Remettez dans l'ordre le trajet du sang à l'urine.",steps:["Le sang arrive au rein par l'artère rénale","Filtration dans les glomérules","Ajustement dans les tubules (eau, sel, potassium)","L'urine se collecte dans le bassinet","Elle descend par l'uretère","Stockage dans la vessie","Évacuation par l'urètre"]},
+ {id:"cellules",map:"sang",spe:["hemato"],titre:"Le sang et ses usines",keys:["moelle","gr","gb","plaquettes","ganglions","rate"]},
+ {id:"hemostase",spe:["hemato"],titre:"L'arrêt d'un saignement",q:"Remettez dans l'ordre les étapes de l'hémostase.",steps:["Lésion du vaisseau","Contraction réflexe du vaisseau","Les plaquettes adhèrent et forment un clou","La coagulation construit un réseau de fibrine","Le caillot solide ferme la brèche","La fibrinolyse dissout le caillot une fois la paroi réparée"]},
+ {id:"transfusion",spe:["hemato"],titre:"Les étapes d'une transfusion",q:"Remettez dans l'ordre les étapes de la transfusion d'un concentré de globules rouges.",steps:["Vérifier la prescription et l'identité du patient","Contrôler la concordance entre documents et poches","Réaliser le contrôle ultime au lit du patient","Débuter lentement en restant auprès du patient","Surveiller pendant et après la transfusion","Assurer la traçabilité"]},
+ {id:"corps",map:"corps",spe:["infectio"],titre:"Les portes d'entrée des infections",keys:["tete","orl","poumons","coeur","abdomen","urinaire","articulations"]},
+ {id:"chaine",spe:["infectio"],titre:"La chaîne de transmission",q:"Remettez dans l'ordre les maillons de la chaîne de transmission d'une infection.",steps:["Un agent infectieux (bactérie, virus, champignon, parasite)","Un réservoir (personne, animal, environnement)","Une porte de sortie (toux, selles, sang…)","Un mode de transmission (mains, contact, gouttelettes, air)","Une porte d'entrée (muqueuse, plaie, cathéter)","Un hôte réceptif"]},
+ {id:"sha",spe:["infectio"],titre:"La friction hydro-alcoolique",q:"Remettez dans l'ordre les étapes de la friction des mains.",steps:["Paume contre paume","Paume sur le dos de l'autre main, doigts entrelacés","Paume contre paume, doigts entrelacés","Dos des doigts contre la paume opposée","Friction en rotation des pouces","Friction en rotation du bout des doigts dans la paume"]},
+ {id:"consolidation",spe:["rhumato"],titre:"La consolidation d'une fracture",q:"Remettez dans l'ordre les étapes de la consolidation osseuse.",steps:["Fracture et hématome","Phase inflammatoire","Cal mou (tissu fibreux et cartilage)","Cal dur (os nouveau)","Remodelage de l'os"]},
+ {id:"peau",map:"peau",spe:["dermato"],titre:"La peau en coupe",keys:["epiderme","derme","hypoderme","follicule","sudoripare","vaisseaux"]},
+ {id:"escarre-st",spe:["dermato"],titre:"Les stades de l'escarre",q:"Remettez dans l'ordre les stades de l'escarre, du moins grave au plus grave.",steps:["Rougeur qui ne blanchit pas à la pression","Phlyctène ou abrasion de l'épiderme","Perte de peau jusqu'à l'hypoderme","Atteinte des muscles, des tendons ou de l'os"]},
+ {id:"cicatrisation",spe:["dermato"],titre:"La cicatrisation d'une plaie",q:"Remettez dans l'ordre les phases de la cicatrisation.",steps:["Détersion : élimination des tissus morts","Bourgeonnement : tissu rouge qui comble la plaie","Épidermisation : la peau recouvre la plaie","Maturation de la cicatrice"]}
 ];
 const pxExpected=(E,i)=>E.map?E.keys[i]:String(i);
 const pxLabel=(E,v)=>E.map?PMAPS[E.map].zones[v]:E.steps[+v];
