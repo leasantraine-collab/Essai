@@ -2,85 +2,35 @@
    schémas d'organes (zone atteinte en couleur), quiz générés et schémas à compléter. Chargé après render.js, avant app.js. */
 const SPE=Object.fromEntries(SPES.map(([id,nom,c,u])=>[id,{id,nom,c,u}]));
 const PBY=Object.fromEntries(PATHOS.map(p=>[p.i,p]));
-const pathosOf=s=>PATHOS.filter(p=>p.s===s);
 const progOf=s=>(PROGRAMME[s]||"").split("|").filter(Boolean);
+/* Une pathologie peut figurer dans plusieurs spécialités : son nom (n) ou un de ses autres noms (nn) suffit. */
+const PNAME={};PATHOS.forEach(p=>[p.n,...(p.nn||[])].forEach(x=>{if(!PNAME[x])PNAME[x]=p;}));
+const pathosOf=s=>{const l=progOf(s).map(n=>PNAME[n]).filter(Boolean);PATHOS.forEach(p=>{if(p.s===s&&!l.includes(p))l.push(p);});return [...new Set(l)];};
+const PROG_ALL=[...new Set(SPES.flatMap(([s])=>progOf(s)))];
+const pxSpeQ=s=>{const ids=new Set(pathosOf(s).map(p=>p.i));return QUIZ.map((q,i)=>i).filter(i=>ids.has(QUIZ[i].pid));};
 const pxDone=()=>store.get("pxdone",[]);
-const SPE_ICO={cardio:"heart",pneumo:"lungs",neuro:"brain",rhumato:"bone",pedia:"baby",ophtalmo:"eye",nephro:"bladder",hemato:"drop",infectio:"thermo",endoc:"scale",nutri:"scale",urg:"alert",onco:"tube",geria:"face",psy:"brain",gastro:"flask",chir:"tube"};
-
-/* ---------- Schémas d'organes ---------- */
-const PM_LAB=(x,y,t,on,a="start")=>tx(x,y,t,on?"st-acc st-b":"st-sub",a);
-const pmCls=(on,kind)=>kind==="s"?(on?"s-acc":"s-ln"):(on?"f-coral":"f-soft");
-const PMAPS={
- coeur:{titre:"Le cœur",zones:{od:"Oreillette droite",og:"Oreillette gauche",vd:"Ventricule droit",vg:"Ventricule gauche",aorte:"Aorte",ap:"Artère pulmonaire",valves:"Valves",coronaires:"Artères coronaires",pericarde:"Péricarde",myocarde:"Muscle cardiaque (myocarde)",conduction:"Système électrique",veines:"Veines caves"},
-  pts:{od:[128,100],og:[192,100],vd:[128,152],vg:[192,156],aorte:[232,46],ap:[80,58],valves:[190,125],coronaires:[226,128],pericarde:[262,150],myocarde:[160,196],conduction:[118,90],veines:[98,34]},
-  draw(h,num){const on=k=>h.includes(k),lb=!num;
-   return sv(232,
-    `<path d="M160 214 C 62 166, 52 98, 92 70 C 118 52, 148 58, 160 80 C 172 58, 202 52, 228 70 C 268 98, 258 166, 160 214 Z" class="${on("pericarde")?"s-acc":"s-ln"}" stroke-dasharray="5 4" fill="none" transform="translate(160 132) scale(1.1) translate(-160 -132)"/>`+
-    `<path d="M160 206 C 70 160, 60 98, 96 74 C 120 58, 148 64, 160 84 C 172 64, 200 58, 224 74 C 260 98, 250 160, 160 206 Z" class="${on("myocarde")?"f-coral":"f-box"}"/>`+
-    `<path d="M112 92 L 96 36" class="${pmCls(on("veines"),"s")}" stroke-width="7" stroke-linecap="round" fill="none"/>`+
-    `<path d="M132 84 C 126 52, 100 44, 84 56" class="${pmCls(on("ap"),"s")}" stroke-width="8" stroke-linecap="round" fill="none"/>`+
-    `<path d="M190 84 C 190 38, 244 30, 252 66" class="${pmCls(on("aorte"),"s")}" stroke-width="9" stroke-linecap="round" fill="none"/>`+
-    `<rect x="106" y="86" width="46" height="34" rx="10" class="${pmCls(on("od"))}"/><rect x="168" y="86" width="46" height="34" rx="10" class="${pmCls(on("og"))}"/>`+
-    `<rect x="106" y="128" width="46" height="46" rx="12" class="${pmCls(on("vd"))}"/><rect x="168" y="128" width="48" height="56" rx="14" class="${pmCls(on("vg"))}"/>`+
-    `<path d="M112 124 H 146 M174 124 H 210 M184 82 H 198 M126 82 H 140" class="${on("valves")?"s-acc":"s-ln"}" stroke-width="3"/>`+
-    `<path d="M196 88 C 238 104, 240 152, 210 188 M146 92 C 106 110, 104 150, 126 182" class="${on("coronaires")?"s-acc":"s-ln"}" fill="none" stroke-width="${on("coronaires")?3:1.5}"/>`+
-    `<circle cx="118" cy="92" r="4.5" class="${on("conduction")?"f-acc":"f-sub"}"/><circle cx="160" cy="124" r="4" class="${on("conduction")?"f-acc":"f-sub"}"/><path d="M160 128 V 184" class="${on("conduction")?"s-acc":"s-ln"}" stroke-dasharray="${on("conduction")?"0":"3 3"}"/>`+
-    (lb?PM_LAB(4,104,"Oreillette\ndroite",on("od"))+PM_LAB(316,104,"Oreillette\ngauche",on("og"),"end")+PM_LAB(4,156,"Ventricule\ndroit",on("vd"))+PM_LAB(316,162,"Ventricule\ngauche",on("vg"),"end")+PM_LAB(258,58,"Aorte",on("aorte"))+PM_LAB(40,48,"Artère\npulmonaire",on("ap"))+PM_LAB(104,24,"Veine cave",on("veines"))
-     +(on("coronaires")?PM_LAB(232,206,"Coronaires",1):"")+(on("pericarde")?PM_LAB(270,214,"Péricarde",1,"end"):"")+(on("conduction")?PM_LAB(60,80,"Nœud sinusal",1):"")+(on("valves")?PM_LAB(160,226,"Valves",1,"middle"):"")+(on("myocarde")&&!on("valves")?PM_LAB(160,226,"Myocarde",1,"middle"):""):"")+
-    (num?pmNums(this,num):""),"Schéma du cœur");}},
- poumons:{titre:"L'appareil respiratoire",zones:{larynx:"Larynx",trachee:"Trachée",bronches:"Bronches",poumons:"Poumons (tissu pulmonaire)",alveoles:"Alvéoles",plevre:"Plèvre",diaphragme:"Diaphragme",vaisseaux:"Vaisseaux pulmonaires"},
-  pts:{larynx:[160,22],trachee:[160,56],bronches:[184,92],poumons:[100,140],alveoles:[218,168],plevre:[262,120],diaphragme:[160,212],vaisseaux:[140,116]},
-  draw(h,num){const on=k=>h.includes(k),lb=!num;
-   return sv(226,
-    `<path d="M138 82 C 92 88, 64 142, 72 200 C 96 212, 132 206, 146 194 L 146 96 Z" class="${on("plevre")?"s-acc":"s-ln"}" fill="none" stroke-dasharray="5 4" transform="translate(110 145) scale(1.07) translate(-110 -145)"/>`+
-    `<path d="M182 82 C 228 88, 256 142, 248 200 C 224 212, 188 206, 174 194 L 174 96 Z" class="${on("plevre")?"s-acc":"s-ln"}" fill="none" stroke-dasharray="5 4" transform="translate(210 145) scale(1.07) translate(-210 -145)"/>`+
-    `<path d="M138 82 C 92 88, 64 142, 72 200 C 96 212, 132 206, 146 194 L 146 96 Z" class="${pmCls(on("poumons"))}"/><path d="M182 82 C 228 88, 256 142, 248 200 C 224 212, 188 206, 174 194 L 174 96 Z" class="${pmCls(on("poumons"))}"/>`+
-    `<rect x="150" y="14" width="20" height="16" rx="6" class="${pmCls(on("larynx"))}"/><rect x="154" y="30" width="12" height="44" rx="5" class="${pmCls(on("trachee"))}"/>`+
-    `<path d="M160 74 L 128 104 L 112 132 M160 74 L 192 104 L 208 132 M128 104 L 120 150 M192 104 L 200 150" class="${on("bronches")?"s-acc":"s-ln"}" stroke-width="${on("bronches")?4:3}" fill="none" stroke-linecap="round"/>`+
-    `<path d="M160 104 C 140 112, 118 118, 96 120 M160 104 C 180 112, 202 118, 224 120" class="${on("vaisseaux")?"s-acc":"s-blue"}" fill="none" stroke-width="${on("vaisseaux")?3:1.5}"/>`+
-    [[206,166],[216,160],[226,166],[211,176],[222,176],[100,170],[90,164],[96,180]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="5" class="${on("alveoles")?"f-acc":"f-soft"}" stroke="currentColor" stroke-opacity=".2"/>`).join("")+
-    `<path d="M64 210 C 120 192, 200 192, 256 210" class="${on("diaphragme")?"s-acc":"s-ln"}" stroke-width="${on("diaphragme")?3.5:2}" fill="none"/>`+
-    (lb?PM_LAB(178,24,"Larynx",on("larynx"))+PM_LAB(176,52,"Trachée",on("trachee"))+PM_LAB(214,96,"Bronches",on("bronches"))+PM_LAB(4,120,"Poumon\ndroit",on("poumons"))+PM_LAB(316,96,"Poumon\ngauche",on("poumons"),"end")+PM_LAB(316,196,"Alvéoles",on("alveoles"),"end")+PM_LAB(160,224,"Diaphragme",on("diaphragme"),"middle")
-     +(on("plevre")?PM_LAB(4,212,"Plèvre",1):"")+(on("vaisseaux")?PM_LAB(4,150,"Vaisseaux",1):""):"")+
-    (num?pmNums(this,num):""),"Schéma de l'appareil respiratoire");}},
- jambe:{titre:"Les vaisseaux de la jambe",zones:{aorte:"Aorte abdominale",arteres:"Artères de la jambe",veinesp:"Veines profondes",veiness:"Veines superficielles (saphène)",mollet:"Mollet",pied:"Pied"},
-  pts:{aorte:[160,18],arteres:[140,96],veinesp:[176,120],veiness:[198,150],mollet:[214,176],pied:[186,214]},
-  draw(h,num){const on=k=>h.includes(k),lb=!num;
-   return sv(230,
-    `<path d="M128 26 C 122 70, 126 120, 134 160 C 138 186, 140 200, 138 212 L 196 218 C 196 210, 180 204, 178 196 C 186 160, 196 120, 194 70 L 192 26 Z" class="f-box"/>`+
-    `<ellipse cx="180" cy="168" rx="22" ry="26" class="${on("mollet")?"f-coral":"f-soft"}" opacity=".85"/>`+
-    `<path d="M138 210 L 198 218 L 206 226 L 136 222 Z" class="${pmCls(on("pied"))}"/>`+
-    `<path d="M156 8 V 30 C 150 80, 146 130, 150 200" class="${on("arteres")?"s-acc":"s-ln"}" stroke-width="${on("arteres")?4:2.5}" fill="none" stroke-linecap="round"/>`+
-    `<path d="M156 8 V 28" class="${on("aorte")?"s-acc":"s-ln"}" stroke-width="7" stroke-linecap="round"/>`+
-    `<path d="M168 30 C 166 80, 164 130, 166 200" class="${on("veinesp")?"s-acc":"s-blue"}" stroke-width="${on("veinesp")?4:2.5}" fill="none" stroke-linecap="round"/>`+
-    `<path d="M186 30 C 192 90, 200 130, 192 200" class="${on("veiness")?"s-acc":"s-blue"}" stroke-width="${on("veiness")?3.5:1.8}" fill="none" stroke-dasharray="${on("veiness")?"0":"4 3"}"/>`+
-    (lb?PM_LAB(170,14,"Aorte",on("aorte"))+PM_LAB(4,96,"Artère\nfémorale",on("arteres"))+PM_LAB(4,150,"Veines\nprofondes",on("veinesp"))+PM_LAB(316,96,"Veine\nsaphène",on("veiness"),"end")+PM_LAB(316,170,"Mollet",on("mollet"),"end")+PM_LAB(220,224,"Pied",on("pied")):"")+
-    (num?pmNums(this,num):""),"Schéma des vaisseaux de la jambe");}}
-};
-function pmNums(map,keys){return keys.map((k,i)=>{const [x,y]=map.pts[k]||[0,0];return `<circle cx="${x}" cy="${y}" r="9" class="f-acc"/><text x="${x}" y="${y+4}" text-anchor="middle" style="fill:#fff;font-weight:700;font-size:11px">${i+1}</text>`;}).join("");}
-function pmFig(z,cap){const m=PMAPS[z[0]];if(!m)return "";const zs=z.slice(1);
- return `<figure class="sch-fig"><div class="sch-head"><span class="sch-kick">Où ça se passe</span><strong>${esc(m.titre)}</strong><small>${zs.map(k=>m.zones[k]).filter(Boolean).map(esc).join(" · ")}</small></div>${m.draw(zs)}${cap?`<figcaption>${md(cap)}</figcaption>`:""}</figure>`;}
+const SPE_ICO={cardio:"heart",pneumo:"lungs",neuro:"brain",rhumato:"bone",pedia:"baby",ophtalmo:"eye",nephro:"kidney",hemato:"drop",infectio:"thermo",endoc:"gland",nutri:"scale",urg:"alert",onco:"tube",geria:"face",psy:"brain",gastro:"gut",chir:"tube"};
 
 /* ---------- Vues ---------- */
 const pmd=s=>md(String(s||""));
 function pxCard(){
- const tot=SPES.reduce((n,[s])=>n+progOf(s).length,0);
- return `<a class="px-card" href="#pathos"><span class="px-card-ic">${ICO.heart}</span><span><b>Pathologies par spécialité</b><small>${PATHOS.length} cours rédigés sur ${tot} · fiche récap, cours détaillé, schéma, quiz</small></span>${chev}</a>`;
+ const cov=PROG_ALL.filter(n=>PNAME[n]).length;
+ return `<a class="px-card" href="#pathos"><span class="px-card-ic">${ICO.heart}</span><span><b>Pathologies par spécialité</b><small>${cov} pathologies rédigées sur ${PROG_ALL.length} · fiche récap, cours détaillé, schéma, quiz</small></span>${chev}</a>`;
 }
 function vPathos(arg){
  if(arg&&SPE[arg])return vSpe(arg);
- const tot=SPES.reduce((n,[s])=>n+progOf(s).length,0),done=pxDone().filter(id=>PBY[id]).length;
+ const tot=PROG_ALL.length,cov=PROG_ALL.filter(n=>PNAME[n]).length,done=pxDone().filter(id=>PBY[id]).length;
  return `<div class="stack-lg">${backBtn("Réviser")}
-  ${vh("Réviser","Pathologies par spécialité",`${PATHOS.length} pathologies rédigées sur ${tot} au programme, ${done} étudiée${done>1?"s":""}. Chacune a une fiche récap, un cours détaillé avec schéma et des questions.`)}
+  ${vh("Réviser","Pathologies par spécialité",`${cov} pathologies rédigées sur ${tot} au programme, ${done} étudiée${done>1?"s":""}. Chacune a une fiche récap, un cours détaillé avec schéma et des questions.`)}
   <button class="search-pill" data-act="nav" data-h="recherche">${IC.search}Rechercher une pathologie…</button>
-  <div class="px-spes">${SPES.map(([s,nom,c])=>{const n=pathosOf(s).length,t=progOf(s).length;return `<a class="px-spe${n?"":" off"}" href="#pathos/${s}" style="--c:${c}"><span class="px-dot"></span><b>${esc(nom)}</b><small>${n?`${n} / ${t} rédigées`:`${t} au programme · bientôt`}</small>${n?`<span class="px-bar"><i style="width:${Math.round(n/t*100)}%"></i></span>`:""}</a>`}).join("")}</div>
+  <div class="px-spes">${SPES.map(([s,nom,c])=>{const n=pathosOf(s).length,t=progOf(s).length;return `<a class="px-spe${n?"":" off"}" href="#pathos/${s}" style="--c:${c}"><span class="px-dot"></span><b>${esc(nom)}</b><small>${n?`${n} / ${t} rédigées`:`${t} au programme · bientôt`}</small>${n?`<span class="px-bar"><i style="width:${Math.min(100,Math.round(n/t*100))}%"></i></span>`:""}</a>`}).join("")}</div>
   <a class="list" href="#entrainer/schemas"><span class="li"><span class="ic">${IC.bolt}</span><span><span class="t">Schémas à compléter et à remettre dans l'ordre</span><span class="s">Dans S'entraîner › Schémas</span></span>${chev}</span></a></div>`;
 }
 function vSpe(s){
- const S=SPE[s],list=progOf(s),q=fold(state.pxq||""),byName=Object.fromEntries(pathosOf(s).map(p=>[p.n,p])),dn=pxDone();
- const extra=pathosOf(s).filter(p=>!list.includes(p.n)).map(p=>p.n);
+ const S=SPE[s],list=progOf(s),q=fold(state.pxq||""),byName={...PNAME},dn=pxDone();
+ const extra=PATHOS.filter(p=>p.s===s&&!list.some(n=>PNAME[n]===p)).map(p=>p.n);
  const rows=[...list,...extra].filter(n=>!q||fold(n).includes(q));
- const nq=QUIZ.filter(x=>x.spe===s).length,exos=PEXOS.filter(e=>e.spe.includes(s));
+ const nq=pxSpeQ(s).length,exos=PEXOS.filter(e=>e.spe.includes(s));
  return `<div class="stack-lg"><a class="back" href="#pathos">${IC.back}Spécialités</a>
   ${vh("Pathologies",esc(S.nom),`${pathosOf(s).length} pathologies rédigées sur ${list.length}${pathosOf(s).length?`, ${pathosOf(s).filter(p=>dn.includes(p.i)).length} étudiée(s)`:""}.`)}
   ${nq||exos.length?`<div class="px-tools">${nq?`<button class="btn" data-act="px-quiz" data-k="${s}">${IC.bolt}Quiz ${esc(S.nom)} · ${nq} questions</button>`:""}${exos.map(e=>`<a class="btn ghost" href="#entrainer/schemas" data-act="px-exo" data-k="${e.id}">${e.steps?"À remettre dans l'ordre":"Schéma à compléter"} : ${esc(e.titre.charAt(0).toLowerCase()+e.titre.slice(1))}</a>`).join("")}</div>`:""}
@@ -93,7 +43,7 @@ function vPatho(id){
  const p=PBY[id];if(!p)return notFound();
  const S=SPE[p.s],mode=state.pxMode||"recap",done=pxDone().includes(id);
  const links=(p.f||[]).map(x=>{const f=FICHES.find(y=>y.id===x),c=f?null:COURS.find(y=>y.id===x&&!y.pro),it=f||c;return it?`<a class="chip" href="#${f?"fiche":"cours"}/${x}">${esc(it.titre)}</a>`:"";}).join("");
- const qs=QUIZ.filter(q=>q.pid===id),same=pathosOf(p.s),k=same.indexOf(p),next=same[k+1];
+ const qs=QUIZ.filter(q=>q.pid===id),same=PATHOS.filter(x=>x.s===p.s),k=same.indexOf(p),next=same[k+1];
  const secs=[["Définition",`<p class="fv-lead">${pmd(p.d)}</p>`],
   ["Comprendre le mécanisme",`${(p.m||"").split("\n").map(x=>`<p class="cv-p">${pmd(x)}</p>`).join("")}${p.a?`<div class="cv-box cv-ana"><span class="cv-lab">${SVG.bulb}Pour comprendre</span><p>${pmd(p.a)}</p></div>`:""}${p.z?pmFig(p.z,"En couleur : la zone concernée."):""}`],
   ["Causes et facteurs de risque",pList(p.c)],
@@ -165,7 +115,18 @@ const PEXOS=[
  {id:"embolie",spe:["cardio","pneumo"],titre:"De la phlébite à l'embolie",q:"Remettez dans l'ordre le trajet du caillot.",steps:["Caillot dans une veine profonde du mollet","Le caillot se détache","Remontée par la veine cave inférieure","Traversée de l'oreillette puis du ventricule droits","Blocage dans une artère pulmonaire"]},
  {id:"poumons",map:"poumons",spe:["pneumo"],titre:"L'appareil respiratoire",keys:["larynx","trachee","bronches","poumons","alveoles","diaphragme"]},
  {id:"air",spe:["pneumo"],titre:"Le trajet de l'air",q:"Remettez dans l'ordre le trajet de l'air inspiré.",steps:["Nez et bouche","Pharynx","Larynx","Trachée","Bronches","Bronchioles","Alvéoles : échanges avec le sang"]},
- {id:"crise",spe:["pneumo"],titre:"La crise d'asthme",q:"Remettez dans l'ordre les étapes d'une crise d'asthme.",steps:["Contact avec un déclencheur (allergène, virus, froid)","Contraction du muscle des bronches et gonflement de la muqueuse","Sécrétion de mucus épais","L'air sort difficilement : sifflements à l'expiration","Le bronchodilatateur relâche le muscle : l'air passe à nouveau"]}
+ {id:"crise",spe:["pneumo"],titre:"La crise d'asthme",q:"Remettez dans l'ordre les étapes d'une crise d'asthme.",steps:["Contact avec un déclencheur (allergène, virus, froid)","Contraction du muscle des bronches et gonflement de la muqueuse","Sécrétion de mucus épais","L'air sort difficilement : sifflements à l'expiration","Le bronchodilatateur relâche le muscle : l'air passe à nouveau"]},
+ {id:"cerveau",map:"cerveau",spe:["neuro"],titre:"Le système nerveux central",keys:["frontal","parietal","temporal","occipital","cervelet","tronc","moelle"]},
+ {id:"avc",spe:["neuro"],titre:"La prise en charge d'un AVC",q:"Remettez dans l'ordre la prise en charge d'un AVC.",steps:["Reconnaître les signes : visage, bras, parole","Appeler le 15 et noter l'heure de début","Transport vers une unité neurovasculaire","IRM ou scanner en urgence","Thrombolyse et/ou thrombectomie si possible","Rééducation et prévention de la récidive"]},
+ {id:"crise-tc",spe:["neuro"],titre:"Une crise tonico-clonique",q:"Remettez dans l'ordre les phases d'une crise tonico-clonique.",steps:["Perte de connaissance brutale et chute","Phase tonique : raidissement, apnée, cyanose","Phase clonique : secousses des membres","Phase de récupération : respiration bruyante, relâchement","Réveil progressif avec confusion et amnésie"]},
+ {id:"digestif",map:"digestif",spe:["gastro"],titre:"L'appareil digestif",keys:["oesophage","estomac","foie","vesicule","pancreas","grele","colon","rectum"]},
+ {id:"aliments",spe:["gastro"],titre:"Le trajet des aliments",q:"Remettez dans l'ordre le trajet des aliments.",steps:["Bouche : mastication et salive","Pharynx puis œsophage","Estomac : brassage et acide","Duodénum : arrivée de la bile et des enzymes du pancréas","Intestin grêle : absorption des nutriments","Côlon : absorption de l'eau","Rectum puis anus : évacuation"]},
+ {id:"glandes",map:"glandes",spe:["endoc"],titre:"Les glandes endocrines",keys:["hypophyse","thyroide","parathyroides","surrenales","pancreas","gonades"]},
+ {id:"glycemie",spe:["endoc"],titre:"La régulation de la glycémie",q:"Remettez dans l'ordre ce qui se passe après un repas.",steps:["Repas : la glycémie monte","Le pancréas libère de l'insuline","Le glucose entre dans les cellules","La glycémie redescend","L'excédent est stocké dans le foie et les muscles"]},
+ {id:"resucrage",spe:["endoc"],titre:"Le resucrage d'une hypoglycémie",q:"Remettez dans l'ordre la conduite à tenir chez un patient conscient.",steps:["Reconnaître les signes : sueurs, tremblements, faim","Contrôler la glycémie capillaire","Donner 15 g de sucre rapide","Recontrôler la glycémie 15 minutes après","Donner une collation de sucres lents"]},
+ {id:"squelette",map:"squelette",spe:["endoc"],titre:"Le squelette et les articulations",keys:["rachis","epaule","poignet","mains","bassin","hanche","genou","pied"]},
+ {id:"rein",map:"rein",spe:["nephro"],titre:"L'appareil urinaire",keys:["reins","surrenales","ureteres","vessie","uretre","prostate"]},
+ {id:"urine",spe:["nephro"],titre:"La fabrication de l'urine",q:"Remettez dans l'ordre le trajet du sang à l'urine.",steps:["Le sang arrive au rein par l'artère rénale","Filtration dans les glomérules","Ajustement dans les tubules (eau, sel, potassium)","L'urine se collecte dans le bassinet","Elle descend par l'uretère","Stockage dans la vessie","Évacuation par l'urètre"]}
 ];
 const pxExpected=(E,i)=>E.map?E.keys[i]:String(i);
 const pxLabel=(E,v)=>E.map?PMAPS[E.map].zones[v]:E.steps[+v];
@@ -178,7 +139,7 @@ function vSchemas(){
   return `<label class="px-ex ${r===true?"good":r===false?"wrong":""}"><span class="px-n">${i+1}</span><select data-px="${i}" ${st.done?"disabled":""} aria-label="${E.map?"Structure n° ":"Étape "}${i+1}"><option value="">Choisir…</option>${opts.map(o=>`<option value="${o}" ${st.a[i]===o?"selected":""}>${esc(pxLabel(E,o))}</option>`).join("")}</select>${r===false?`<small>Réponse : ${esc(pxLabel(E,pxExpected(E,i)))}</small>`:""}</label>`}).join("");
  const correction=E.map?`<figure class="sch-fig" style="cursor:default"><div class="sch-head"><span class="sch-kick">Correction</span><strong>${esc(M.titre)}</strong></div>${M.draw([])}</figure>`
   :`<ol class="px-order">${E.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>`;
- const groups=[["cardio","Cardiologie"],["pneumo","Pneumologie"]];
+ const groups=SPES.filter(([g])=>PEXOS.some(e=>e.spe[0]===g)).map(([g,l])=>[g,l]);
  return `<div class="stack-sm">${groups.map(([g,l])=>`<span class="eyebrow">${l}</span><div class="chips wrapchips" role="group" aria-label="${l}">${PEXOS.filter(e=>e.spe[0]===g).map(e=>`<button class="chip" data-act="px-exo" data-k="${e.id}" aria-pressed="${e.id===E.id}">${e.steps?"↕ ":""}${esc(e.titre)}</button>`).join("")}</div>`).join("")}</div>
   <div class="calc-card"><div class="row"><span class="eyebrow">${E.map?"Schéma à compléter":"À remettre dans l'ordre"} · ${esc(E.titre)}</span>${st.done?`<span class="muted" style="font-size:.85rem">${score} / ${n}</span>`:""}</div>
    <p class="muted">${E.map?"Associez chaque numéro du schéma à la bonne structure, puis vérifiez.":esc(E.q)}</p>
@@ -189,16 +150,16 @@ function vSchemas(){
 }
 /* Bloc ajouté à l'accueil du quiz : quiz par spécialité et schémas. */
 function pxQuizBlock(){
- const sp=SPES.filter(([s])=>QUIZ.some(q=>q.spe===s));if(!sp.length)return "";
+ const sp=SPES.filter(([s])=>pxSpeQ(s).length);if(!sp.length)return "";
  return `<section class="stack-sm"><div class="section-title"><h2>Pathologies par spécialité</h2><a href="#pathos">Les cours</a></div>
-  <div class="chips wrapchips">${sp.map(([s,nom,c])=>`<button class="chip" style="--c:${c}" data-act="px-quiz" data-k="${s}"><i></i>${esc(nom)} · ${QUIZ.filter(q=>q.spe===s).length}</button>`).join("")}</div>
+  <div class="chips wrapchips">${sp.map(([s,nom,c])=>`<button class="chip" style="--c:${c}" data-act="px-quiz" data-k="${s}"><i></i>${esc(nom)} · ${pxSpeQ(s).length}</button>`).join("")}</div>
   <a class="list" href="#entrainer/schemas"><span class="li"><span class="ic acc">${IC.bolt}</span><span><span class="t">Schémas à compléter</span><span class="s">${PEXOS.length} exercices : schémas d'organes et étapes à remettre dans l'ordre</span></span>${chev}</span></a></section>`;
 }
 
 /* ---------- Actions ---------- */
 function pathoAct(b,a){const k=b.dataset.k;
  if(a==="px-mode"){state.pxMode=k;render();const t=document.querySelector(".px-head");if(t)t.scrollIntoView();return;}
- if(a==="px-quiz"){launchQuiz(QUIZ.map((q,i)=>i).filter(i=>QUIZ[i].spe===k).sort(()=>Math.random()-.5).slice(0,20),"Quiz "+SPE[k].nom);return;}
+ if(a==="px-quiz"){launchQuiz(pxSpeQ(k).sort(()=>Math.random()-.5).slice(0,20),"Quiz "+SPE[k].nom);return;}
  if(a==="px-qp"){launchQuiz(QUIZ.map((q,i)=>i).filter(i=>QUIZ[i].pid===k),"Quiz · "+PBY[k].n);return;}
  if(a==="px-done"){let d=pxDone();const on=!d.includes(k);d=on?[...d,k]:d.filter(x=>x!==k);store.set("pxdone",d);haptic();if(on)toast("Pathologie marquée comme étudiée");render();return;}
  if(a==="px-exo"){state.exo=k;state.exoAns=null;state.train="schemas";if(route().v==="entrainer")render();return;}
@@ -210,5 +171,5 @@ function pathoInput(t){
  if(t.dataset.px!=null&&state.exoAns){state.exoAns.a[+t.dataset.px]=t.value;return true;}
  return false;
 }
-function pxIdx(){return PATHOS.map(p=>({t:"p",it:{id:p.i,titre:p.n,cat:"patho",theme:SPE[p.s].nom},txt:plainTxt([p.d,p.m,(p.c||[]).join(" "),(p.sg||[]).join(" "),(p.tt||[]).join(" "),(p.ri||[]).join(" "),p.r].join(" "))}));}
+function pxIdx(){return PATHOS.map(p=>({t:"p",it:{id:p.i,titre:p.n,cat:"patho",theme:SPE[p.s].nom},txt:plainTxt([(p.nn||[]).join(" "),p.d,p.m,(p.c||[]).join(" "),(p.sg||[]).join(" "),(p.tt||[]).join(" "),(p.ri||[]).join(" "),p.r].join(" "))}));}
 pxMakeQuiz();
