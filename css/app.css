@@ -556,3 +556,28 @@ a.back{text-decoration:none}
 .pdoc .pc-list{columns:2;column-gap:6mm}
 .pdoc .pc-list .pc-t{break-inside:avoid;padding:.5mm 0;border-bottom:.4pt dotted #aaa}
 .pdoc .pc-box{border:.6pt solid #888;height:18mm;border-radius:1.5mm}
+
+/* ---------- Glisser vers la gauche (Mes feuilles) ---------- */
+.fs-list{overflow:hidden}
+.sw{position:relative;border-top:1px solid var(--line);overflow:hidden;transition:height .25s ease,opacity .25s}
+.sw:first-child{border-top:0}
+.sw.gone{opacity:0}
+.sw .sw-main{position:relative;z-index:1;background:var(--surface);border-top:0;touch-action:pan-y;transition:transform .22s ease;-webkit-user-select:none;user-select:none}
+.sw.drag .sw-main{transition:none}
+.sw-acts{position:absolute;top:0;right:0;bottom:0;width:246px;display:grid;grid-template-columns:repeat(3,1fr)}
+.sw-b{font:inherit;font-size:.74rem;font-weight:700;border:0;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;padding:0 4px}
+.sw-b svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sw-b b{font-size:1.05rem;line-height:1}
+.sw-edit{background:var(--brand-2)}
+.sw-ord{background:#8A6A2E}
+.sw-del{background:var(--bad)}
+.sw-del[data-armed]{background:#8E2A1F}
+:root[data-theme="dark"] .sw-edit{background:#2E6F82}
+.fs-hint{font-size:.82rem}
+.fs-re{grid-template-columns:28px minmax(0,1fr) auto;cursor:default}
+.fs-rank{width:26px;height:26px;border-radius:50%;background:var(--brand-soft);color:var(--brand);font-weight:700;font-size:.8rem;display:grid;place-items:center}
+.fs-arrows{display:flex;gap:6px}
+.fs-arrows .del{font-size:1rem;font-weight:700;color:var(--brand)}
+.fs-arrows .del:disabled{opacity:.3}
+.sw .sw-main{-webkit-user-drag:none;-webkit-touch-callout:none}
+.section-title .btn{background:var(--brand);color:var(--on-brand);padding:8px 18px;border-radius:10px;font-weight:650}
