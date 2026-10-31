@@ -239,20 +239,31 @@ function fsPrintDoc(type,inst){
  return h+`</section>`;
 }
 function fsPrintPlanif(inst){
- const blank=!inst,d=blank?{}:(inst.data||{}),pats=blank?[{},{},{},{}]:(d.patients&&d.patients.length?d.patients:[{}]);
- const F=SHEETS.planif.sections[1].g.f;
- const cols=[];for(let i=0;i<pats.length;i+=4)cols.push(pats.slice(i,i+4));
- let h=`<section class="pp"><h1>Planification de ma journée${blank?"":" · "+esc(fsTitle("planif",inst))}</h1>
-  <table class="pt"><tr><th>Date</th><td>${blank?"":esc(d.date?fmtISO(d.date):"")}</td><th>Poste, horaires</th><td>${blank?"":esc([d.poste,d.horaires].filter(Boolean).join(" · "))}</td></tr><tr><th>Secteur</th><td>${blank?"":esc(d.secteur||"")}</td><th>Référent du jour</th><td>${blank?"":esc(d.referent||"")}</td></tr></table>`;
- cols.forEach(group=>{h+=`<table class="pt pg fs-pt"><tr><th style="width:22%">Patient</th>${group.map((p,i)=>`<th>${blank?"Ch. …… Initiales ……":esc(fsPatLabel(p,i))}</th>`).join("")}</tr>
-  ${F.filter(f=>!["chambre","initiales"].includes(f.k)).map(f=>`<tr><th>${esc(f.l.split(" (")[0])}</th>${group.map(p=>`<td>${blank?"":pe(p[f.k])}</td>`).join("")}</tr>`).join("")}</table>`;});
- h+=`</section><section class="pp"><h1>Mon planning heure par heure</h1>`;
+ const blank=!inst,d=blank?{}:(inst.data||{});
+ const pats=blank?[{},{},{},{}]:(d.patients||[]).filter(p=>p.chambre||p.initiales);
+ const labels=pats.map((p,i)=>fsPatLabel(p,i));
+ const short={motif:"Motif",atcd:"ATCD, allergies",autonomie:"Autonomie",alim:"Alimentation",dispositifs:"Dispositifs",surv:"Surveillances",ttt:"Traitements",soins:"Soins prévus",examens:"Examens, RDV",vigilance:"Vigilance"};
+ const F=SHEETS.planif.sections[1].g.f.filter(f=>short[f.k]);
+ let h=`<section class="pp pcompact"><div class="pc-head"><b>Planification${blank?"":" · "+esc(fsTitle("planif",inst))}</b><span>${blank?"Date ……………… Poste ……………… Secteur ……………… Référent ………………":esc([d.horaires,d.secteur?"Secteur "+d.secteur:"",d.referent?"Référent "+d.referent:""].filter(Boolean).join(" · "))}</span></div>`;
+ /* Patients : seules les rubriques remplies */
+ if(pats.length){const rows=blank?[{k:"_",l:"Âge, isolement"},...F]:F.filter(f=>pats.some(p=>p[f.k]));
+  for(let i=0;i<pats.length;i+=4){const g=pats.slice(i,i+4).map((p,j)=>[p,i+j]);
+   h+=`<table class="pt pc ${blank?"pcb":""}"><tr><th class="pc-l">Patient</th>${g.map(([p,k])=>{const sub=blank?"":[p.age?p.age+" ans":"",p.isolement&&p.isolement!=="Aucun"?"isolement "+p.isolement.toLowerCase():""].filter(Boolean).join(" · ");
+    return `<th>${blank?"Ch. ……  ………":esc(labels[k])}${sub?`<br><small>${esc(sub)}</small>`:""}</th>`}).join("")}</tr>
+    ${rows.length?rows.map(f=>`<tr><th class="pc-l">${esc(short[f.k]||f.l)}</th>${g.map(([p])=>`<td>${blank?"":pe(p[f.k])}</td>`).join("")}</tr>`).join(""):""}</table>`;}}
+ /* Planning en grille : heures × patients */
+ h+=`<h2>Planning</h2>`;
  if(blank){const hours=[6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21];
-  h+=`<table class="pt pg fs-grid-p"><tr><th style="width:16mm">Heure</th><th>Patient 1</th><th>Patient 2</th><th>Patient 3</th><th>Patient 4</th><th style="width:9mm">✓</th></tr>${hours.map(x=>`<tr><th style="white-space:nowrap">${x} h</th><td></td><td></td><td></td><td></td><td></td></tr>`).join("")}</table>`;}
+  h+=`<table class="pt pc pgrid pcb"><tr><th class="pc-h">Heure</th><th>Patient 1</th><th>Patient 2</th><th>Patient 3</th><th>Patient 4</th></tr>${hours.map(x=>`<tr><th class="pc-h">${x} h</th><td></td><td></td><td></td><td></td></tr>`).join("")}</table>`;}
  else{const tasks=(d.taches||[]).slice().sort((a,b)=>plKey(a.heure,d)-plKey(b.heure,d));
-  h+=`<table class="pt pg"><tr><th style="width:16mm">Heure</th><th style="width:28%">Patient</th><th>Soin ou tâche</th><th style="width:9mm">✓</th></tr>${tasks.length?tasks.map(t=>`<tr><td>${esc(t.heure||"")}</td><td>${esc(t.patient||"Tous")}</td><td>${esc(t.tache||"")}</td><td>${t.fait?"☑":"☐"}</td></tr>`).join(""):""}${"<tr><td></td><td></td><td></td><td></td></tr>".repeat(4)}</table>`;}
- h+=`<h2>À transmettre en fin de poste</h2>${blank||!d.transmissions?lines(5):`<p>${pe(d.transmissions)}</p>`}
-  <p class="psub">Priorités : 1. urgences et dégradation · 2. soins à heure fixe · 3. douleur, sécurité · 4. soins prévus · 5. confort, éducation. Tout soin réalisé est tracé dans le dossier. Feuille détruite en fin de poste.</p></section>`;
+  if(!tasks.length)h+=`<p class="psub">Aucun soin planifié.</p>`;
+  else{const cols=[...(tasks.some(t=>!t.patient)?[""]:[]),...labels.filter(l=>tasks.some(t=>t.patient===l)),...[...new Set(tasks.map(t=>t.patient).filter(p=>p&&!labels.includes(p)))]];
+   const hours=[];tasks.forEach(t=>{const k=(t.heure||"--").slice(0,2);if(!hours.includes(k))hours.push(k);});
+   const cell=(hh,c)=>tasks.filter(t=>(t.heure||"--").slice(0,2)===hh&&(t.patient||"")===c).map(t=>{const mn=(t.heure||"").slice(3);return `<span class="pc-t ${t.fait?"ok":""}">${t.fait?"☑":"☐"} ${mn&&mn!=="00"?`<i>${hh}h${mn}</i> `:""}${esc(t.tache||"")}</span>`}).join("");
+   if(cols.length<=5)h+=`<table class="pt pc pgrid"><tr><th class="pc-h">Heure</th>${cols.map(c=>`<th>${c?esc(c):"Tous"}</th>`).join("")}</tr>${hours.map(hh=>`<tr><th class="pc-h">${hh==="--"?"–":(+hh)+" h"}</th>${cols.map(c=>`<td>${cell(hh,c)}</td>`).join("")}</tr>`).join("")}</table>`;
+   else h+=`<div class="pc-list">${tasks.map(t=>`<span class="pc-t ${t.fait?"ok":""}">${t.fait?"☑":"☐"} <i>${esc(t.heure||"")}</i> <b>${esc(t.patient||"Tous")}</b> ${esc(t.tache||"")}</span>`).join("")}</div>`;}}
+ h+=`<h2>À transmettre</h2>${blank||!d.transmissions?`<div class="pc-box"></div>`:`<p>${pe(d.transmissions)}</p>`}
+  <p class="psub">Priorités : urgences · heure fixe · douleur, sécurité · soins prévus · confort. Tout soin réalisé est tracé dans le dossier. Feuille détruite en fin de poste.</p></section>`;
  return h;
 }
 function printHTML(html){
