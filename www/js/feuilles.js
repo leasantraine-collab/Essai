@@ -160,14 +160,40 @@ function fsEditor(type,inst){
   <button class="link danger" data-act="fs-del" data-k="${type}" data-id="${inst.id}">Supprimer cette feuille</button>
   <p class="disclaimer">Données de santé : initiales seulement. Une feuille imprimée reste dans le service et se détruit en fin de stage.</p></div>`;
 }
+function fsSorted(type){
+ const list=(feuilles()[type]||[]).slice();
+ return list.some(x=>x.ord!=null)?list.sort((a,b)=>(a.ord??-1e9)-(b.ord??-1e9)):list.sort((a,b)=>(b.updated||b.created||"").localeCompare(a.updated||a.created||""));
+}
 function fsList(type){
- const S=SHEETS[type],list=(feuilles()[type]||[]).slice().sort((a,b)=>(b.updated||b.created||"").localeCompare(a.updated||a.created||""));
+ const S=SHEETS[type],list=fsSorted(type),re=state.fsReorder===type;
+ const row=(x,i)=>{const t=esc(fsTitle(type,x)),sub=`Modifiée le ${esc(fmtShort(at(x.updated||x.created,"12:00")))}`;
+  if(re)return `<div class="li fs-re"><span class="fs-rank">${i+1}</span><span><span class="t">${t}</span><span class="s">${sub}</span></span><span class="fs-arrows"><button class="del" data-act="fs-ord" data-k="${type}" data-id="${x.id}" data-d="-1" aria-label="Monter ${t}" ${i?"":"disabled"}>↑</button><button class="del" data-act="fs-ord" data-k="${type}" data-id="${x.id}" data-d="1" aria-label="Descendre ${t}" ${i<list.length-1?"":"disabled"}>↓</button></span></div>`;
+  return `<div class="sw" data-sw="${x.id}"><div class="sw-acts">
+    <button class="sw-b sw-edit" data-act="fs-sw-edit" data-k="${type}" data-id="${x.id}" tabindex="-1">${IC.sheet}<span>Modifier</span></button>
+    <button class="sw-b sw-ord" data-act="fs-sw-ord" data-k="${type}" data-id="${x.id}" tabindex="-1"><b>↑↓</b><span>Hiérarchiser</span></button>
+    <button class="sw-b sw-del" data-act="fs-sw-del" data-k="${type}" data-id="${x.id}" tabindex="-1">${IC.x}<span>Supprimer</span></button></div>
+   <a class="li sw-main" href="#feuille/${type}/${x.id}" draggable="false"><span class="bar" style="--c:${CAT.stage.c}"></span><span><span class="t">${t}</span><span class="s">${sub}</span></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a></div>`;};
  return `<div class="stack-lg">${backBtn("Stages")}${vh("Feuille de travail",esc(S.titre),esc(S.desc))}
   <div class="btn-row"><button class="btn" data-act="fs-new" data-k="${type}">${IC.plus}Nouvelle feuille</button><button class="btn ghost" data-act="fs-print" data-k="${type}">${IC.sheet}Imprimer vierge</button></div>
   <a class="cd-card cn-entry" href="#fiche/${S.guide}"><span class="cd-ic">${IC.book}</span><span><b>Mode d'emploi</b><small>Comment utiliser et remplir cette feuille, avec un exemple</small></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
-  <section class="stack-sm"><div class="section-title"><h2>Mes feuilles</h2><span class="muted">${list.length}</span></div>
-  ${list.length?`<div class="list">${list.map(x=>`<a class="li" href="#feuille/${type}/${x.id}"><span class="bar" style="--c:${CAT.stage.c}"></span><span><span class="t">${esc(fsTitle(type,x))}</span><span class="s">Modifiée le ${esc(fmtShort(at(x.updated||x.created,"12:00")))}</span></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>`).join("")}</div>`:`<div class="empty">Aucune feuille. Créez-en une pour la remplir ici, ou imprimez une feuille vierge à remplir à la main.</div>`}</section></div>`;
+  <section class="stack-sm"><div class="section-title"><h2>Mes feuilles</h2>${re?`<button class="btn" data-act="fs-ord-done" data-k="${type}">Terminé</button>`:`<span class="muted">${list.length}</span>`}</div>
+  ${list.length?`<p class="muted fs-hint">${re?"Utilisez les flèches pour classer vos feuilles par ordre d'importance.":"Glissez une feuille vers la gauche pour la modifier, la hiérarchiser ou la supprimer."}</p><div class="list fs-list">${list.map(row).join("")}</div>`:`<div class="empty">Aucune feuille. Créez-en une pour la remplir ici, ou imprimez une feuille vierge à remplir à la main.</div>`}</section></div>`;
 }
+/* ---------- Glisser vers la gauche ---------- */
+const SW_W=246;let swDrag=null,swBlockClick=false;
+const swClose=(except)=>document.querySelectorAll(".sw.open").forEach(r=>{if(r!==except){r.classList.remove("open");const m=r.querySelector(".sw-main");m.style.transform="";r.querySelectorAll(".sw-b").forEach(x=>x.tabIndex=-1);const d=r.querySelector(".sw-del");if(d&&d.dataset.armed){delete d.dataset.armed;d.querySelector("span").textContent="Supprimer";}}});
+const swOpen=r=>{swClose(r);r.classList.add("open");r.querySelector(".sw-main").style.transform=`translateX(${-SW_W}px)`;r.querySelectorAll(".sw-b").forEach(x=>x.tabIndex=0);};
+document.addEventListener("pointerdown",e=>{const m=e.target.closest(".sw-main");
+ if(!m){if(!e.target.closest(".sw-acts"))swClose();return;}
+ const r=m.closest(".sw");swDrag={r,m,x0:e.clientX,y0:e.clientY,base:r.classList.contains("open")?-SW_W:0,dir:null,id:e.pointerId,x:0};});
+document.addEventListener("pointermove",e=>{const d=swDrag;if(!d||e.pointerId!==d.id)return;const dx=e.clientX-d.x0,dy=e.clientY-d.y0;
+ if(!d.dir){if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)){d.dir="h";try{d.m.setPointerCapture(d.id)}catch(_){}d.r.classList.add("drag");swClose(d.r);}else if(Math.abs(dy)>8){swDrag=null;return;}else return;}
+ d.x=Math.max(-SW_W-40,Math.min(0,d.base+dx));d.m.style.transform=`translateX(${d.x}px)`;e.preventDefault();},{passive:false});
+const swEnd=e=>{const d=swDrag;swDrag=null;if(!d||d.dir!=="h"){if(d&&document.querySelector(".sw.open")&&!d.r.classList.contains("open")){swClose();swBlockClick=true;}else if(d&&d.r.classList.contains("open")){swClose();swBlockClick=true;}return;}
+ d.r.classList.remove("drag");swBlockClick=true;if(d.x<-SW_W/2)swOpen(d.r);else swClose();};
+document.addEventListener("pointerup",()=>{if(swBlockClick)setTimeout(()=>{swBlockClick=false;},400);},true);
+document.addEventListener("pointerup",swEnd);document.addEventListener("dragstart",e=>{if(e.target.closest&&e.target.closest(".sw-main"))e.preventDefault();});document.addEventListener("pointercancel",e=>{const d=swDrag;swDrag=null;if(d){d.r.classList.remove("drag");d.m.style.transform=d.r.classList.contains("open")?`translateX(${-SW_W}px)`:"";}});
+document.addEventListener("click",e=>{if(swBlockClick&&e.target.closest(".sw-main")){e.preventDefault();e.stopPropagation();}swBlockClick=false;},true);
 function vFeuille(arg){
  const [type,id]=(arg||"").split("/");if(!SHEETS[type])return notFound();
  if(id){const inst=fsInst(type,id);return inst?fsEditor(type,inst):notFound();}
@@ -194,9 +220,19 @@ function feuilleInput(t){
 }
 function feuilleAct(b,a){
  const F=feuilles(),type=b.dataset.type||b.dataset.k,id=b.dataset.id,inst=id?(F[type]||[]).find(x=>x.id===id):null;
+ if(a==="fs-sw-edit"){nav("feuille/"+type+"/"+id);return;}
+ if(a==="fs-sw-ord"||a==="fs-ord"||a==="fs-ord-done"){
+  if(a==="fs-ord-done"){state.fsReorder=null;render();return;}
+  const list=fsSorted(type);list.forEach((x,i)=>{const it=F[type].find(y=>y.id===x.id);if(it)it.ord=i;});
+  if(a==="fs-ord"){const i=list.findIndex(x=>x.id===id),j=i+(+b.dataset.d);if(j>=0&&j<list.length){const A=F[type].find(y=>y.id===list[i].id),B=F[type].find(y=>y.id===list[j].id);[A.ord,B.ord]=[B.ord,A.ord];haptic();}}
+  saveFeuilles(F);state.fsReorder=type;render();return;}
+ if(a==="fs-sw-del"){const sp=b.querySelector("span");if(!b.dataset.armed){b.dataset.armed="1";sp.textContent="Confirmer";haptic("MEDIUM");setTimeout(()=>{if(b.isConnected&&b.dataset.armed){delete b.dataset.armed;sp.textContent="Supprimer";}},3500);return;}
+  const r=b.closest(".sw");F[type]=F[type].filter(x=>x.id!==id);saveFeuilles(F);haptic("MEDIUM");toast("Feuille supprimée");
+  if(r){r.style.height=r.offsetHeight+"px";requestAnimationFrame(()=>{r.classList.add("gone");r.style.height="0px";});setTimeout(render,260);}else render();return;}
  if(a==="fs-new"){const it={id:cnId(),created:todayISO(),updated:todayISO(),data:{date:todayISO()}};
   if(type==="planif"){const s=stageInfo(),hh=new Date().getHours();if(hh>=19){const t=new Date();t.setDate(t.getDate()+1);t.setMinutes(t.getMinutes()-t.getTimezoneOffset());it.data.date=t.toISOString().slice(0,10);}it.data.poste=hh>=12&&hh<19?"Après-midi":"Matin";it.data.horaires=s.horaires||"";it.data.patients=[];state.pl=null;}
   if(type==="projet")it.data.pb=[{id:cnId()}];
+  if(F[type].some(x=>x.ord!=null))it.ord=Math.min(...F[type].map(x=>x.ord??0))-1;
   F[type].push(it);saveFeuilles(F);haptic();nav("feuille/"+type+"/"+it.id);return;}
  if(a==="fs-del"){if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Toucher à nouveau pour supprimer la feuille";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent="Supprimer cette feuille";}},3500);return;}
   F[type]=F[type].filter(x=>x.id!==id);saveFeuilles(F);toast("Feuille supprimée");location.replace("#feuille/"+type);return;}
