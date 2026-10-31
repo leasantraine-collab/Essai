@@ -40,7 +40,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.3 · 31 octobre 2026";
+const APP_VERSION="1.4 · 31 octobre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -77,7 +77,7 @@ applyTheme();
 
 /* ---------- Routage ---------- */
 const ROOTS=["accueil","reviser","entrainer","stages","programme"];
-const PARENT={fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const PARENT={carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 function route(){const [v,...rest]=decodeURIComponent(location.hash.slice(1)).split("/");return {v:VIEWS[v]?v:"accueil",arg:rest.join("/")};}
 function nav(h){if(location.hash==="#"+h)render(true);else location.hash=h;}
 let depth=0;
@@ -121,7 +121,7 @@ function stageCountdown(){
  const s=stageInfo(),start=at(s.debut,s.arrivee||"07:00"),end=s.fin?at(s.fin,"23:59"):null,now=Date.now(),title=s.service?esc(s.service):"Mon prochain stage";
  if(!start) return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Compte à rebours</span><h2>${title}</h2><p class="muted">Renseignez la date de début ci-dessous pour lancer le compte à rebours.</p></section>`;
  if(now<start) return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Début du stage · ${jMoins(start)}</span><h2>${title}</h2>${cdBox(start)}<p class="cd-date">${IC.cal}${esc(fmtFull(start))}${end?` · jusqu'au ${esc(fmtShort(end))}`:""}</p></section>`;
- if(end&&now>end) return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Stage terminé</span><h2>${title}</h2><p class="muted">Pensez à compléter votre portfolio. Quand vous connaissez votre prochain stage, effacez ces informations pour repartir de zéro.</p><button class="btn ghost block" data-act="stage-new">Préparer un nouveau stage</button></section>`;
+ if(end&&now>end) return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Stage terminé</span><h2>${title}</h2><p class="muted">Pensez à compléter votre portfolio et à <a class="link" href="#carnet/imprimer">imprimer votre carnet de suivi</a>. Quand vous connaissez votre prochain stage, effacez ces informations et le carnet pour repartir de zéro.</p><button class="btn ghost block" data-act="stage-new">Préparer un nouveau stage</button></section>`;
  const tot=end?Math.max(1,Math.round((day0(end)-day0(start))/DAY)+1):null,jour=Math.round((day0(now)-day0(start))/DAY)+1;
  return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Stage en cours${tot?` · jour ${Math.min(jour,tot)} sur ${tot}`:""}</span><h2>${title}</h2>
   ${tot?`<div class="progress"><i style="width:${Math.min(100,jour/tot*100)}%"></i></div>`:""}${end?`<p class="muted">Fin du stage dans</p>${cdBox(end)}`:`<p class="muted">Ajoutez la date de fin pour suivre l'avancée du stage.</p>`}</section>`;
@@ -299,6 +299,7 @@ function vStages(){
  const done=store.get("check",[]);
  return `<div class="stack-lg">${vh("Stages","Arriver préparé·e dans chaque service",`Compte à rebours, infos pratiques, check-list, posture et repères pour ${STAGES.length} services.`)}
   ${stageCountdown()}
+  ${carnetCard()}
   ${stageForm()}
   <section class="stack-sm"><div class="section-title"><h2>Avant le premier jour</h2><span class="muted">${done.length} / ${CHECKLIST.length}</span></div>
    <div class="progress"><i style="width:${done.length/CHECKLIST.length*100}%"></i></div>
@@ -396,8 +397,8 @@ function vReglages(){
 }
 
 /* ---------- Rendu ---------- */
-const VIEWS={accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
-const TAB={fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const VIEWS={carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
+const TAB={carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 let lastKey=null;
 function render(top){
  const r=route(),key=r.v+"/"+r.arg;
@@ -422,6 +423,7 @@ function checkCalc(show){
 }
 function launchQuiz(list,label){if(!list.length){toast("Aucune question disponible");return;}startQuiz(list,label);state.train="quiz";nav("entrainer/quiz");}
 app.addEventListener("submit",ev=>{if(ev.target.id==="calc-form"){ev.preventDefault();checkCalc(false);}
+ else if(ev.target.id.startsWith("cn-")){ev.preventDefault();carnetSubmit(ev.target);}
  else if(ev.target.id==="exam-form"){ev.preventDefault();const nom=document.getElementById("ex-nom").value.trim(),date=document.getElementById("ex-date").value,heure=document.getElementById("ex-heure").value||"08:00";
   if(!nom||!date){toast("Indiquez un intitulé et une date");return;}
   store.set("exams",[...exams(),{id:Date.now().toString(36),nom,date,heure}]);haptic();toast("Partiel ajouté");render();setTimeout(()=>{const i=document.getElementById("ex-nom");i&&i.focus()},0);}});
@@ -429,10 +431,12 @@ function saveStageField(t){const s=stageInfo();s[t.dataset.sf]=t.value;store.set
  if(["debut","fin","arrivee","service"].includes(t.dataset.sf)){const c=document.getElementById("stage-cd");if(c)c.outerHTML=stageCountdown();}
  const m=document.getElementById("sf-saved");if(m){m.textContent="Enregistré ✓";clearTimeout(saveStageField.t);saveStageField.t=setTimeout(()=>{m.textContent="Enregistré sur cet appareil"},1500);}}
 app.addEventListener("input",ev=>{const t=ev.target;if(t.id==="q"){state.q=t.value;document.getElementById("res").innerHTML=results(state.q)||"";}
- else if(t.dataset.sf)saveStageField(t);});
+ else if(t.dataset.sf)saveStageField(t);
+ else if(t.dataset.cn)carnetInput(t);});
 app.addEventListener("click",ev=>{
  const b=ev.target.closest("[data-act]");if(!b)return;
  const a=b.dataset.act,k=b.dataset.k,id=b.dataset.id;
+ if(a.startsWith("cn-")){carnetAct(b,a);return;}
  if(a==="nav"){nav(b.dataset.h);}
  else if(a==="back"||a==="fiche-back"||a==="cours-back"){goBack();}
  else if(a==="go-cat"){ev.preventDefault();
@@ -479,14 +483,14 @@ app.addEventListener("click",ev=>{
  else if(a==="exam-edit"){state.examEdit=true;render();}
  else if(a==="exam-done"){state.examEdit=false;render();}
  else if(a==="exam-del"){store.set("exams",exams().filter(e=>e.id!==id));haptic();toast("Partiel supprimé");render();}
- else if(a==="stage-new"){if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Toucher à nouveau pour effacer les infos";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent="Préparer un nouveau stage";}},4000);return;}
-  try{localStorage.removeItem("ifsi_stage");localStorage.removeItem("ifsi_check")}catch(e){}haptic("MEDIUM");toast("Prêt pour le prochain stage");render();}
+ else if(a==="stage-new"){if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Toucher à nouveau pour tout effacer";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent="Préparer un nouveau stage";}},4000);return;}
+  try{["stage","check","carnet"].forEach(x=>localStorage.removeItem("ifsi_"+x))}catch(e){}haptic("MEDIUM");toast("Prêt pour le prochain stage");render();}
  else if(a==="reset"){const t=b.querySelector(".t");
   if(!b.dataset.armed){b.dataset.armed="1";t.textContent="Toucher à nouveau pour tout effacer";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;t.textContent="Réinitialiser ma progression";}},4000);return;}
   ["reviewed","studied","stats","wrong","favs","check","last"].forEach(x=>{try{localStorage.removeItem("ifsi_"+x)}catch(e){}});haptic("MEDIUM");toast("Progression réinitialisée");render();}
 });
 app.addEventListener("change",ev=>{
- const t=ev.target;if(t.dataset.sf){saveStageField(t);return;}if(t.dataset.act!=="check")return;
+ const t=ev.target;if(t.dataset.sf){saveStageField(t);return;}if(t.dataset.cn){carnetInput(t);return;}if(t.dataset.act!=="check")return;
  let d=store.get("check",[]);const i=+t.dataset.i;
  d=t.checked?[...new Set([...d,i])]:d.filter(x=>x!==i);store.set("check",d);haptic();render();
 });
