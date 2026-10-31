@@ -42,7 +42,7 @@ PA(
  r:"Un AVC qui s'est arrêté tout seul : signes qui disparaissent en quelques minutes. Urgence quand même : risque d'AVC majeur dans les 48 h.",
  z:["cerveau","vaisseaux"],f:["avc","antiagregants"]},
 
-{i:"epilepsie-n",s:"neuro",n:"Épilepsie",zq:0,
+{i:"epilepsie-n",s:"neuro",n:"Épilepsie",nn:["Épilepsie de l'enfant"],zq:0,
  d:"Maladie chronique caractérisée par la **répétition de crises épileptiques spontanées** (au moins 2 crises non provoquées, à plus de 24 h d'intervalle).",
  m:"Une crise épileptique est une **décharge électrique anormale, excessive et synchrone** d'un groupe de neurones, comme un court-circuit.\nSi la décharge touche tout le cerveau d'emblée, la crise est **généralisée** (perte de connaissance avec convulsions, ou absence). Si elle part d'une zone précise, la crise est **focale** : ses signes dépendent de la zone (secousses d'un bras, sensations, gestes automatiques) et elle peut ensuite se généraliser.\nL'épilepsie peut être génétique ou être la cicatrice d'une lésion du cerveau (AVC, traumatisme, tumeur, infection).",
  a:"Un orage électrique dans le cerveau : un petit groupe de neurones s'emballe et entraîne les autres.",
@@ -182,7 +182,7 @@ PA(
  r:"Maladie héréditaire dominante (1 risque sur 2) : chorée, troubles psychiatriques, démence. Nutrition enrichie et surveillance du risque suicidaire.",
  z:["cerveau","frontal","ventricules"],f:["deglutition","suicide"]},
 
-{i:"meningite-bact",s:"neuro",n:"Méningite bactérienne",
+{i:"meningite-bact",s:"neuro",n:"Méningite bactérienne",nn:["Méningite de l'enfant"],
  d:"**Infection bactérienne des méninges** (enveloppes du cerveau et de la moelle) et du liquide céphalorachidien. **Urgence vitale absolue.**",
  m:"Des bactéries passent dans le sang (ou viennent d'une otite, d'une sinusite) et franchissent la barrière qui protège le cerveau. Elles se multiplient dans le liquide céphalorachidien (LCR), qui baigne le cerveau.\nLes méninges s'enflamment : la nuque devient raide et la tête fait très mal. L'inflammation fait gonfler le cerveau (hypertension intracrânienne) et peut abîmer les vaisseaux.\nLe **méningocoque** peut en plus provoquer une infection généralisée foudroyante avec taches violacées : le **purpura fulminans**, qui peut tuer en quelques heures.",
  a:"Une infection du « liquide de refroidissement » du cerveau : elle se propage partout autour de lui en très peu de temps.",
@@ -294,7 +294,7 @@ PA(
  r:"Pression qui monte dans une boîte rigide : céphalées matinales, vomissements en jet, troubles visuels. Tête à 30°. HTA + bradycardie + pupille dilatée = engagement imminent.",
  z:["cerveau","ventricules","frontal","parietal"],f:["tc","glasgow"]},
 
-{i:"tumeur-cerebrale",s:"neuro",n:"Tumeur cérébrale",zq:0,
+{i:"tumeur-cerebrale",s:"neuro",n:"Tumeur cérébrale",nn:["Cancer du cerveau"],zq:0,
  d:"Prolifération anormale de cellules dans la boîte crânienne : tumeur **primitive** (née du cerveau ou des méninges : gliome, méningiome) ou **secondaire** (métastase d'un autre cancer, la plus fréquente chez l'adulte).",
  m:"Une tumeur grossit dans un espace qui ne peut pas s'agrandir : elle comprime le cerveau autour d'elle et provoque un œdème.\nElle donne trois grands types de signes : une **hypertension intracrânienne** (céphalées, vomissements), des **crises d'épilepsie** (irritation du cortex) et des **signes de localisation** qui dépendent de la zone (paralysie, trouble du langage, changement de comportement si le lobe frontal est atteint).\nLes métastases viennent surtout des cancers du poumon, du sein, du rein, du côlon et du mélanome.",
  a:"Un invité qui prend de plus en plus de place dans une pièce déjà pleine.",
@@ -308,7 +308,7 @@ PA(
  r:"Tumeur primitive ou métastase : céphalées, crises d'épilepsie, déficit progressif. IRM puis biopsie. Corticoïdes contre l'œdème.",
  z:["cerveau","frontal","temporal"],f:["cancer","corticoides","antiepileptiques"]},
 
-{i:"tumeur-medullaire",s:"neuro",n:"Tumeur médullaire",
+{i:"tumeur-medullaire",s:"neuro",n:"Tumeur médullaire",nn:["Compression médullaire"],
  d:"Tumeur développée dans le **canal rachidien**, qui comprime la **moelle épinière** ou ses racines. Le plus souvent une **métastase** vertébrale.",
  m:"La moelle épinière est un câble nerveux protégé par les vertèbres. Une tumeur dans la vertèbre ou autour de la moelle la comprime progressivement.\nD'abord, la douleur : dans le dos et en ceinture (irritation des racines). Puis les messages ne passent plus sous le niveau de la compression : faiblesse des jambes, perte de sensibilité, troubles urinaires.\nLa **compression médullaire** est une urgence : si elle dure plus de 24 à 48 h, la perte de la marche peut devenir définitive.",
  a:"Un câble électrique pincé dans une gaine : tout ce qui est branché après lui s'éteint.",

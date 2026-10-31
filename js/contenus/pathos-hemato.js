@@ -224,7 +224,7 @@ PA(
  r:"Trop de plaquettes : le plus souvent une réaction (fer, inflammation). Sinon maladie de la moelle avec risque de thrombose : aspirine.",
  z:["sang","plaquettes","moelle"],f:["sang-c"]},
 
-{i:"neutropenie",s:"hemato",n:"Neutropénie",
+{i:"neutropenie",s:"hemato",n:"Neutropénie",nn:["Neutropénie fébrile"],
  d:"**Polynucléaires neutrophiles trop bas** (< 1,5 G/L). Sous 0,5 G/L (agranulocytose), le risque d'infection grave est majeur.",
  m:"Les neutrophiles sont la **première ligne de défense** contre les bactéries et les champignons. Sans eux, une infection banale peut devenir un sepsis en quelques heures.\nComme ce sont eux qui fabriquent le pus et l'inflammation, les signes habituels d'infection peuvent **manquer** : la **fièvre** est souvent le seul signe d'alerte.\nLa cause la plus fréquente à l'hôpital est la **chimiothérapie** (creux entre le 7e et le 14e jour).",
  a:"Une ville sans pompiers : le moindre départ de feu peut tout embraser.",

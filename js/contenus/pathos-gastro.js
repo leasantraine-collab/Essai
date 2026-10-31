@@ -126,7 +126,7 @@ PA(
  r:"Diarrhée de plus de 4 semaines : toujours chercher une cause (intestin irritable, MICI, maladie cœliaque, pancréas, médicaments). Sang, amaigrissement ou réveils nocturnes = organique.",
  z:["digestif","grele","colon"],f:["ugd-mici","denutrition"]},
 
-{i:"constipation",s:"gastro",n:"Constipation chronique",
+{i:"constipation",s:"gastro",n:"Constipation chronique",nn:["Constipation"],
  d:"**Selles trop rares** (moins de 3 par semaine) et/ou **difficiles à évacuer** (efforts, selles dures, sensation d'évacuation incomplète), depuis plus de 6 mois.",
  m:"Deux mécanismes. Soit le **transit est lent** : les selles restent longtemps dans le côlon, qui en absorbe l'eau, et elles durcissent. Soit l'**évacuation est difficile** : le rectum et l'anus ne se coordonnent pas bien pour expulser (dyschésie).\nLes causes s'additionnent souvent : alimentation pauvre en fibres, manque d'eau, immobilité, médicaments (surtout les **opioïdes**), et besoin d'aller aux toilettes qu'on retient.\nUne constipation **récente après 50 ans** doit faire rechercher un cancer colorectal.",
  a:"Une rivière qui coule trop lentement : la boue se dépose et durcit.",
@@ -602,7 +602,7 @@ PA(
  r:"Le gluten détruit les villosités de l'intestin : diarrhée, cassure de croissance chez l'enfant, anémie et fatigue chez l'adulte. Anticorps avant d'arrêter le gluten, biopsies, régime sans gluten à vie.",
  z:["digestif","grele"],f:["alimentation","denutrition"]},
 
-{i:"dysphagie",s:"gastro",n:"Dysphagie",zq:0,
+{i:"dysphagie",s:"gastro",n:"Dysphagie",nn:["Troubles de la déglutition","Dysphagie neurologique"],zq:0,
  d:"**Gêne ou blocage lors de la déglutition**, au passage des aliments de la bouche vers l'estomac. Haute (oropharyngée) ou basse (œsophagienne).",
  m:"Avaler est un geste complexe : la langue propulse la bouchée, le larynx se ferme pour protéger les voies respiratoires, puis l'œsophage fait progresser l'aliment par des contractions.\nSi la **commande nerveuse** est atteinte (AVC, Parkinson, SLA, démence), la bouchée part mal : toux, **fausses routes** vers les poumons. C'est la dysphagie **haute**.\nSi l'**œsophage** est rétréci (cancer, sténose) ou ne se contracte plus normalement, les aliments **bloquent** derrière le sternum. C'est la dysphagie **basse**. Une dysphagie progressive avec amaigrissement doit faire penser à un cancer.",
  a:"Un toboggan dont l'entrée est mal gardée (dysphagie haute) ou dont la pente est obstruée (dysphagie basse).",

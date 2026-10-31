@@ -1,6 +1,6 @@
 /* Carnet IFSI — pathologies : Pneumologie (31). */
 PA(
-{i:"asthme",s:"pneumo",n:"Asthme",
+{i:"asthme",s:"pneumo",n:"Asthme",nn:["Asthme de l'enfant"],
  d:"Maladie **inflammatoire chronique des bronches** qui donne des **crises de rétrécissement des bronches**, réversibles spontanément ou sous traitement.",
  m:"Les bronches sont en permanence un peu enflammées et **hyperréactives** : elles réagissent de façon excessive à des déclencheurs (allergènes, virus, froid, effort, fumée).\nPendant la crise, trois phénomènes rétrécissent les bronches : le **muscle** autour des bronches se contracte (bronchospasme), la **muqueuse** gonfle (œdème) et du **mucus** épais est sécrété. L'air entre encore, mais il a du mal à **sortir** : l'expiration devient longue et sifflante.\nLe traitement de fond agit sur l'inflammation (corticoïdes inhalés) ; le traitement de crise relâche le muscle (bronchodilatateurs).",
  a:"Respirer à travers une paille de plus en plus fine : l'air entre encore, mais il faut forcer pour le faire sortir.",
@@ -70,7 +70,7 @@ PA(
  r:"Toux et crachats tous les jours, au moins 3 mois par an pendant 2 ans. Le tabac en est la cause : l'arrêter peut faire disparaître la toux.",
  z:["poumons","bronches"],f:["bpco"]},
 
-{i:"pneumonie-com",s:"pneumo",n:"Pneumonie communautaire",
+{i:"pneumonie-com",s:"pneumo",n:"Pneumonie communautaire",nn:["Pneumonie pédiatrique"],
  d:"**Infection aiguë des alvéoles** acquise **en dehors de l'hôpital**. Germe principal : le **pneumocoque**.",
  m:"Des germes inhalés atteignent les alvéoles et s'y multiplient. Les défenses réagissent : les alvéoles se remplissent de pus et de liquide inflammatoire.\nLa zone atteinte (souvent un lobe entier) ne participe plus aux échanges : l'oxygène baisse, le patient respire vite. À la radio, cette zone apparaît blanche (« foyer »).\nChez la personne âgée, la pneumonie peut se cacher derrière une **confusion**, une chute ou une altération de l'état général, parfois **sans fièvre**.",
  a:"Une partie de l'éponge pulmonaire qui se remplit de pus : elle ne peut plus absorber d'air.",
@@ -140,7 +140,7 @@ PA(
  r:"Bacille de Koch transmis par l'air : toux, fièvre le soir, sueurs la nuit, amaigrissement. Précautions air (FFP2). 6 mois de traitement sans interruption, le matin à jeun.",
  z:["poumons","poumons"],f:["tuberculose","precautions","antibio"]},
 
-{i:"cancer-bp",s:"pneumo",n:"Cancer bronchopulmonaire",
+{i:"cancer-bp",s:"pneumo",n:"Cancer bronchopulmonaire",nn:["Cancer du poumon"],
  d:"**Tumeur maligne** née des cellules des bronches ou du poumon. **1re cause de décès par cancer** en France, lié au **tabac** dans 85 % des cas.",
  m:"Les substances cancérigènes du tabac abîment l'ADN des cellules des bronches. Après des années, une cellule se met à se multiplier sans contrôle et forme une tumeur.\nLa tumeur peut boucher une bronche (infections, atélectasie), saigner (crachats de sang), envahir la plèvre, les nerfs, les vaisseaux du médiastin, et envoyer des **métastases** (cerveau, os, foie, surrénales).\nDeux grandes familles : les cancers **non à petites cellules** (85 %, adénocarcinome, épidermoïde) et les cancers **à petites cellules** (15 %, très agressifs, très liés au tabac).",
  a:"Une erreur de copie qui se répète à l'infini dans une imprimante : les pages fausses envahissent tout.",
@@ -196,7 +196,7 @@ PA(
  r:"Sang dans la plèvre après un traumatisme : poumon comprimé + perte de sang. Drainage, transfusion, chirurgie si saignement massif. Surveiller le volume drainé.",
  z:["poumons","plevre","vaisseaux"],f:["drains","transfusion","urgence-c"]},
 
-{i:"ira-resp",zq:0,s:"pneumo",n:"Insuffisance respiratoire aiguë",
+{i:"ira-resp",zq:0,s:"pneumo",n:"Insuffisance respiratoire aiguë",nn:["Détresse respiratoire aiguë"],
  d:"**Défaillance brutale** de la respiration, qui n'assure plus des échanges gazeux suffisants : **hypoxémie** (PaO2 < 60 mmHg, SpO2 < 90 %) ± **hypercapnie** (PaCO2 > 45 mmHg).",
  m:"Deux grands mécanismes. Soit les **poumons n'échangent plus** (alvéoles inondées ou infectées, vaisseaux bouchés) : l'oxygène baisse.\nSoit la **pompe respiratoire** est défaillante (muscles épuisés, BPCO, sédation, coma, maladie neuromusculaire) : le patient ne ventile plus assez, le CO2 s'accumule (hypercapnie) et le sang devient acide.\nAu début, le corps compense en respirant plus vite. Quand la respiration **ralentit** chez un patient en détresse, ce n'est pas une amélioration : c'est l'**épuisement**.",
  a:"Un échangeur bouché (les poumons) ou un soufflet qui n'a plus la force de pomper (les muscles).",
@@ -392,7 +392,7 @@ PA(
  r:"Toux en quintes avec chant du coq, qui dure des semaines. Mortelle pour le nourrisson (apnées). Macrolide, précautions gouttelettes, vaccination de la femme enceinte et de l'entourage.",
  z:["poumons","trachee","bronches"],f:["vaccins","pediatrie-c","precautions"]},
 
-{i:"laryngite",s:"pneumo",n:"Laryngite",
+{i:"laryngite",s:"pneumo",n:"Laryngite",nn:["Laryngite aiguë"],
  d:"**Inflammation aiguë du larynx**, le plus souvent virale. Chez l'enfant de 6 mois à 3 ans : **laryngite sous-glottique** avec toux aboyante et gêne à l'inspiration. Chez l'adulte : voix enrouée.",
  m:"Un virus provoque un **œdème** de la muqueuse juste sous les cordes vocales. Chez le petit enfant, c'est déjà la partie la plus étroite des voies aériennes : quelques millimètres d'œdème suffisent à la rétrécir beaucoup.\nL'air passe mal **à l'inspiration** : on entend un bruit aigu (stridor) et l'enfant a une **toux rauque « aboyante »**, souvent la nuit.\nÀ distinguer de l'**épiglottite** (bactérienne, rare depuis la vaccination) : enfant fébrile, assis penché en avant, qui bave et ne peut plus avaler → urgence absolue.",
  a:"Une porte d'entrée déjà étroite dont le chambranle gonfle : il devient très difficile d'entrer.",
@@ -420,7 +420,7 @@ PA(
  r:"Liquide dans la plèvre : transsudat (insuffisance cardiaque, protéines basses) ou exsudat (infection, cancer). Ponction pour comprendre ; pas plus de 1 à 1,5 L évacués d'un coup.",
  z:["poumons","plevre"],f:["assist-examens","drains"]},
 
-{i:"atelectasie",s:"pneumo",n:"Atélectasie",
+{i:"atelectasie",s:"pneumo",n:"Atélectasie",nn:["Atélectasie postopératoire"],
  d:"**Affaissement d'une partie du poumon** (alvéoles qui ne contiennent plus d'air), par **obstruction d'une bronche** ou compression du poumon. Fréquente après une chirurgie.",
  m:"Si une bronche est bouchée (bouchon de mucus, corps étranger, tumeur), l'air situé en aval est peu à peu absorbé par le sang : les alvéoles se vident et s'affaissent.\nAprès une opération, la douleur, les morphiniques et l'alitement font **respirer superficiellement** : les bases des poumons ne se gonflent plus et s'affaissent (atélectasie postopératoire, souvent avec une petite fièvre à J1-J2).\nLa zone affaissée reçoit toujours du sang mais plus d'air : l'oxygène baisse. Non traitée, elle peut s'infecter (pneumonie).",
  a:"Un ballon de baudruche dont on a bouché l'embout : l'air qu'il contenait s'échappe peu à peu à travers la paroi et il se dégonfle.",

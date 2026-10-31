@@ -224,7 +224,7 @@ PA(
  r:"Sang dans les urines sans douleur chez un fumeur = cancer de la vessie jusqu'à preuve du contraire. Cystoscopie, résection, instillations ; cystectomie si infiltrant.",
  z:["rein","vessie"],f:["cancer","stomie","sondage"]},
 
-{i:"rau",s:"nephro",n:"Rétention aiguë d'urine",
+{i:"rau",s:"nephro",n:"Rétention aiguë d'urine",nn:["Rétention aiguë d'urine postopératoire"],
  d:"**Impossibilité totale et brutale d'uriner** malgré une vessie pleine (**globe vésical**), le plus souvent douloureuse.",
  m:"L'urine est fabriquée normalement mais ne peut pas sortir de la vessie : soit un **obstacle** ferme la sortie (prostate surtout), soit la vessie **ne se contracte plus** (médicaments, anesthésie, atteinte nerveuse).\nLa vessie se distend : douleur et besoin pressant d'uriner, avec une boule au-dessus du pubis.\nSans drainage, l'urine reflue vers les reins (insuffisance rénale). Chez la personne âgée ou confuse, la rétention peut se manifester seulement par une **agitation**.",
  a:"Un réservoir plein dont le robinet de sortie est bloqué.",
