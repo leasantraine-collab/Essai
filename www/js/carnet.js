@@ -66,11 +66,10 @@ function cnJournal(c){
 }
 function cnSoins(c){
  const S=cnStats(c);
- return `<div class="cn-help"><p>Touchez un compteur à chaque fois que vous réalisez le soin : <b>Observé</b>, <b>Avec aide</b> ou <b>Seul·e</b>. Vous voyez ainsi votre progression d'un coup d'œil, et vous avez des exemples précis pour vos bilans.</p>
-  <label class="cn-minus"><input type="checkbox" data-act="cn-minus" ${state.cnMinus?"checked":""}> Mode correction : un appui retire 1</label></div>
- <div class="cn-kpi"><span><b>${S.soinsSeul}</b>soins réalisés seul·e</span><span><b>${S.actes}</b>actes notés</span></div>
+ return `<div class="cn-help"><p>À chaque fois que vous réalisez un soin, touchez <b>+</b> sous <b>Observé</b>, <b>Avec aide</b> ou <b>Seul·e</b>. Le <b>−</b> corrige une erreur. Vous voyez ainsi votre progression d'un coup d'œil, et vous avez des exemples précis pour vos bilans.</p></div>
+ <div class="cn-kpi"><span><b data-kpi="soinsSeul">${S.soinsSeul}</b>soins réalisés seul·e</span><span><b data-kpi="actes">${S.actes}</b>actes notés</span></div>
  ${cnAllSoins(c).map(([g,items])=>`<section class="stack-sm"><h3 class="cn-g">${esc(g)}</h3><div class="list">${items.map(n=>{const k=cnHash(n),v=c.soins[k]||{};
-   return `<div class="cn-soin ${v.seul?"acq":""}"><span class="t">${esc(n)}</span><span class="cn-cnt">${[["obs","Observé"],["aide","Avec aide"],["seul","Seul·e"]].map(([f,l])=>`<button data-act="cn-count" data-k="${k}" data-f="${f}" aria-label="${esc(n)} : ${l}, ${v[f]||0} fois"><b>${v[f]||0}</b><small>${l}</small></button>`).join("")}</span></div>`}).join("")}</div></section>`).join("")}
+   return `<div class="cn-soin ${v.seul?"acq":""}"><span class="t">${esc(n)}</span><span class="cn-cnt">${[["obs","Observé"],["aide","Avec aide"],["seul","Seul·e"]].map(([f,l])=>`<span class="cn-step" data-f="${f}"><small>${l}</small><span class="cn-ctl"><button data-act="cn-count" data-k="${k}" data-f="${f}" data-d="-1" aria-label="${esc(n)} : retirer 1 à ${l}" ${v[f]?"":"disabled"}>−</button><b aria-live="polite">${v[f]||0}</b><button data-act="cn-count" data-k="${k}" data-f="${f}" data-d="1" aria-label="${esc(n)} : ajouter 1 à ${l}">+</button></span></span>`).join("")}</span></div>`}).join("")}</div></section>`).join("")}
  <form id="cn-soin-form" class="cd-form cn-inline"><label for="cn-soin-new">Ajouter un soin propre à ce service<input id="cn-soin-new" maxlength="80" placeholder="Ex. Soins de trachéotomie" autocomplete="off"></label><button class="btn" type="submit">${IC.plus}Ajouter</button></form>`;
 }
 function cnObjectifsSec(c){
@@ -158,7 +157,7 @@ function vCarnet(arg){
  return `<div class="stack-lg">${backBtn("Stages")}
   ${vh("Stage","Carnet de suivi de stage",st.service?esc(st.service)+(st.debut?" · du "+esc(fmtShort(at(st.debut,"12:00")))+(st.fin?" au "+esc(fmtShort(at(st.fin,"12:00"))):""):""):"Renseignez le service et les dates dans les infos du stage.")}
   ${cnLieuCard()}
-  <div class="cn-kpi cn-top"><span><b>${S.jours}</b>jours notés</span><span><b>${S.soinsSeul}</b>soins seul·e</span><span><b>${S.atteints}/${S.objs}</b>objectifs</span><span><b>${Math.floor(S.minutes/60)} h</b>de stage</span></div>
+  <div class="cn-kpi cn-top"><span><b>${S.jours}</b>jours notés</span><span><b data-kpi="soinsSeul">${S.soinsSeul}</b>soins seul·e</span><span><b>${S.atteints}/${S.objs}</b>objectifs</span><span><b>${Math.floor(S.minutes/60)} h</b>de stage</span></div>
   <div class="chips cn-tabs" role="tablist" aria-label="Sections du carnet">${CN_SECS.map(([k,l])=>`<button class="chip" role="tab" data-act="cn-sec" data-k="${k}" aria-pressed="${k===sec}">${l}</button>`).join("")}</div>
   <div class="section-title"><h2>${CN_SECS.find(s=>s[0]===sec)[1]}</h2>${sec!=="imprimer"?`<span class="muted" id="cn-saved">Enregistré sur cet appareil</span>`:""}</div>
   <div class="stack">${body}</div>
@@ -179,9 +178,9 @@ function carnetAct(b,a){
   setTimeout(()=>{const el=document.querySelector(`[data-cn^="${k}|${it.id}"]`);el&&el.scrollIntoView({block:"center"});},50);return;}
  if(a==="cn-del"){if(!b.dataset.armed){b.dataset.armed="1";const t=b.innerHTML;b.textContent="Toucher à nouveau pour supprimer";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.innerHTML=t;}},3500);return;}
   c[k]=c[k].filter(x=>x.id!==id);saveCarnet(c);haptic("MEDIUM");toast("Supprimé");render();return;}
- if(a==="cn-count"){const f=b.dataset.f,v=c.soins[k]||{obs:0,aide:0,seul:0};v[f]=Math.max(0,(v[f]||0)+(state.cnMinus?-1:1));c.soins[k]=v;saveCarnet(c);haptic();
-  b.querySelector("b").textContent=v[f];b.closest(".cn-soin").classList.toggle("acq",v.seul>0);return;}
- if(a==="cn-minus"){state.cnMinus=b.checked;return;}
+ if(a==="cn-count"){const f=b.dataset.f,v=c.soins[k]||{obs:0,aide:0,seul:0};v[f]=Math.max(0,(v[f]||0)+(+b.dataset.d||1));c.soins[k]=v;saveCarnet(c);haptic();
+  const st=b.closest(".cn-step");st.querySelector("b").textContent=v[f];st.querySelector('[data-d="-1"]').disabled=!v[f];b.closest(".cn-soin").classList.toggle("acq",v.seul>0);
+  const S=cnStats(c);document.querySelectorAll("[data-kpi]").forEach(el=>{if(S[el.dataset.kpi]!=null)el.textContent=S[el.dataset.kpi];});return;}
  if(a==="cn-statut"){c.obj[k]=c.obj[k]||{};c.obj[k].statut=b.dataset.f;saveCarnet(c);haptic();if(b.dataset.f==="ok")toast("Objectif atteint, bravo");render();return;}
  if(a==="cn-qdone"){const q=c.questions.find(x=>x.id===id);if(q){q.done=b.checked;saveCarnet(c);const l=b.parentNode.querySelector("label");l&&l.classList.toggle("done",q.done);}return;}
  if(a==="cn-print"){cnPrint(k);return;}
