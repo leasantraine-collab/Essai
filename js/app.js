@@ -40,7 +40,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.15 · 31 octobre 2026";
+const APP_VERSION="1.16 · 31 octobre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -77,7 +77,7 @@ applyTheme();
 
 /* ---------- Routage ---------- */
 const ROOTS=["accueil","reviser","entrainer","stages","programme"];
-const PARENT={feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const PARENT={patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 function route(){const [v,...rest]=decodeURIComponent(location.hash.slice(1)).split("/");return {v:VIEWS[v]?v:"accueil",arg:rest.join("/")};}
 function nav(h){if(location.hash==="#"+h)render(true);else location.hash=h;}
 let depth=0;
@@ -197,6 +197,7 @@ function vReviser(arg){
  const nDone=isF?reviewed().filter(id=>FICHES.some(f=>f.id===id)).length:studied().filter(id=>FULL_COURS.some(c=>c.id===id)).length;
  return `<div class="stack-lg">${vh("Réviser",isF?"Fiches récap":"Cours détaillés",isF?`L'essentiel en une page, à relire avant un partiel ou le matin d'un stage. ${nDone} / ${FICHES.length} révisées.`:`Comprendre, pas seulement retenir. ${nDone} / ${FULL_COURS.length} cours étudiés.`,
    `<button class="icon-btn" data-act="nav" data-h="recherche" aria-label="Rechercher">${IC.search}</button>`)}
+  ${pxCard()}
   <div class="seg" role="group" aria-label="Type de contenu"><button data-act="rev" data-k="fiches" aria-pressed="${isF}">Fiches · ${FICHES.length}</button><button data-act="rev" data-k="cours" aria-pressed="${!isF}">Cours · ${FULL_COURS.length}</button></div>
   <div class="chips" role="group" aria-label="Filtrer">
    <button class="chip" data-act="fav-only" aria-pressed="${state.favOnly}">★ Favoris</button>
@@ -253,7 +254,8 @@ function vQuizHome(){
    <div class="chips wrapchips" role="group" aria-label="Catégorie du quiz">
     <button class="chip" data-act="quiz-cat" data-k="all" aria-pressed="${state.quizCat==="all"}">Tout mélanger</button>
     ${present.map(c=>`<button class="chip" style="--c:${c.c}" data-act="quiz-cat" data-k="${c.id}" aria-pressed="${state.quizCat===c.id}"><i></i>${esc(c.nom)}</button>`).join("")}</div>
-   <button class="btn block" data-act="quiz-start">${IC.play}Commencer · ${plural(n,"question")}</button></section>`;
+   <button class="btn block" data-act="quiz-start">${IC.play}Commencer · ${plural(n,"question")}</button></section>
+  ${pxQuizBlock()}`;
 }
 function vQuizRun(){
  const z=state.quiz;
@@ -287,12 +289,13 @@ function vCalc(){
   <p class="disclaimer">En pratique, un calcul de dose se fait toujours en double vérification.</p>`;
 }
 function vEntrainer(arg){
- if(arg==="quiz"||arg==="calculs")state.train=arg;
+ if(arg==="quiz"||arg==="calculs"||arg==="schemas")state.train=arg;
  if(state.train==="quiz"&&state.quiz)return vQuizRun();
- const isQ=state.train==="quiz";
- return `<div class="stack-lg">${vh("S'entraîner",isQ?"Quiz":"Calculs de dose",isQ?`${QUIZ.length} questions, chaque réponse est expliquée.`:"Un nouvel énoncé à chaque fois, avec la correction détaillée.")}
-  <div class="seg" role="group" aria-label="Type d'entraînement"><button data-act="train" data-k="quiz" aria-pressed="${isQ}">Quiz</button><button data-act="train" data-k="calculs" aria-pressed="${!isQ}">Calculs</button></div>
-  ${isQ?vQuizHome():vCalc()}</div>`;
+ const T=state.train==="schemas"?"schemas":state.train==="quiz"?"quiz":"calculs";
+ const H={quiz:["Quiz",`${QUIZ.length} questions, chaque réponse est expliquée.`],calculs:["Calculs de dose","Un nouvel énoncé à chaque fois, avec la correction détaillée."],schemas:["Schémas à compléter","Placez les structures sur les schémas et remettez les étapes dans l'ordre."]}[T];
+ return `<div class="stack-lg">${vh("S'entraîner",H[0],H[1])}
+  <div class="seg three" role="group" aria-label="Type d'entraînement"><button data-act="train" data-k="quiz" aria-pressed="${T==="quiz"}">Quiz</button><button data-act="train" data-k="calculs" aria-pressed="${T==="calculs"}">Calculs</button><button data-act="train" data-k="schemas" aria-pressed="${T==="schemas"}">Schémas</button></div>
+  ${T==="quiz"?vQuizHome():T==="schemas"?vSchemas():vCalc()}</div>`;
 }
 
 /* ---------- Stages ---------- */
@@ -362,7 +365,7 @@ const plain=h=>String(h).replace(/<[^>]+>/g," ").replace(/\*\*|==/g,"").replace(
 let IDX=null;
 function textOf(v){if(v==null)return "";if(typeof v==="string")return v;if(Array.isArray(v))return v.map(textOf).join(" ");if(typeof v==="object")return Object.entries(v).filter(([k])=>!["t","k","tone","ico","n","one","two","light","wave","blue"].includes(k)).map(([,x])=>textOf(x)).join(" ");return "";}
 function buildIdx(){
- IDX=[...FICHES.map(f=>({t:"f",it:f,txt:plain(f.body||textOf(f.pages))})),...COURS.filter(c=>!c.pro).map(c=>({t:"c",it:c,txt:plain(c.chap?textOf(c.chap)+" "+textOf(c.ess):textOf(c.sections))}))];
+ IDX=[...pxIdx(),...FICHES.map(f=>({t:"f",it:f,txt:plain(f.body||textOf(f.pages))})),...COURS.filter(c=>!c.pro).map(c=>({t:"c",it:c,txt:plain(c.chap?textOf(c.chap)+" "+textOf(c.ess):textOf(c.sections))}))];
  IDX.forEach(e=>{e.ft=fold(e.it.titre);e.fm=fold(e.it.theme||"")+" "+fold(CAT[e.it.cat].nom);e.fx=fold(e.txt);});
 }
 function hl(s,q){const f=fold(s),i=f.indexOf(q);if(i<0)return esc(s);return esc(s.slice(0,i))+`<mark class="hl">${esc(s.slice(i,i+q.length))}</mark>`+esc(s.slice(i+q.length));}
@@ -373,9 +376,9 @@ function results(raw){
  r.sort((a,b)=>b.sc-a.sc);
  if(!r.length)return `<div class="empty">Aucun résultat pour « ${esc(raw)} ».</div>`;
  return `<p class="muted">${plural(r.length,"résultat")}</p><div class="list">${r.slice(0,60).map(({e})=>{
-  let snip=esc(e.t==="f"?e.it.theme:"Cours · "+CAT[e.it.cat].nom);
+  let snip=esc(e.t==="f"?e.it.theme:e.t==="p"?"Pathologie · "+e.it.theme:"Cours · "+CAT[e.it.cat].nom);
   if(!e.ft.includes(q)){const i=e.fx.indexOf(q);if(i>=0){const a=Math.max(0,i-40),s=e.txt.slice(a,i+q.length+60);snip=(a?"…":"")+hl(s,q)+"…";}}
-  return `<a class="li" href="#${e.t==="f"?"fiche":"cours"}/${e.it.id}" style="--c:${CAT[e.it.cat].c}"><span class="bar"></span><span><span class="t">${hl(e.it.titre,q)}</span><span class="s">${snip}</span></span>${chev}</a>`}).join("")}</div>`;
+  return `<a class="li" href="#${e.t==="f"?"fiche":e.t==="p"?"patho":"cours"}/${e.it.id}" style="--c:${CAT[e.it.cat].c}"><span class="bar"></span><span><span class="t">${hl(e.it.titre,q)}</span><span class="s">${snip}</span></span>${chev}</a>`}).join("")}</div>`;
 }
 function vRecherche(){
  return `<div class="stack">${backBtn("Retour")}<div class="search-bar"><label class="search-field">${IC.search}<input id="q" type="search" enterkeyhint="search" placeholder="Rechercher dans ${FICHES.length+FULL_COURS.length} contenus" value="${esc(state.q)}" autocomplete="off" aria-label="Rechercher"></label></div>
@@ -403,8 +406,8 @@ function vReglages(){
 }
 
 /* ---------- Rendu ---------- */
-const VIEWS={feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
-const TAB={feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const VIEWS={pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
+const TAB={pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 let lastKey=null;
 function render(top){
  const r=route(),key=r.v+"/"+r.arg;
@@ -440,16 +443,18 @@ function saveStageField(t){const s=stageInfo();s[t.dataset.sf]=t.value;store.set
 app.addEventListener("input",ev=>{const t=ev.target;if(t.id==="q"){state.q=t.value;document.getElementById("res").innerHTML=results(state.q)||"";}
  else if(t.dataset.sf)saveStageField(t);
  else if(t.dataset.cn)carnetInput(t);
- else if(t.dataset.fs)feuilleInput(t);});
+ else if(t.dataset.fs)feuilleInput(t);
+ else pathoInput(t);});
 app.addEventListener("click",ev=>{
  const b=ev.target.closest("[data-act]");if(!b)return;
  const a=b.dataset.act,k=b.dataset.k,id=b.dataset.id;
  if(a.startsWith("cn-")){carnetAct(b,a);return;}
  if(a.startsWith("fs-")){feuilleAct(b,a);return;}
+ if(a.startsWith("px-")){pathoAct(b,a);return;}
  if(a==="nav"){nav(b.dataset.h);}
  else if(a==="back"||a==="fiche-back"||a==="cours-back"){goBack();}
  else if(a==="go-cat"){ev.preventDefault();
-  if(k==="stage")nav("stages");else if(k==="calcul")nav("entrainer/calculs");else if(k==="quiz")nav("entrainer/quiz");
+  if(k==="stage")nav("stages");else if(k==="patho")nav("pathos");else if(k==="calcul")nav("entrainer/calculs");else if(k==="quiz")nav("entrainer/quiz");
   else if(k==="calcul-fiches"){state.filter="calcul";state.favOnly=false;nav("reviser/fiches");}
   else{state.filter=k;state.favOnly=false;nav("reviser/"+(FICHES.some(f=>f.cat===k)?"fiches":"cours"));}}
  else if(a==="rev"){state.rev=k;store.set("rev",k);location.replace("#reviser/"+k);}
@@ -497,10 +502,10 @@ app.addEventListener("click",ev=>{
   try{["stage","check","carnet"].forEach(x=>localStorage.removeItem("ifsi_"+x))}catch(e){}haptic("MEDIUM");toast("Prêt pour le prochain stage");render();}
  else if(a==="reset"){const t=b.querySelector(".t");
   if(!b.dataset.armed){b.dataset.armed="1";t.textContent="Toucher à nouveau pour tout effacer";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;t.textContent="Réinitialiser ma progression";}},4000);return;}
-  ["reviewed","studied","stats","wrong","favs","check","last"].forEach(x=>{try{localStorage.removeItem("ifsi_"+x)}catch(e){}});haptic("MEDIUM");toast("Progression réinitialisée");render();}
+  ["reviewed","studied","stats","wrong","favs","check","last","pxdone"].forEach(x=>{try{localStorage.removeItem("ifsi_"+x)}catch(e){}});haptic("MEDIUM");toast("Progression réinitialisée");render();}
 });
 app.addEventListener("change",ev=>{
- const t=ev.target;if(t.id==="restore-file"){if(t.files&&t.files[0])restoreData(t.files[0]);t.value="";return;}if(t.dataset.sf){saveStageField(t);return;}if(t.dataset.cn){carnetInput(t);return;}if(t.dataset.fs){feuilleInput(t);return;}if(t.dataset.act!=="check")return;
+ const t=ev.target;if(t.id==="restore-file"){if(t.files&&t.files[0])restoreData(t.files[0]);t.value="";return;}if(t.dataset.sf){saveStageField(t);return;}if(t.dataset.cn){carnetInput(t);return;}if(t.dataset.fs){feuilleInput(t);return;}if(t.dataset.px!=null){pathoInput(t);return;}if(t.dataset.act!=="check")return;
  let d=store.get("check",[]);const i=+t.dataset.i;
  d=t.checked?[...new Set([...d,i])]:d.filter(x=>x!==i);store.set("check",d);haptic();render();
 });
