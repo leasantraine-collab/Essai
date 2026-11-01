@@ -516,7 +516,8 @@ function cvBlock(s){
   case "exemple": return `<div class="cv-box cv-ex"><span class="cv-lab">${SVG.case}Exemple${s.h?" · "+esc(s.h):""}</span>${s.ps.map(p=>`<p>${md(p)}</p>`).join("")}</div>`;
   case "pieges": return `<div class="cv-box cv-trap"><span class="cv-lab">${SVG.warn}Erreurs fréquentes</span><ul>${s.items.map(i=>`<li>${md(i)}</li>`).join("")}</ul></div>`;
   case "verif": return `<div class="cv-verif"><span class="cv-lab">${SVG.check}Vérifier ses connaissances</span>${s.items.map(([q,a])=>`<details><summary>${md(q)}</summary><p>${md(a)}</p></details>`).join("")}</div>`;
-  case "calc": return `<div class="cv-calc"><span class="cv-lab">${SVG.case}${esc(s.h||"Calcul pas à pas")}</span><p>${md(s.q)}</p><ol>${s.steps.map(x=>`<li>${md(x)}</li>`).join("")}</ol><p class="cv-res">${md(s.r)}</p></div>`;
+  case "map": return amFig(s);
+ case "calc": return `<div class="cv-calc"><span class="cv-lab">${SVG.case}${esc(s.h||"Calcul pas à pas")}</span><p>${md(s.q)}</p><ol>${s.steps.map(x=>`<li>${md(x)}</li>`).join("")}</ol><p class="cv-res">${md(s.r)}</p></div>`;
  }
  return fvBlock(s);
 }
