@@ -462,7 +462,14 @@ button.px-card{border:0;width:100%;text-align:left;font:inherit;cursor:pointer}
 .px-entry{cursor:pointer}
 .px-revlab{display:block;text-transform:uppercase}
 .px-revbar{margin-top:-20px;position:sticky;top:env(safe-area-inset-top,0px);z-index:6;margin-inline:calc(-1 * max(18px,env(safe-area-inset-left,0px)));padding-block:8px;background:color-mix(in srgb,var(--bg) 92%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
-.px-revbar .chips{margin-inline:0;padding-inline:max(18px,env(safe-area-inset-left,0px));padding-bottom:2px}
+.px-sel{position:relative;display:flex;align-items:center;gap:12px;margin-inline:max(18px,env(safe-area-inset-left,0px));padding:13px 16px;border-radius:14px;background:var(--surface);border:1px solid var(--line-2);box-shadow:var(--shadow);cursor:pointer}
+.px-sel .dot{width:12px;height:12px;border-radius:50%;background:var(--c);flex:none}
+.px-sel b{flex:1;min-width:0;font-size:1rem;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.px-sel small{color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums}
+.px-sel svg{width:18px;height:18px;stroke:var(--ink-2);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.px-sel select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:16px;-webkit-appearance:none;appearance:none;border:0}
+.px-sel:focus-within{outline:2px solid var(--brand);outline-offset:2px}
+.px-spedone{font-size:.84rem;align-self:center}
 .px-spehead{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:14px 16px;border-radius:var(--r-sm);background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--c)}
 .px-spehead>div:first-child{flex:1 1 150px;min-width:0}
 .px-spehead b{display:block;font-family:var(--f-display);font-size:1.05rem;line-height:1.25}

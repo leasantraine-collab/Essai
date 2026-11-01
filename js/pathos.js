@@ -23,7 +23,6 @@ function vPathos(arg){
  location.replace("#reviser");return "";
 }
 /* ---------- Réviser › Pathologies : toutes les fiches récap et tous les cours, menu défilant des spécialités ---------- */
-const SPE_COURT={cardio:"Cardio",pneumo:"Pneumo",neuro:"Neuro",gastro:"Gastro",nephro:"Néphro-uro",endoc:"Endocrino",hemato:"Hémato",infectio:"Infectio",rhumato:"Rhumato",dermato:"Dermato",gyneco:"Gynéco-obstétrique",pedia:"Pédiatrie",geria:"Gériatrie",psy:"Psychiatrie",onco:"Onco",ophtalmo:"Ophtalmo",orl:"ORL",chir:"Chirurgie",urg:"Urgences",nutri:"Nutrition",immuno:"Immuno",pallia:"Palliatifs",transv:"Transversal"};
 const pxSpeCur=()=>{const s=state.pxSpe||store.get("pxspe","all");return SPE[s]?s:"all";};
 const pxRevN=()=>PATHOS.length;
 const pxCut=(s,n=96)=>{const t=plainTxt(s);return t.length>n?t.slice(0,n).replace(/\s+\S*$/,"")+"…":t;};
@@ -41,23 +40,20 @@ function pxRevList(isF){
  return h||`<div class="empty">Aucune pathologie ne correspond à « ${esc(state.pxq)} ».</div>`;
 }
 function pxRev(isF){
- const s=pxSpeCur(),S=SPE[s],dn=pxDone();
- const head=S?(()=>{const l=pathosOf(s),nq=pxSpeQ(s).length,ex=PEXOS.filter(e=>e.spe.includes(s)).length,d=l.filter(p=>dn.includes(p.i)).length;
-   return `<div class="px-spehead" style="--c:${S.c}"><div><b>${esc(S.nom)}</b><small>${l.length} pathologies${d?` · ${d} étudiée${d>1?"s":""}`:""}</small></div>
-    <div class="px-spebtns">${nq?`<button class="btn sm" data-act="px-quiz" data-k="${s}">${IC.bolt}Quiz · ${nq}</button>`:""}${ex?`<a class="btn sm ghost" href="#entrainer/schemas">Schémas · ${ex}</a>`:""}</div></div>`;})():"";
+ const s=pxSpeCur(),S=SPE[s],dn=pxDone(),n=S?pathosOf(s).length:PATHOS.length;
+ const tools=S?(()=>{const nq=pxSpeQ(s).length,ex=PEXOS.filter(e=>e.spe.includes(s)).length,d=pathosOf(s).filter(p=>dn.includes(p.i)).length;
+   return nq||ex||d?`<div class="px-spebtns">${nq?`<button class="btn sm" data-act="px-quiz" data-k="${s}">${IC.bolt}Quiz · ${nq}</button>`:""}${ex?`<a class="btn sm ghost" href="#entrainer/schemas">Schémas · ${ex}</a>`:""}${d?`<span class="muted px-spedone">${d} étudiée${d>1?"s":""}</span>`:""}</div>`:"";})():"";
  return `<span class="eyebrow px-revlab" id="px-top">Spécialité</span>
-  <div class="px-revbar" id="px-revbar"><div class="chips" role="group" aria-label="Spécialités">
-   <button class="chip" data-act="px-spe" data-k="all" aria-pressed="${s==="all"}">Toutes · ${PATHOS.length}</button>
-   ${SPES.map(([id,nom,c])=>`<button class="chip" style="--c:${c}" data-act="px-spe" data-k="${id}" aria-pressed="${s===id}"><i></i>${esc(SPE_COURT[id]||nom)} · ${pathosOf(id).length}</button>`).join("")}</div></div>
-  ${head}
+  <div class="px-revbar" id="px-revbar"><label class="px-sel" style="--c:${S?S.c:"var(--brand)"}"><span class="dot"></span><b>${esc(S?S.nom:"Toutes les spécialités")}</b><small>${n}</small><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+   <select id="pxspe" aria-label="Choisir une spécialité"><option value="all"${s==="all"?" selected":""}>Toutes les spécialités (${PATHOS.length})</option>${SPES.map(([id,nom])=>`<option value="${id}"${s===id?" selected":""}>${esc(nom)} (${pathosOf(id).length})</option>`).join("")}</select></label></div>
+  ${tools}
   <label class="search-field">${IC.search}<input id="pxq" type="search" placeholder="Filtrer les pathologies" value="${esc(state.pxq||"")}" autocomplete="off" aria-label="Filtrer les pathologies"></label>
   <div class="stack-lg" id="px-list">${pxRevList(isF)}</div>`;
 }
-/* Après chaque rendu : la spécialité choisie reste visible dans le menu défilant. */
+/* Après chaque rendu : la catégorie choisie reste visible dans la rangée de filtres de Réviser. */
 function pxBind(scroll){
  const ctr=(row,sel)=>{const on=row&&row.querySelector(sel);if(on)row.scrollLeft=on.offsetLeft-row.clientWidth/2+on.clientWidth/2;};
  if(route().v==="reviser")document.querySelectorAll("main .chips").forEach(r=>ctr(r,'[data-act="filter"][aria-pressed="true"]'));
- const bar=document.querySelector("#px-revbar .chips");if(!bar)return;ctr(bar,'[aria-pressed="true"]');
  if(scroll){const a=document.getElementById("px-top");if(a){const y=a.getBoundingClientRect().top+window.scrollY;if(window.scrollY>y)window.scrollTo(0,y);}}
 }
 const plainTxt=h=>String(h||"").replace(/<[^>]+>/g," ").replace(/\*\*|==/g,"").replace(/\s+/g," ").trim();
@@ -303,6 +299,7 @@ function pathoAct(b,a){const k=b.dataset.k;
  if(a==="px-film-reset"){render();return;}
 }
 function pathoInput(t){
+ if(t.id==="pxspe"){if(pxSpeCur()!==t.value){state.pxSpe=t.value;store.set("pxspe",t.value);render();pxBind(true);}return true;}
  if(t.id==="pxq"){state.pxq=t.value;const ol=document.getElementById("px-list");if(ol)ol.innerHTML=pxRevList(state.rev==="fiches");return true;}
  if(t.dataset.px!=null&&state.exoAns){state.exoAns.a[+t.dataset.px]=t.value;return true;}
  if(t.dataset.pf!=null)return true;
