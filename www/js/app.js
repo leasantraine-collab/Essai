@@ -40,7 +40,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.21 · 1er novembre 2026";
+const APP_VERSION="1.22 · 1er novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -195,16 +195,19 @@ function vReviser(arg){
  if(state.filter!=="all"&&!present.some(c=>c.id===state.filter))state.filter="all";
  const cats=CATS.filter(c=>(state.filter==="all"||state.filter===c.id)&&items.some(i=>i.cat===c.id));
  const nDone=isF?reviewed().filter(id=>FICHES.some(f=>f.id===id)).length:studied().filter(id=>FULL_COURS.some(c=>c.id===id)).length;
- return `<div class="stack-lg">${vh("Réviser",isF?"Fiches récap":"Cours détaillés",isF?`L'essentiel en une page, à relire avant un partiel ou le matin d'un stage. ${nDone} / ${FICHES.length} révisées.`:`Comprendre, pas seulement retenir. ${nDone} / ${FULL_COURS.length} cours étudiés.`,
+ const pxv=state.filter==="patho"&&!state.favOnly,pxd=pxv?pxDone().filter(id=>PBY[id]).length:0;
+ const desc=pxv?(isF?`Les ${PATHOS.length} pathologies du programme classées par spécialité : l'essentiel de chacune en une page. ${pxd} étudiée${pxd>1?"s":""}.`:`Un cours détaillé pour chacune des ${PATHOS.length} pathologies : mécanisme en images, signes, examens, traitements, rôle infirmier.`)
+  :isF?`L'essentiel en une page, à relire avant un partiel ou le matin d'un stage. ${nDone} / ${FICHES.length} révisées.`:`Comprendre, pas seulement retenir. ${nDone} / ${FULL_COURS.length} cours étudiés.`;
+ return `<div class="stack-lg">${vh("Réviser",isF?"Fiches récap":"Cours détaillés",desc,
    `<button class="icon-btn" data-act="nav" data-h="recherche" aria-label="Rechercher">${IC.search}</button>`)}
-  ${pxCard()}
-  <div class="seg" role="group" aria-label="Type de contenu"><button data-act="rev" data-k="fiches" aria-pressed="${isF}">Fiches · ${FICHES.length}</button><button data-act="rev" data-k="cours" aria-pressed="${!isF}">Cours · ${FULL_COURS.length}</button></div>
+  ${pxv?"":pxCard()}
+  <div class="seg" role="group" aria-label="Type de contenu"><button data-act="rev" data-k="fiches" aria-pressed="${isF}">Fiches · ${pxv?pxRevN(true):FICHES.length}</button><button data-act="rev" data-k="cours" aria-pressed="${!isF}">Cours · ${pxv?pxRevN(false):FULL_COURS.length}</button></div>
   <div class="chips" role="group" aria-label="Filtrer">
    <button class="chip" data-act="fav-only" aria-pressed="${state.favOnly}">★ Favoris</button>
    <button class="chip" data-act="filter" data-k="all" aria-pressed="${state.filter==="all"}">Tout</button>
    ${present.map(c=>`<button class="chip" style="--c:${c.c}" data-act="filter" data-k="${c.id}" aria-pressed="${state.filter===c.id}"><i></i>${esc(c.nom)}</button>`).join("")}</div>
-  ${cats.length?cats.map(c=>{const l=items.filter(i=>i.cat===c.id).sort((a,b)=>(b.pages||b.chap?1:0)-(a.pages||a.chap?1:0)||(a.pro?1:0)-(b.pro?1:0));
-   return `<section class="stack-sm"><div class="cat-head" style="--c:${c.c}"><span class="dot"></span><h2>${esc(c.nom)}</h2><span class="muted" style="margin-left:auto">${l.length}</span></div><div class="list">${l.map(i=>itemRow(i,t)).join("")}</div></section>`}).join("")
+  ${pxv?pxRev(isF):cats.length?cats.map(c=>{const l=items.filter(i=>i.cat===c.id).sort((a,b)=>(b.pages||b.chap?1:0)-(a.pages||a.chap?1:0)||(a.pro?1:0)-(b.pro?1:0));
+   return `<section class="stack-sm"><div class="cat-head" style="--c:${c.c}"><span class="dot"></span><h2>${esc(c.nom)}</h2><span class="muted" style="margin-left:auto">${l.length}</span></div><div class="list">${c.id==="patho"&&!state.favOnly?`<a class="li px-entry" role="button" tabindex="0" data-act="px-go" style="--c:${c.c}"><span class="bar"></span><span><span class="t">Toutes les pathologies par spécialité</span><span class="s">${PATHOS.length} ${isF?"fiches récap":"cours détaillés"} · cardio, pneumo, neuro…</span></span><span class="end"><span class="tag">${PATHOS.length}</span>${chev}</span></a>`:""}${l.map(i=>itemRow(i,t)).join("")}</div></section>`}).join("")
    :`<div class="empty">${state.favOnly?"Aucun favori ici. Touchez l'étoile en haut d'une fiche ou d'un cours pour l'ajouter.":"Pas encore de contenu dans cette catégorie."}</div>`}
  </div>`;
 }
@@ -409,15 +412,18 @@ function vReglages(){
 const VIEWS={pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
 const TAB={pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 let lastKey=null;
+const SCROLL={};
 function render(top){
- const r=route(),key=r.v+"/"+r.arg;
- if(top&&key!==lastKey)depth=ROOTS.includes(r.v)||lastKey===null?0:depth+1;
+ const r=route(),key=r.v+"/"+r.arg,moved=top&&key!==lastKey;
+ if(moved&&lastKey)SCROLL[lastKey]=window.scrollY;
+ if(moved)depth=ROOTS.includes(r.v)||lastKey===null?0:depth+1;
  app.innerHTML=VIEWS[r.v](r.arg);
  const tab=TAB[r.v]||r.v;
  document.querySelectorAll("nav.tabs a").forEach(a=>a.dataset.v===tab?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current"));
- if(top&&key!==lastKey)window.scrollTo(0,0);
+ /* Retour d'une fiche, d'un cours ou d'une pathologie vers la liste Réviser : on retrouve la position dans la liste. */
+ if(moved)window.scrollTo(0,r.v==="reviser"&&/^(patho|fiche|cours)\//.test(lastKey||"")&&SCROLL[key]!=null?SCROLL[key]:0);
  lastKey=key;
- fvBind();
+ fvBind();pxBind();
  if(r.v==="recherche"){const q=document.getElementById("q");if(q&&top&&!state.q)setTimeout(()=>q.focus(),60);}
 }
 
@@ -454,7 +460,7 @@ app.addEventListener("click",ev=>{
  if(a==="nav"){nav(b.dataset.h);}
  else if(a==="back"||a==="fiche-back"||a==="cours-back"){goBack();}
  else if(a==="go-cat"){ev.preventDefault();
-  if(k==="stage")nav("stages");else if(k==="patho")nav("pathos");else if(k==="calcul")nav("entrainer/calculs");else if(k==="quiz")nav("entrainer/quiz");
+  if(k==="stage")nav("stages");else if(k==="patho"){state.filter="patho";state.favOnly=false;nav("reviser");}else if(k==="calcul")nav("entrainer/calculs");else if(k==="quiz")nav("entrainer/quiz");
   else if(k==="calcul-fiches"){state.filter="calcul";state.favOnly=false;nav("reviser/fiches");}
   else{state.filter=k;state.favOnly=false;nav("reviser/"+(FICHES.some(f=>f.cat===k)?"fiches":"cours"));}}
  else if(a==="rev"){state.rev=k;store.set("rev",k);location.replace("#reviser/"+k);}
