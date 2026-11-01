@@ -48,6 +48,8 @@ const FILES=[
  "js/contenus/images-dermato.js",
  "js/contenus/images-gyneco.js",
  "js/contenus/images-psy.js",
+ "js/contenus/images-pedia.js",
+ "js/contenus/images-geria.js",
  "js/pathos-maps.js",
  "js/pathos.js",
  "js/data.js",
