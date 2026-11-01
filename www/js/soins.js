@@ -1,6 +1,6 @@
 /* Carnet IFSI — fiches de soins : fiche récap et cours détaillé, checklist interactive, mise en situation, quiz,
    et vue Réviser › Soins et techniques / Examens et surveillance (menu déroulant des catégories). Chargé après pathos.js, avant app.js. */
-const soK=s=>String(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[’]/g,"'").replace(/\s+/g," ").trim();
+const soK=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[’]/g,"'").replace(/\s+/g," ").trim();
 const SONAME={};SOINS.forEach(o=>[o.n,...o.nn].forEach(x=>{const k=soK(x);if(!SONAME[k])SONAME[k]=o;}));
 /* Fiches d'une catégorie : soins de la liste fournie qui ont une fiche (sans doublon), puis fiches propres à la catégorie. */
 const SO_SF={};
