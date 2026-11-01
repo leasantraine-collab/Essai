@@ -4,6 +4,9 @@
    co (complications), tt (traitements), ri (rôle infirmier), r (à retenir), z ([schéma, zones]), f (fiches ou cours liés). */
 const PATHOS=[];
 const PA=(...l)=>PATHOS.push(...l);
+/* Images pédagogiques par pathologie : h = histoire imagée, hc = correspondances [image, corps], hs = film du mécanisme. */
+const PIMG={};
+const IM=o=>Object.assign(PIMG,o);
 const SPES=[
  ["cardio","Cardiologie","#EDC4C7","2.7 2.8|B.1"],
  ["pneumo","Pneumologie","#B9D4EE","2.7 2.5|B.1"],
