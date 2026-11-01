@@ -72,25 +72,32 @@ const PXPIC={
  moins:'<path d="M12 4.5V19M6 13l6 6 6-6"/>',
  muscle:'<path d="M4 15c2-6 6-9 10-9 3 0 5 2 5 4.5S17 15 14 15c-2 0-3-1-3-2.5"/><path d="M4 15c3 2.5 9 3.5 15 1"/>',
  vaisseau:'<path d="M3 8c4-2 6 2 9 0s5-2 9 0M3 16c4-2 6 2 9 0s5-2 9 0"/><path d="M9 12h5M12 10l2 2-2 2"/>',
+ soin:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/>',
+ ok:'<circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.8 2.8L16.2 9.5"/>',
+ esprit:'<path d="M7 16.5a5 5 0 0 1-1.5-9.5 5.5 5.5 0 0 1 10.3-1.6A4.5 4.5 0 1 1 17 14.5c-.6 0-1.2-.1-1.7-.3A4.8 4.8 0 0 1 7 16.5z"/><circle cx="7.5" cy="19.5" r="1.2"/><circle cx="4.5" cy="21.5" r=".6"/>',
+ nuit:'<path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/>',
+ muet:'<path d="M6 16V11a6 6 0 0 1 9.5-4.9M18 10.5V16l1.5 2H5.5M10 20.5a2 2 0 0 0 4 0M3.5 3.5l17 17"/>',
  film:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M3 15h18M7.5 5v4M12 5v4M16.5 5v4M7.5 15v4M12 15v4M16.5 15v4"/>',
  dot:'<circle cx="12" cy="12" r="3.5"/>'};
 const PXW="(?:^|[^a-zœ])";
 const PXPIC_RE=[["virus","virus|viral"],["bact","bacteri|microbe|germe|infect|pus(?:[^a-z]|$)|abces"],["caillot","caillot|thromb|embol"],["tumeur","cancer|tumeur|metasta|maligne"],
  ["adn",PXW+"genet|heredit|"+PXW+"gene(?:[^a-z]|$)|chromosom"],["bebe","fœtus|foetus|bebe|nouveau-ne|nourrisson|grossesse|placenta|accouch"],["thermo","fievre|temperature|frisson"],
  ["bouclier","anticorps|immunit|defense|globules blancs|lymphocyte|auto-immun"],["hormone","hormone|insuline|thyro|cortisol|messager|adrenaline"],["sucre","sucre|glucose|glycem"],
- ["sang","saign|hemorrag|"+PXW+"sang(?:[^a-z]|$)|sanguin|hemoglobin|globules rouges|anemi"],["feu","inflamm|irrit|brul|enflamm"],["eclair","douleur|douloureu|decharge|convuls|electri|"+PXW+"nerf"],
- ["bouche","bouch|obstru|retreci|etroit|bloqu|comprim|ecras|coince"],["eau","œdem|oedem|liquide|"+PXW+"eau(?:[^a-z]|$)|gonfle|ascite|epanchement|urine|hydrat"],["coeur","cœur|coeur|cardiaque|pompe"],
- ["poumon","poumon|respir|oxygen|alveol|bronch|essouffl|"+PXW+"air(?:[^a-z]|$)"],["cerveau","cerveau|cerebr|neurone|conscience|memoire"],["os",PXW+"os(?:[^a-z]|$)|osseu|fractur|articul|cartilag"],
+ ["sang","saign|hemorrag|"+PXW+"sang(?:[^a-z]|$)|sanguin|hemoglobin|globules rouges|anemi"],["feu","inflamm|irrit|brul|enflamm"],["eclair","douleur|douloureu|decharge|convuls|electri|"+PXW+"nerf|myeline|influx|"+PXW+"racine"],
+ ["bouche","bouch|obstru|retreci|etroit|bloqu|comprim|ecras|coince"],["eau","œdem|oedem|liquide|"+PXW+"eau(?:[^a-z]|$)|gonfle|ascite|epanchement|urine|hydrat"],["coeur","cœur|coeur|cardiaque|pompe|"+PXW+"valve|ventricul|oreillette|palpitation"],
+ ["poumon","poumon|respir|oxygen|alveol|bronch|essouffl|"+PXW+"air(?:[^a-z]|$)|mucus|"+PXW+"cils|crachat|"+PXW+"toux|expector"],["cerveau","cerveau|cerebr|neurone|conscience|memoire"],["os",PXW+"os(?:[^a-z]|$)|osseu|fractur|articul|cartilag"],
  ["rein",PXW+"rein|renal|filtr"],["peau","peau|cutane|plaie|cicatri"],["oeil","œil|oeil|vision|retine|cristallin"],["oreille","oreille|audition|auditi|tympan"],
- ["ventre","intestin|estomac|digest|selles|foie|bile"],["muscle","muscle|musculaire"],["pilule","medicament|toxique|alcool|tabac|drogue"],["alerte","mort|necros|meurt|danger|urgence|choc|arret|deces|grave"],
- ["vaisseau","arter|vaisseau|"+PXW+"veine|capillaire|aorte"],["plus","augment|monte|exces|trop(?:[^a-z]|$)|accumul|grossit"],["moins","baisse|diminu|manque|chute|insuffisan|perte"],["cellule","cellule"]].map(([k,r])=>[new RegExp(r),k]);
+ ["ventre","intestin|estomac|digest|selles|foie|bile"],["muscle","muscle|musculaire|paralys|faiblesse|boiter|crampe|raideur|contracture"],["muet","silenc|aucun symptome|sans symptome|inapercu|longtemps peu"],["ok","guerison|guerit|regress|disparai|rentre dans l|cede"],["esprit","angoiss|anxi|panique|"+PXW+"peur|stress|emotion|triste|honte|culpabil|humeur|desespoir|delire|hallucin|obsession|pensee|repli"],["nuit","sommeil|fatigue|somnol|insomni|"+PXW+"nuit"],["pilule","medicament|toxique|alcool|tabac|drogue"],["soin","chirurgi|operat|remplac|greffe|dialyse|antibiot|antivir|traitement|ponction|drainage|lavement|sondage|stent|thrombolys|thrombectom|angioplast|transfus|vaccin|perfusion|reeducation|kine|injection|implant|laser|pyloromyotom|exerese|ablation|prothese|resucr|refroidi|rechauff|massage|defibrill|surveillance|bilan|corset|platre|anticoagul|insuline injectee"],["alerte","mort|necros|meurt|danger|urgence|choc|arret|deces|grave"],
+ ["vaisseau","arter|vaisseau|"+PXW+"veine|capillaire|aorte|atherome|plaque|cholesterol|valvule"],["plus","augment|monte|exces|trop(?:[^a-z]|$)|accumul|grossit"],["moins","baisse|diminu|manque|chute|insuffisan|perte"],["cellule","cellule"]].map(([k,r])=>[new RegExp(r),k]);
 const pxStep=t=>String(t).replace(/^[a-z]+\|/,"");
 function pxPicKey(t){const m=String(t).match(/^([a-z]+)\|/);if(m&&PXPIC[m[1]])return m[1];const f=fold(plainTxt(t));for(const [re,k] of PXPIC_RE)if(re.test(f))return k;return "dot";}
 const pxPicSvg=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${PXPIC[k]||PXPIC.dot}</svg>`;
 function pxFilm(steps,mini){const n=steps.length;
  return `<ol class="px-film${mini?" mini":""}">${steps.map((s,i)=>`<li style="--k:${n>1?Math.round(i/(n-1)*85):0}%"><span class="px-pic">${pxPicSvg(pxPicKey(s))}</span><span class="px-st">${mini?"":`<small>${i===0?"Point de départ":i===n-1?"Résultat":"Étape "+(i+1)}</small>`}<span>${pmd(pxStep(s))}</span></span></li>`).join("")}</ol>`;}
+/* Le slogan (p.a) n'est affiché que si l'histoire ne le reprend pas déjà dans sa première phrase. */
+function pxTagDup(a,h){const w=t=>new Set(fold(plainTxt(t)).split(/[^a-zœ]+/).filter(x=>x.length>3));const A=w(a),H=w(String(h).split(/[.:!?]\s/)[0]+" "+String(h).split("\n")[0]);if(!A.size)return true;let n=0;A.forEach(x=>{if(H.has(x))n++;});return n/A.size>=.5;}
 function pxImages(p){const I=PIMG[p.i];if(!I)return "";
- return `${I.h?`<div class="px-story"><span class="cv-lab">${SVG.bulb}Imaginez…</span>${p.a?`<p class="px-tag">${pmd(p.a)}</p>`:""}${I.h.split("\n").map(x=>`<p>${pmd(x)}</p>`).join("")}</div>`:""}
+ return `${I.h?`<div class="px-story"><span class="cv-lab">${SVG.bulb}Imaginez…</span>${p.a&&!pxTagDup(p.a,I.h)?`<p class="px-tag">${pmd(p.a)}</p>`:""}${I.h.split("\n").map(x=>`<p>${pmd(x)}</p>`).join("")}</div>`:""}
  ${I.hc&&I.hc.length?`<div class="px-corr" role="table" aria-label="Correspondances entre l'image et le corps"><div class="px-corr-h" role="row"><span role="columnheader">Dans l'image</span><span></span><span role="columnheader">Dans le corps</span></div>${I.hc.map(([a,b])=>`<div role="row"><span role="cell">${pmd(a)}</span><i aria-hidden="true">→</i><span role="cell">${pmd(b)}</span></div>`).join("")}</div>`:""}
  ${I.hs&&I.hs.length?`<div class="px-filmbox"><span class="cv-lab">${pxPicSvg("film")}Le film de la maladie</span>${pxFilm(I.hs)}</div>`:""}`;}
 function pxFilmEx(p){const I=PIMG[p.i];if(!I||!I.hs||I.hs.length<3)return "";const n=I.hs.length,opts=pxShuffle([...Array(n).keys()],pxRand(p.i+"film"));
