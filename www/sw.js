@@ -54,6 +54,8 @@ const FILES=[
  "js/contenus/images-orl.js",
  "js/contenus/images-onco.js",
  "js/contenus/images-chir.js",
+ "js/contenus/images-urg.js",
+ "js/contenus/images-pallia.js",
  "js/pathos-maps.js",
  "js/pathos.js",
  "js/data.js",
