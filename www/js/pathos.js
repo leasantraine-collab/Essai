@@ -299,6 +299,7 @@ function pathoAct(b,a){const k=b.dataset.k;
  if(a==="px-film-reset"){render();return;}
 }
 function pathoInput(t){
+ if(t.id==="sosec"||t.id==="soq")return soInput(t);
  if(t.id==="pxspe"){if(pxSpeCur()!==t.value){state.pxSpe=t.value;store.set("pxspe",t.value);render();pxBind(true);}return true;}
  if(t.id==="pxq"){state.pxq=t.value;const ol=document.getElementById("px-list");if(ol)ol.innerHTML=pxRevList(state.rev==="fiches");return true;}
  if(t.dataset.px!=null&&state.exoAns){state.exoAns.a[+t.dataset.px]=t.value;return true;}

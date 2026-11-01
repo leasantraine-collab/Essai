@@ -493,3 +493,39 @@ button.px-card{border:0;width:100%;text-align:left;font:inherit;cursor:pointer}
 .ue-pg>.list{border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;margin:0}
 
 .px-card .chev{width:16px;height:16px;flex:none;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+/* Fiches de soins */
+.so-badges{display:flex;flex-wrap:wrap;gap:6px}
+.so-st{font-size:.76rem;font-weight:700;padding:4px 10px;border-radius:99px;background:var(--surface-2);color:var(--ink-2)}
+.so-st.so-rp{background:var(--ok-soft);color:var(--ok)}
+.so-st.so-pm,.so-st.so-pr{background:color-mix(in srgb,var(--fx-blue) 16%,transparent);color:var(--fx-blue)}
+.so-st.so-hab{background:color-mix(in srgb,var(--fx-amber-ink) 18%,transparent);color:var(--fx-amber-ink)}
+.so-st.so-col{background:color-mix(in srgb,#7B5EA7 18%,transparent);color:#8E6CC0}
+.so-st.so-urg{background:var(--bad-soft);color:var(--fx-coral)}
+.so-mat{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.so-mat>div{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:.86rem;line-height:1.3;min-width:0}
+.so-mat svg{width:32px;height:32px;flex:none;fill:none;stroke:var(--ink-2);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;padding:5px;border-radius:9px;background:color-mix(in srgb,var(--c) 45%,transparent)}
+.px-r .so-mat>div{background:var(--bg)}
+.so-tbl div{grid-template-columns:minmax(118px,.6fr) minmax(0,1.4fr)}
+.so-tbl span:last-child{color:var(--ink)}
+.so-hint{font-size:.86rem;margin:0}
+.so-chkbar{display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--muted)}
+.so-prog{flex:1;height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.so-prog i{display:block;height:100%;background:var(--ok);transition:width .2s}
+.so-chkbar button{font:inherit;font-size:.82rem;border:0;background:none;color:var(--accent);cursor:pointer;padding:4px}
+.so-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.so-step{display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;align-items:start;width:100%;text-align:left;font:inherit;font-size:.95rem;color:inherit;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 12px;cursor:pointer;line-height:1.45;box-shadow:var(--shadow)}
+.so-n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.85rem;background:color-mix(in srgb,var(--c) 55%,transparent);color:var(--ink)}
+.so-step.on{background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+.so-step.on .so-n{background:var(--ok);color:#fff;font-size:0}
+.so-step.on .so-n::after{content:"✓";font-size:.95rem}
+.so-mini{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:5px;line-height:1.45}
+.so-grp h4{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:6px 0 0}
+.so-grp h4:first-child{margin-top:0}
+.so-q .so-qq{font-weight:700;line-height:1.45;margin:0}
+.so-sit{line-height:1.55;margin:0}
+.so-opts{display:flex;flex-direction:column;gap:8px}
+.so-opt{text-align:left;font:inherit;font-size:.93rem;line-height:1.4;padding:11px 13px;border-radius:12px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);cursor:pointer}
+.so-opt.good{background:var(--ok-soft);border-color:var(--ok)}
+.so-opt.bad{background:var(--bad-soft);border-color:var(--fx-coral)}
+.so-opt:disabled{cursor:default}
+.so-old>summary>span{flex:1;min-width:0}
