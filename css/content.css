@@ -457,3 +457,15 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .sch .pm-halo{fill:none;stroke:#FFC21A;stroke-opacity:.8;stroke-linecap:round;stroke-linejoin:round}
 .sch .pm-lead{stroke:var(--fx-sub);stroke-width:.8;fill:none;opacity:.75}
 .sch .pm-lead.on{stroke:var(--fx-coral);stroke-width:1.3;opacity:1}
+/* Réviser › Pathologies : menu défilant des spécialités */
+button.px-card{border:0;width:100%;text-align:left;font:inherit;cursor:pointer}
+.px-entry{cursor:pointer}
+.px-revlab{display:block;text-transform:uppercase}
+.px-revbar{margin-top:-20px;position:sticky;top:env(safe-area-inset-top,0px);z-index:6;margin-inline:calc(-1 * max(18px,env(safe-area-inset-left,0px)));padding-block:8px;background:color-mix(in srgb,var(--bg) 92%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.px-revbar .chips{margin-inline:0;padding-inline:max(18px,env(safe-area-inset-left,0px));padding-bottom:2px}
+.px-spehead{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:14px 16px;border-radius:var(--r-sm);background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--c)}
+.px-spehead>div:first-child{flex:1 1 150px;min-width:0}
+.px-spehead b{display:block;font-family:var(--f-display);font-size:1.05rem;line-height:1.25}
+.px-spehead small{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}
+.px-spebtns{display:flex;gap:8px;flex-wrap:wrap}
+.px-spebtns .btn{padding:8px 12px;font-size:.84rem;min-height:0;width:auto}
