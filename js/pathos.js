@@ -24,23 +24,18 @@ function vPathos(arg){
 }
 /* ---------- Réviser › Pathologies : toutes les fiches récap et tous les cours, menu défilant des spécialités ---------- */
 const SPE_COURT={cardio:"Cardio",pneumo:"Pneumo",neuro:"Neuro",gastro:"Gastro",nephro:"Néphro-uro",endoc:"Endocrino",hemato:"Hémato",infectio:"Infectio",rhumato:"Rhumato",dermato:"Dermato",gyneco:"Gynéco-obstétrique",pedia:"Pédiatrie",geria:"Gériatrie",psy:"Psychiatrie",onco:"Onco",ophtalmo:"Ophtalmo",orl:"ORL",chir:"Chirurgie",urg:"Urgences",nutri:"Nutrition",immuno:"Immuno",pallia:"Palliatifs",transv:"Transversal"};
-/* Cours généraux non reliés directement à une pathologie : spécialités où les proposer. */
-const PX_GEN_SPE={"psy1-c":["psy"],"psy2-c":["psy"],"obstructifs-c":["cardio","neuro","gastro","pneumo"],"diabete-c":["endoc"],"avc-c":["neuro"],"sca-c":["cardio"],"pediatrie-c":["pedia"],"geriatrie-c":["geria"]};
 const pxSpeCur=()=>{const s=state.pxSpe||store.get("pxspe","all");return SPE[s]?s:"all";};
-const pxGen=isF=>(isF?FICHES:COURS).filter(i=>i.cat==="patho");
-const pxRevN=isF=>PATHOS.length+pxGen(isF).filter(i=>!i.pro).length;
+const pxRevN=()=>PATHOS.length;
 const pxCut=(s,n=96)=>{const t=plainTxt(s);return t.length>n?t.slice(0,n).replace(/\s+\S*$/,"")+"…":t;};
 /* Pathologies d'une spécialité, dans l'ordre du programme, sans doublon. */
 function pxSpeList(s){const seen=new Set(),out=[];
  [...progOf(s).map(n=>[n,PNAME[n]]),...PATHOS.filter(p=>p.s===s).map(p=>[p.n,p])].forEach(([n,p])=>{if(p&&!seen.has(p.i)){seen.add(p.i);out.push([n,p]);}});return out;}
-function pxGenOf(s,isF){const g=pxGen(isF);if(s==="all")return g;const ids=new Set(pathosOf(s).flatMap(p=>p.f||[]));return g.filter(i=>ids.has(i.id)||(PX_GEN_SPE[i.id]||[]).includes(s));}
 const pxRow=([n,p],isF,dn)=>`<a class="li" href="#patho/${p.i}" data-act="px-open" data-k="${isF?"recap":"cours"}"><span class="bar"></span><span><span class="t">${esc(n)}</span><span class="s">${esc(pxCut(isF?p.d:(p.m||p.d)))}</span></span><span class="end">${dn.includes(p.i)?'<span class="tag done">Étudiée</span>':""}${chev}</span></a>`;
 const pxSec=(c,title,n,rows)=>`<section class="stack-sm"><div class="cat-head" style="--c:${c}"><span class="dot"></span><h2>${title}</h2><span class="muted" style="margin-left:auto">${n}</span></div><div class="list" style="--c:${c}">${rows}</div></section>`;
 function pxRevList(isF){
- const s=pxSpeCur(),dn=pxDone(),q=fold(state.pxq||"").trim(),t=isF?"f":"c";
+ const s=pxSpeCur(),dn=pxDone(),q=fold(state.pxq||"").trim();
  const hit=([n,p])=>!q||fold(n).includes(q)||fold(p.n).includes(q)||(p.nn||[]).some(x=>fold(x).includes(q));
- const gen=pxGenOf(s,isF).filter(i=>!q||fold(i.titre).includes(q));
- let h=gen.length?pxSec(CAT.patho.c,isF?"Fiches complètes":"Cours complets",gen.length,gen.map(i=>itemRow(i,t)).join("")):"";
+ let h="";
  const spes=s==="all"?SPES.map(x=>x[0]):[s];let n=0;
  spes.forEach(sp=>{const l=pxSpeList(sp).filter(hit);n+=l.length;if(l.length)h+=pxSec(SPE[sp].c,s==="all"?esc(SPE[sp].nom):(isF?"Fiches récap":"Cours détaillés"),l.length,l.map(x=>pxRow(x,isF,dn)).join(""));});
  return h||`<div class="empty">Aucune pathologie ne correspond à « ${esc(state.pxq)} ».</div>`;

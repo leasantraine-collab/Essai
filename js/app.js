@@ -40,7 +40,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.22 · 1er novembre 2026";
+const APP_VERSION="1.23 · 1er novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -171,8 +171,8 @@ function vAccueil(){
     <button class="qa" data-act="favs"><span class="ic">${IC.star}</span><b>Favoris</b><small>${plural(favs().length,"élément")}</small></button>
    </div></section>
   <section class="stack-sm"><div class="section-title"><h2>Réviser par thème</h2><a href="#reviser">Tout voir</a></div>
-   <div class="cats">${CATS.map(c=>{const n=FICHES.filter(f=>f.cat===c.id).length+FULL_COURS.filter(x=>x.cat===c.id).length;
-    const sub=c.id==="stage"?"Préparation":c.id==="calcul"?"Exercices illimités":c.id==="quiz"?QUIZ.length+" questions":plural(n,"contenu");
+   <div class="cats">${RCATS.map(c=>{const n=FICHES.filter(f=>rcat(f)===c.id).length+FULL_COURS.filter(x=>rcat(x)===c.id).length;
+    const sub=c.id==="stage"?"Préparation":c.id==="calcul"?"Exercices illimités":c.id==="quiz"?QUIZ.length+" questions":c.id==="patho"?PATHOS.length+" pathologies par spécialité":c.id==="ue"?plural(n,"contenu")+" classés par UE":plural(n,"contenu");
     return `<button class="cat-row" style="--c:${c.c}" data-act="go-cat" data-k="${c.id}"><span class="sw">${CAT_IC[c.id].replace('<svg','<svg style="width:18px;height:18px;stroke:#1A252A;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"')}</span><span><b>${esc(c.nom)}</b><small>${sub}</small></span></button>`}).join("")}</div></section>
   <a href="#programme" class="list"><span class="li"><span class="ic">${IC.cap.replace("<svg",'<svg style="stroke:var(--brand)"')}</span><span><span class="t">Suivre le programme par UE</span><span class="s">Référentiels 2026 et 2009, semestres 1 à 6</span></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></a>
   <p class="disclaimer">Contenus pédagogiques. Vérifiez toujours avec vos cours et les protocoles de votre établissement.</p></div>`;
@@ -191,9 +191,9 @@ function vReviser(arg){
  if(arg==="fiches"||arg==="cours"){state.rev=arg;store.set("rev",arg);}
  const isF=state.rev==="fiches",t=isF?"f":"c",all=isF?FICHES:COURS;
  const items=state.favOnly?all.filter(i=>isFav(t+":"+i.id)):all;
- const present=CATS.filter(c=>all.some(i=>i.cat===c.id));
+ const present=RCATS.filter(c=>c.id==="patho"||all.some(i=>rcat(i)===c.id));
  if(state.filter!=="all"&&!present.some(c=>c.id===state.filter))state.filter="all";
- const cats=CATS.filter(c=>(state.filter==="all"||state.filter===c.id)&&items.some(i=>i.cat===c.id));
+ const cats=RCATS.filter(c=>(state.filter==="all"||state.filter===c.id)&&(c.id==="patho"?!state.favOnly:items.some(i=>rcat(i)===c.id)));
  const nDone=isF?reviewed().filter(id=>FICHES.some(f=>f.id===id)).length:studied().filter(id=>FULL_COURS.some(c=>c.id===id)).length;
  const pxv=state.filter==="patho"&&!state.favOnly,pxd=pxv?pxDone().filter(id=>PBY[id]).length:0;
  const desc=pxv?(isF?`Les ${PATHOS.length} pathologies du programme classées par spécialité : l'essentiel de chacune en une page. ${pxd} étudiée${pxd>1?"s":""}.`:`Un cours détaillé pour chacune des ${PATHOS.length} pathologies : mécanisme en images, signes, examens, traitements, rôle infirmier.`)
@@ -206,8 +206,11 @@ function vReviser(arg){
    <button class="chip" data-act="fav-only" aria-pressed="${state.favOnly}">★ Favoris</button>
    <button class="chip" data-act="filter" data-k="all" aria-pressed="${state.filter==="all"}">Tout</button>
    ${present.map(c=>`<button class="chip" style="--c:${c.c}" data-act="filter" data-k="${c.id}" aria-pressed="${state.filter===c.id}"><i></i>${esc(c.nom)}</button>`).join("")}</div>
-  ${pxv?pxRev(isF):cats.length?cats.map(c=>{const l=items.filter(i=>i.cat===c.id).sort((a,b)=>(b.pages||b.chap?1:0)-(a.pages||a.chap?1:0)||(a.pro?1:0)-(b.pro?1:0));
-   return `<section class="stack-sm"><div class="cat-head" style="--c:${c.c}"><span class="dot"></span><h2>${esc(c.nom)}</h2><span class="muted" style="margin-left:auto">${l.length}</span></div><div class="list">${c.id==="patho"&&!state.favOnly?`<a class="li px-entry" role="button" tabindex="0" data-act="px-go" style="--c:${c.c}"><span class="bar"></span><span><span class="t">Toutes les pathologies par spécialité</span><span class="s">${PATHOS.length} ${isF?"fiches récap":"cours détaillés"} · cardio, pneumo, neuro…</span></span><span class="end"><span class="tag">${PATHOS.length}</span>${chev}</span></a>`:""}${l.map(i=>itemRow(i,t)).join("")}</div></section>`}).join("")
+  ${pxv?pxRev(isF):cats.length?cats.map(c=>{const head=n=>`<div class="cat-head" style="--c:${c.c}"><span class="dot"></span><h2>${esc(c.nom)}</h2><span class="muted" style="margin-left:auto">${n}</span></div>`;
+   if(c.id==="patho")return `<section class="stack-sm">${head(PATHOS.length)}<div class="list"><a class="li px-entry" role="button" tabindex="0" data-act="px-go" style="--c:${c.c}"><span class="bar"></span><span><span class="t">Toutes les pathologies par spécialité</span><span class="s">${PATHOS.length} ${isF?"fiches récap":"cours détaillés"} · cardio, pneumo, neuro…</span></span><span class="end">${chev}</span></a></div></section>`;
+   const l=items.filter(i=>rcat(i)===c.id).sort((a,b)=>(b.pages||b.chap?1:0)-(a.pages||a.chap?1:0)||(a.pro?1:0)-(b.pro?1:0));
+   if(c.id==="ue")return `<section class="stack-sm">${head(l.length)}<p class="muted ue-note">Les fiches et cours complets de pathologie, rangés dans leur unité d'enseignement (${esc(UE[state.ueRef].sub)}). Chaque UE est aussi dans l'onglet Programme.</p>${ueRevGroups(l,t)}</section>`;
+   return `<section class="stack-sm">${head(l.length)}<div class="list">${l.map(i=>itemRow(i,t)).join("")}</div></section>`}).join("")
    :`<div class="empty">${state.favOnly?"Aucun favori ici. Touchez l'étoile en haut d'une fiche ou d'un cours pour l'ajouter.":"Pas encore de contenu dans cette catégorie."}</div>`}
  </div>`;
 }
@@ -341,6 +344,28 @@ function svcCard(sv,i){
 }
 
 /* ---------- Programme (UE) ---------- */
+/* Les fiches et cours complets de pathologie sont rangés par UE (processus) ; la catégorie Pathologies de Réviser
+   regroupe les 528 pathologies par spécialité. */
+const UE_CAT={id:"ue",nom:"Par UE",c:"#D9A77C",desc:"Fiches et cours complets de pathologie classés par unité d'enseignement"};
+const RCATS=(()=>{const i=CATS.findIndex(c=>c.id==="patho");return [...CATS.slice(0,i+1),UE_CAT,...CATS.slice(i+1)];})();
+const rcat=it=>it.cat==="patho"?"ue":it.cat;
+CAT_IC.ue=IC.cap;
+const PROC_UE=["2.3","2.4","2.5","2.6","2.7","2.8","2.9"];
+const procOf=it=>{const l=(it.ue&&it.ue["2009"]||[]).filter(c=>PROC_UE.includes(c));return l.length?l:["2.7"];};
+/* Regroupe des contenus de pathologie par processus (UE 2.3 à 2.9 du référentiel 2009) ; all=false : processus principal seulement. */
+function procGroups(list,all){const g={};list.forEach(it=>(all?procOf(it):procOf(it).slice(0,1)).forEach(c=>{(g[c]=g[c]||[]).push(it);}));
+ return UE["2009"].list.filter(u=>g[u[0]]).map(u=>[u[0],u[1],g[u[0]]]);}
+function ueRevGroups(list,t){const r=state.ueRef,b1=UE[r].list.find(u=>u[0]==="B.1");
+ return procGroups(list,r==="2009").map(([code,lab,its])=>{const ue=r==="2009"?code:"B.1";
+  return `<div class="ue-grp"><a class="ue-grp-h" href="#ue/${encodeURIComponent(ue)}"><span class="code">UE ${esc(ue)}</span><span><b>${esc(lab)}</b>${r==="2009"?"":`<small>${esc(b1?b1[1]:"")}</small>`}</span>${chev}</a><div class="list">${its.map(i=>itemRow(i,t)).join("")}</div></div>`;}).join("");}
+/* Page d'une UE : contenus regroupés par thème, pathologies par processus quand l'UE en contient beaucoup. */
+function ueSections(list,t,code){
+ const pat=list.filter(i=>i.cat==="patho"),sub=!PROC_UE.includes(code)&&pat.length>8,groups=[];
+ CATS.forEach(c=>{const l=list.filter(i=>i.cat===c.id);if(!l.length)return;
+  if(c.id==="patho"&&sub)procGroups(l,false).forEach(([pc,lab,its])=>groups.push(["Pathologies · "+lab,c.c,its]));else groups.push([c.nom,c.c,l]);});
+ if(groups.length<2||list.length<8)return `<div class="list">${list.map(i=>itemRow(i,t)).join("")}</div>`;
+ return groups.map(([n,c,l])=>`<div class="ue-sub"><div class="ue-sub-h" style="--c:${c}"><span class="dot"></span><span>${esc(n)}</span><span class="muted">${l.length}</span></div><div class="list">${l.map(i=>itemRow(i,t)).join("")}</div></div>`).join("");
+}
 function linked(code){const r=state.ueRef,has=it=>it.ue&&(it.ue[r]||[]).includes(code);return {f:FICHES.filter(has),c:COURS.filter(has),q:QUIZ.filter(has)};}
 function vProgramme(){
  const R=UE[state.ueRef],list=R.list.filter(u=>u[3].includes(state.sem));
@@ -356,8 +381,8 @@ function vUE(code){
  const L=linked(u[0]);
  return `<div class="stack-lg">${backBtn("Programme")}
   <header class="vh"><span class="eyebrow">UE ${u[0]} · ${esc(R.groups[u[2]])}</span><h1>${esc(u[1])}</h1><p class="muted">Enseignée en ${u[3].map(s=>"S"+s).join(", ")} · ${esc(R.sub)}</p></header>
-  ${L.c.length?`<section class="stack-sm"><h2>Cours</h2><div class="list">${L.c.map(c=>itemRow(c,"c")).join("")}</div></section>`:""}
-  ${L.f.length?`<section class="stack-sm"><h2>Fiches</h2><div class="list">${L.f.map(f=>itemRow(f,"f")).join("")}</div></section>`:""}
+  ${L.c.length?`<section class="stack-sm"><h2>Cours</h2>${ueSections(L.c,"c",u[0])}</section>`:""}
+  ${L.f.length?`<section class="stack-sm"><h2>Fiches</h2>${ueSections(L.f,"f",u[0])}</section>`:""}
   ${L.q.length?`<button class="btn block" data-act="ue-quiz" data-k="${esc(u[0])}">${IC.play}Quiz de cette UE · ${plural(L.q.length,"question")}</button>`:""}
   ${!L.c.length&&!L.f.length&&!L.q.length?`<div class="empty">Les contenus de cette UE arrivent bientôt.</div>`:""}</div>`;
 }
@@ -461,6 +486,7 @@ app.addEventListener("click",ev=>{
  else if(a==="back"||a==="fiche-back"||a==="cours-back"){goBack();}
  else if(a==="go-cat"){ev.preventDefault();
   if(k==="stage")nav("stages");else if(k==="patho"){state.filter="patho";state.favOnly=false;nav("reviser");}else if(k==="calcul")nav("entrainer/calculs");else if(k==="quiz")nav("entrainer/quiz");
+  else if(k==="ue"){state.filter="ue";state.favOnly=false;nav("reviser/fiches");}
   else if(k==="calcul-fiches"){state.filter="calcul";state.favOnly=false;nav("reviser/fiches");}
   else{state.filter=k;state.favOnly=false;nav("reviser/"+(FICHES.some(f=>f.cat===k)?"fiches":"cours"));}}
  else if(a==="rev"){state.rev=k;store.set("rev",k);location.replace("#reviser/"+k);}
