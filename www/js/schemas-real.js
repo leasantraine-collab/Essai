@@ -349,3 +349,201 @@ PMR("orl",{sinus:[100,44],nez:[108,84],bouche:[112,124],amygdales:[146,120],lary
   og("M262 118 C270 112 286 114 292 122 C294 132 284 136 274 136 C266 136 260 128 262 118 Z","bone",on("mastoide"),{s:"#B8A27C"})+[[270,124],[278,122],[284,128],[274,130]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.3" style="fill:#E8DCC6;stroke:#B8A27C;stroke-width:.6"/>`).join("")+
   (lb?LB(4,40,"Sinus",on("sinus"),"start",94,42)+LB(4,72,"Fosses\nnasales",on("nez"),"start",100,84)+LB(4,124,"Bouche,\nlangue",on("bouche"),"start",98,122)+LB(4,170,"Pharynx,\namygdales",on("amygdales"),"start",146,122)+LB(4,210,"Larynx",on("larynx"),"start",146,178)+
    LB(316,28,"Tympan",on("tympan"),"end",264,88)+LB(232,158,"Oreille\ninterne",on("oreille_int"),"middle",242,98)+LB(316,160,"Oreille\nexterne",on("oreille_ext"),"end",300,112)+LB(316,198,"Mastoïde",on("mastoide"),"end",282,132):""),"Schéma de la sphère ORL");});
+
+/* =====================================================================
+   SCHÉMAS DES FICHES (SCH) — versions réalistes, mêmes textes pédagogiques
+   ===================================================================== */
+const svIn=s=>s.replace(/^<svg[^>]*>/,"").replace(/<\/svg>$/,"");
+const AR=(d,c,w=2.2)=>{const id="ar"+c.replace("#","");return `<path d="${d}" style="fill:none;stroke:${c};stroke-width:${w};stroke-linecap:round;stroke-linejoin:round" marker-end="url(#mk-${c.replace("#","")})"/>`;};
+(function(){const put=()=>{const d=document.getElementById("pm-defs");if(!d||d.querySelector("#mk-2E5AAC"))return;const defs=d.querySelector("defs");
+ defs.insertAdjacentHTML("beforeend",["2E5AAC","C8372D","B4513A","5C6B7A","2E7D4F"].map(c=>`<marker id="mk-${c}" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#${c}"/></marker>`).join(""));};
+ if(document.body)put();else document.addEventListener("DOMContentLoaded",put);})();
+/* silhouette humaine réaliste (même tracé que le schéma « corps ») */
+const HBODY="M160 4 C171 4 177 12 177 22 C177 31 172 37 167 39 L168 46 C182 48 196 50 204 56 C211 61 212 70 213 82 L218 118 C220 132 222 142 224 152 C225 157 221 159 219 155 L214 140 C210 128 208 118 204 104 L201 90 L200 130 C201 148 198 170 194 190 C192 206 192 220 194 230 C195 236 186 238 182 236 L180 226 C178 212 176 198 174 184 L170 150 C168 146 152 146 150 150 L146 184 C144 198 142 212 140 226 L138 236 C134 238 125 236 126 230 C128 220 128 206 126 190 C122 170 119 148 120 130 L119 90 L116 104 C112 118 110 128 106 140 L101 155 C99 159 95 157 96 152 C98 142 100 132 102 118 L107 82 C108 70 109 61 116 56 C124 50 138 48 152 46 L153 39 C148 37 143 31 143 22 C143 12 149 4 160 4 Z";
+const HB=(cx,y0,s,inner="")=>`<g transform="translate(${cx-160*s} ${y0}) scale(${s})">${og(HBODY,"skin",false,{s:"#B98868",w:.9/s})}${fl("M160 104 a1.6 1.6 0 1 0 0.1 0 M152 118 C156 122 164 122 168 118",'#C9946F',.8/s)}${inner}</g>`;
+const HP=(cx,y0,s,x,y)=>[+(cx+(x-160)*s).toFixed(1),+(y0+y*s).toFixed(1)];
+const dot=(x,y,c="#C8372D")=>`<circle cx="${x}" cy="${y}" r="5" style="fill:${c};stroke:#fff;stroke-width:1.6"/><circle cx="${x}" cy="${y}" r="9" style="fill:none;stroke:${c};stroke-width:1.2;opacity:.5"/>`;
+const LL=(x1,y1,x2,y2)=>`<path d="M${x1} ${y1} L${x2} ${y2}" class="pm-lead"/>`;
+/* bloc de peau en coupe (épiderme, derme, hypoderme, muscle) */
+const skinBlock=(x,y,w,h1,h2,h3,h4)=>{const y1=y+h1,y2=y1+h2,y3=y2+h3,y4=y3+h4,fat=[];for(let i=0;i<Math.floor(w/22);i++)for(let j=0;j<Math.max(1,Math.floor(h3/18));j++)fat.push(`<ellipse cx="${x+11+i*22+(j%2?11:0)}" cy="${y2+9+j*18}" rx="10.5" ry="8.5" style="fill:url(#rg-fat);stroke:#D6B25E;stroke-width:.7"/>`);
+ return `<rect x="${x}" y="${y3}" width="${w}" height="${h4}" style="fill:url(#rg-muscle)"/>`+fl(Array.from({length:Math.floor(w/10)},(_,i)=>`M${x+5+i*10} ${y3+2} L${x+5+i*10} ${y4-2}`).join(" "),"#A84A3E",.7)+
+ `<rect x="${x}" y="${y2}" width="${w}" height="${h3}" style="fill:#F4D58A"/><g clip-path="none">${fat.filter(f=>true).join("")}</g>`+
+ `<rect x="${x}" y="${y1}" width="${w}" height="${h2}" style="fill:url(#rg-mucosa);opacity:.9"/>`+fl(Array.from({length:3},(_,k)=>`M${x} ${y1+8+k*(h2-12)/2} `+Array.from({length:Math.floor(w/40)},(_,i)=>`q10 -5 20 0 q10 5 20 0`).join(" ")).join(" "),"#E7B0A2",1)+
+ `<rect x="${x}" y="${y}" width="${w}" height="${h1}" style="fill:url(#rg-skin)"/>`+fl(`M${x} ${y+1} H${x+w}`,"#C98E6C",1.2)+`<rect x="${x}" y="${y}" width="${w}" height="${y4-y}" style="fill:none;stroke:#B8957A;stroke-width:.8"/>`;};
+
+Object.assign(SCH,{
+ /* circulation dans le cœur : vrai cœur en coupe + trajet du sang */
+ coeur:()=>{const H=svIn(PMAPS.coeur.draw([],[])).replace(/<circle[^>]*class="f-acc"[^>]*\/><text[\s\S]*?<\/text>/g,"");
+  return sv(300,`<g transform="translate(0 40)">${H}</g>`+
+   og("M98 6 C82 8 74 22 76 34 L118 34 C118 20 112 8 98 6 Z","lung",false,{s:"#A85A54"})+og("M222 6 C238 8 246 22 244 34 L202 34 C202 20 208 8 222 6 Z","lung",false,{s:"#A85A54"})+tx(160,24,"Poumons","st-b","middle")+
+   AR("M118 96 L118 128","#2E5AAC",2.4)+AR("M126 178 L134 200","#2E5AAC",2.4)+AR("M150 186 C150 160 150 130 146 102","#2E5AAC",2.4)+AR("M120 88 C112 70 104 50 104 36","#2E5AAC",2.4)+
+   AR("M226 36 C238 70 252 116 236 144","#C8372D",2.4)+AR("M206 166 L206 190","#C8372D",2.4)+AR("M196 212 C186 190 182 160 182 124","#C8372D",2.4)+AR("M258 130 C262 200 250 262 222 284","#C8372D",2.4)+AR("M100 284 C80 270 76 260 80 254","#2E5AAC",2.4)+
+   `<rect x="112" y="272" width="96" height="24" rx="8" style="fill:url(#rg-gray);stroke:#B8AE9F;stroke-width:.8"/>`+tx(160,288,"Organes","st-b st-dark","middle")+
+   tx(6,56,"CŒUR\nDROIT","st-blue st-b")+tx(6,84,"sang pauvre\nen O₂","st-sub")+tx(314,56,"CŒUR\nGAUCHE","st-acc st-b","end")+tx(314,84,"sang riche\nen O₂","st-sub","end")+
+   tx(6,224,"Veines\ncaves","st-sub")+tx(314,236,"Aorte","st-sub","end"),"Circulation dans le cœur droit et le cœur gauche");},
+ artere:()=>{const sec=(x,lbl,sub,lumen)=>`<circle cx="${x}" cy="70" r="40" style="fill:url(#rg-skin);stroke:#C99A82;stroke-width:1"/><circle cx="${x}" cy="70" r="34" style="fill:url(#rg-muscle);stroke:#8E3A30;stroke-width:.8"/><circle cx="${x}" cy="70" r="28" style="fill:#F7E3D8;stroke:#E2B9A6;stroke-width:.8"/>${lumen}`+tx(x,130,lbl,"st-b","middle")+tx(x,144,sub,"st-sub","middle");
+  const blood=(x,y,r)=>`<circle cx="${x}" cy="${y}" r="${r}" style="fill:url(#rg-blood)"/>`,rbc=(x,y)=>`<ellipse cx="${x}" cy="${y}" rx="4" ry="2.6" style="fill:#F07C70;opacity:.75"/>`;
+  return sv(165,
+   sec(55,"Artère saine","circulation libre",blood(55,70,26)+rbc(48,64)+rbc(62,76)+rbc(58,60))+
+   sec(160,"Plaque","rétrécie : angor",`<path d="M133 70 A27 27 0 0 1 187 70 C176 64 170 60 160 60 C150 60 144 64 133 70 Z" style="fill:url(#rg-fat);stroke:#C9A24E;stroke-width:.8"/><path d="M137 66 C146 60 152 58 160 58 C168 58 174 60 183 66" style="fill:none;stroke:#F2E2C0;stroke-width:2"/>`+blood(160,80,15)+rbc(156,80)+rbc(166,84))+
+   sec(265,"Plaque + caillot","bouchée : infarctus",`<path d="M238 70 A27 27 0 0 1 292 70 C281 64 275 60 265 60 C255 60 249 64 238 70 Z" style="fill:url(#rg-fat);stroke:#C9A24E;stroke-width:.8"/><path d="M240 72 C246 92 284 92 290 72 C280 66 270 64 265 64 C258 64 248 66 240 72 Z" style="fill:#6E1E1A;stroke:#4A100D;stroke-width:.8"/>`+fl("M246 76 L284 84 M250 86 L280 72 M258 70 L272 90",'#E2C66A',.9))+
+   tx(160,12,"Coupe d'une artère coronaire","st-sub","middle"),
+   "Coupe d'une artère saine, rétrécie par une plaque, puis bouchée par un caillot");},
+ bronche:()=>{const cart=(x,r)=>[0,72,144,216,288].map(a=>`<path d="M${x+r*Math.cos((a-24)*Math.PI/180)} ${72+r*Math.sin((a-24)*Math.PI/180)} A${r} ${r} 0 0 1 ${x+r*Math.cos((a+24)*Math.PI/180)} ${72+r*Math.sin((a+24)*Math.PI/180)}" style="fill:none;stroke:#DCEAF0;stroke-width:6;stroke-linecap:round"/>`).join("");
+  const wall=(x,R)=>`<circle cx="${x}" cy="72" r="${R}" style="fill:url(#rg-skin);stroke:#C99A82;stroke-width:1"/>`+cart(x,R-6);
+  const folded=(x,r,n,amp)=>{let d="";for(let i=0;i<=n*2;i++){const a=i/(n*2)*Math.PI*2,rr=r+(i%2?amp:-amp);d+=(i?"L":"M")+(x+rr*Math.cos(a)).toFixed(1)+" "+(72+rr*Math.sin(a)).toFixed(1)+" ";}return d+"Z";};
+  return sv(175,
+   wall(55,36)+`<circle cx="55" cy="72" r="27" style="fill:url(#rg-muscle);stroke:#8E3A30;stroke-width:.6"/><circle cx="55" cy="72" r="24" style="fill:url(#rg-mucosa)"/><circle cx="55" cy="72" r="20" style="fill:#FBF4EE"/>`+
+   tx(55,132,"Bronche normale","st-b","middle")+tx(55,146,"paroi fine","st-sub","middle")+
+   wall(160,40)+`<circle cx="160" cy="72" r="31" style="fill:url(#rg-muscle);stroke:#8E3A30;stroke-width:.6"/><path d="${folded(160,20,9,4)}" style="fill:url(#rg-mucosa);stroke:#B5675C;stroke-width:.6"/><path d="${folded(160,11,9,3)}" style="fill:#FBF4EE"/><ellipse cx="164" cy="75" rx="5" ry="3.4" style="fill:#E6D27A;stroke:#B9A044;stroke-width:.6"/>`+
+   tx(160,132,"Asthme (crise)","st-b","middle")+tx(160,146,"resserrée","st-sub","middle")+tx(160,160,"réversible","st-green","middle")+
+   wall(265,40)+`<circle cx="265" cy="72" r="32" style="fill:url(#rg-mucosa);stroke:#B5675C;stroke-width:.6"/><circle cx="265" cy="72" r="18" style="fill:#FBF4EE"/>`+[[256,68,8,5],[272,78,6,4],[262,80,5,3]].map(([x,y,a,b])=>`<ellipse cx="${x}" cy="${y}" rx="${a}" ry="${b}" style="fill:#D9C66A;stroke:#A9933E;stroke-width:.6"/>`).join("")+
+   tx(265,132,"BPCO","st-b","middle")+tx(265,146,"épaissie + mucus","st-sub","middle")+tx(265,160,"permanente","st-acc","middle")+
+   tx(160,12,"Coupe d'une bronche (cartilage, muscle, muqueuse)","st-sub","middle"),
+   "Coupe d'une bronche normale, en crise d'asthme et dans la BPCO");},
+ avc:()=>{const brain=(dx)=>`<g transform="translate(${dx} 0) scale(.58)">`+og("M70 128 C56 104 66 70 96 54 C126 38 168 34 200 46 C230 58 250 84 248 112 C246 130 236 140 222 144 C210 148 198 146 190 150 C176 162 150 166 128 160 C112 156 100 150 92 146 C82 142 74 138 70 128 Z","brain",false,{s:"#9A6E66"})+
+   og("M188 152 C194 140 222 138 238 146 C252 154 252 172 236 180 C218 188 196 182 188 170 Z","brain",false,{s:"#9A6E66"})+og("M170 150 C168 166 170 184 173 200 L187 202 C187 186 185 170 188 154 Z","brain",false,{s:"#9A6E66"})+
+   fl("M170 40 C164 64 160 88 150 112 M98 120 C116 113 138 110 158 113 C172 116 182 120 190 128 M84 92 C96 84 104 90 112 82 M78 110 C92 104 100 112 116 102 M104 66 C112 76 122 70 130 78 M132 52 C134 66 144 70 140 84 M184 52 C186 66 196 70 198 84 M200 60 C206 72 214 70 216 82 M190 92 C200 98 210 94 214 102 M212 120 C220 126 230 122 236 130 M110 132 C122 128 134 136 148 130 M196 150 C214 146 232 150 244 158 M192 160 C212 156 232 160 246 168","#B9857A",1.4)+`</g>`;
+  const mca=(dx)=>vs(`M${dx+66} 74 C${dx+74} 70 ${dx+80} 66 ${dx+88} 62 M${dx+80} 66 C${dx+82} 56 ${dx+88} 48 ${dx+94} 42 M${dx+88} 62 C${dx+98} 58 ${dx+106} 56 ${dx+114} 56`,2,RC.art,RC.artD,false);
+  return sv(185,
+   brain(-14)+`<path d="M58 60 C66 46 84 40 96 44 C102 54 98 66 86 72 C74 74 62 70 58 60 Z" style="fill:#8BA6C7;opacity:.55"/>`+mca(-14)+`<ellipse cx="66" cy="66" rx="4.5" ry="3.4" style="fill:#5A1714;stroke:#2E0B09;stroke-width:.7"/>`+
+   tx(80,140,"AVC ischémique","st-b","middle")+tx(80,154,"un caillot bouche l'artère","st-sub","middle")+tx(80,168,"≈ 80 % des cas","st-blue st-b","middle")+
+   brain(146)+mca(146)+`<path d="M240 56 C252 46 272 50 274 64 C276 78 262 86 250 82 C238 78 232 66 240 56 Z" style="fill:url(#rg-blood);stroke:#7E1E18;stroke-width:.8"/>`+
+   tx(240,140,"AVC hémorragique","st-b","middle")+tx(240,154,"une artère se rompt et saigne","st-sub","middle")+tx(240,168,"≈ 20 % des cas","st-acc st-b","middle")+
+   tx(160,12,"Seule l'imagerie (scanner, IRM) permet de les distinguer","st-sub","middle"),
+   "AVC ischémique et AVC hémorragique");},
+ alveole:()=>{const rbc=(x,y,r)=>`<g transform="translate(${x} ${y}) rotate(${r})"><ellipse rx="6" ry="4" style="fill:url(#rg-blood);stroke:#8E1F17;stroke-width:.5"/><ellipse rx="2.8" ry="1.6" style="fill:#F07C70;opacity:.7"/></g>`;
+  return sv(210,
+   vs("M160 0 V30",20,"#F2D2CC","#B97A70",false)+og("M160 30 C206 30 220 70 214 100 C208 130 186 142 160 142 C134 142 112 130 106 100 C100 70 114 30 160 30 Z","lung",false,{s:"#B5675C"})+
+   `<path d="M160 36 C200 36 210 72 206 98 C202 124 184 134 160 134 C136 134 118 124 114 98 C110 72 120 36 160 36 Z" style="fill:#FBF2EF"/>`+tx(160,74,"Alvéole","st-b st-dark","middle")+tx(160,88,"(air inspiré)","st-dark","middle")+
+   `<path d="M30 168 C90 136 230 136 290 168" style="fill:none;stroke:url(#rg-bloodB);stroke-width:22;stroke-linecap:round"/><path d="M160 145 C220 146 260 154 290 168" style="fill:none;stroke:#D9574A;stroke-width:22;stroke-linecap:round"/><path d="M30 168 C90 136 230 136 290 168" style="fill:none;stroke:#fff;stroke-width:4;stroke-opacity:.25;stroke-linecap:round" transform="translate(-2 -4)"/>`+
+   rbc(60,158,-20)+rbc(96,146,-10)+rbc(130,142,0)+rbc(190,142,5)+rbc(226,148,15)+rbc(262,158,22)+tx(160,206,"Capillaire sanguin","st-b","middle")+tx(22,190,"sang pauvre en O₂","st-blue")+tx(298,190,"sang riche en O₂","st-acc","end")+
+   AR("M138 96 L138 140","#2E5AAC",2.4)+fl("M104 118 H134","#2E5AAC",.8)+tx(100,114,"O₂","st-blue st-b","end")+tx(100,128,"vers le sang","st-blue","end")+AR("M182 140 L182 98","#B4513A",2.4)+fl("M186 118 H216","#B4513A",.8)+tx(220,114,"CO₂","st-acc st-b")+tx(220,128,"rejeté","st-acc")+
+   tx(8,24,"Paroi très fine :","st-b")+tx(8,38,"les gaz passent","st-sub")+tx(8,52,"par diffusion","st-sub"),
+   "Échanges gazeux entre l'alvéole et le capillaire sanguin");},
+ nephron:()=>sv(240,
+  `<circle cx="46" cy="52" r="22" style="fill:#FBEFE6;stroke:#C99A82;stroke-width:1.4"/>`+art("M30 30 C36 40 34 46 40 50",2.4,false)+`<g>${[[40,48],[48,44],[52,54],[44,58],[38,56],[50,62],[56,48]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="5" style="fill:url(#rg-blood);stroke:#8E1F17;stroke-width:.5"/>`).join("")}</g>`+art("M56 60 C62 70 60 78 54 84",2,false)+
+  tx(46,92,"Glomérule","st-b","middle")+tx(46,105,"filtration","st-sub","middle")+
+  vs("M66 52 C80 40 90 66 104 52 S122 44 126 58 L140 196 C142 214 168 214 170 196 L182 70 C186 54 196 66 202 54 S212 46 216 54",9,"#F3D2B8","#B98B6E",false)+fl("M66 52 C80 40 90 66 104 52 S122 44 126 58 L140 196 C142 214 168 214 170 196 L182 70 C186 54 196 66 202 54 S212 46 216 54",'#FFF6EE',2.2,";opacity:.7")+
+  vs("M222 40 L222 218",11,"#E9D9C2","#A99070",false)+AR("M222 214 L222 232","#5C6B7A",2)+tx(230,236,"Urines","st-sub")+
+  tx(96,30,"Tube proximal","st-sub","middle")+tx(210,30,"Tube distal","st-sub","middle")+tx(155,230,"Anse de Henle","st-sub","middle")+tx(234,110,"Tube\ncollecteur","st-sub")+
+  dot(175,160,"#C8372D")+tx(128,164,"Furosémide","st-acc st-b","end")+dot(208,52,"#D9A23A")+tx(312,84,"Thiazidiques","st-amber st-b","end")+LL(212,58,262,76)+dot(222,140,"#2E5AAC")+tx(234,150,"Spironolactone","st-blue st-b"),
+  "Néphron et sites d'action des diurétiques"),
+ pac:()=>sv(220,
+  skinBlock(0,64,320,10,24,66,26)+tx(8,58,"Peau","st-sub")+
+  `<path d="M96 104 C96 92 174 92 174 104 L174 128 C174 136 96 136 96 128 Z" style="fill:url(#rg-steel);stroke:#7D8A96;stroke-width:1"/><ellipse cx="135" cy="98" rx="30" ry="6" style="fill:#E8EEF2;stroke:#9AA7B2;stroke-width:1"/><ellipse cx="135" cy="98" rx="22" ry="4" style="fill:#C9D6E0"/>`+
+  `<rect x="80" y="139" width="110" height="26" rx="5" style="fill:#FFF8F0;opacity:.88"/><rect x="200" y="119" width="54" height="16" rx="5" style="fill:#FFF8F0;opacity:.88"/>`+tx(135,149,"Boîtier sous la peau","st-b st-dark","middle")+tx(135,160,"avec son septum","st-dark","middle")+
+  `<path d="M116 18 L152 18 L152 30 L144 32 L144 40 L128 40 L128 32 L116 30 Z" style="fill:#3E7CC4;stroke:#2A578C;stroke-width:1"/>`+vs("M136 40 L136 96",2.6,"#D7DEE4","#7D8A96",false)+vs("M136 96 L132 100",2.6,"#D7DEE4","#7D8A96",false)+
+  tx(160,24,"Aiguille de Huber","st-acc st-b")+tx(160,38,"(coudée, non traumatique)","st-sub")+
+  vs("M174 116 C220 116 250 114 286 100",4,"#F4F6F8","#9AA7B2",false)+tx(206,130,"Cathéter","st-b st-dark")+
+  `<rect x="282" y="74" width="28" height="116" rx="13" style="fill:url(#rg-bloodB);stroke:#2E4079;stroke-width:1"/>`+vs("M290 100 L296 150",3.4,"#F4F6F8","#9AA7B2",false)+tx(297,66,"Veine","st-b","middle")+
+  tx(150,204,"Extrémité du cathéter : veine cave supérieure","st-sub","middle"),
+  "Chambre implantable : boîtier sous la peau, aiguille de Huber et cathéter dans la veine"),
+ angles:()=>{const needle=(x,ang,len,lbl,deg,lx,ly,la)=>{const r=ang*Math.PI/180,c=Math.cos(r),s=Math.sin(r),x2=x+c*len,y2=40+s*len,x1=x-c*18,y1=40-s*18,x0=x-c*46,y0=40-s*46;
+   return vs(`M${x1.toFixed(1)} ${y1.toFixed(1)} L${x2.toFixed(1)} ${y2.toFixed(1)}`,1.8,"#DCE3E8","#6E7B86",false)+vs(`M${x0.toFixed(1)} ${y0.toFixed(1)} L${x1.toFixed(1)} ${y1.toFixed(1)}`,7,"#F4F8FB","#9AA7B2",false,{cap:"butt"})+`<circle cx="${x2.toFixed(1)}" cy="${y2.toFixed(1)}" r="2.6" style="fill:#B4513A"/>`+tx(lx,ly,lbl+" "+deg,"st-b",la);};
+  return sv(230,skinBlock(10,40,300,16,40,46,56)+art("M254 66 C268 62 290 62 310 66",8,false)+
+   needle(96,12,40,"ID","10–15°",84,12,"middle")+needle(150,45,62,"SC","45°",150,16,"start")+needle(204,90,124,"IM","90°",212,14,"start")+needle(250,25,30,"IV","≈ 25°",258,28,"start")+
+   tx(14,52,"Épiderme","st-dark")+tx(14,82,"Derme","st-dark")+tx(14,124,"Hypoderme","st-dark")+tx(14,176,"Muscle","st-b")+tx(306,84,"veine","st-dark","end")+
+   tx(160,218,"SC : 90° possible avec une aiguille courte ou un pli épais","st-sub","middle"),"Angles et profondeur des quatre voies d'injection");},
+ peau:()=>{const bar=(x,h,top,bot,lbl)=>`<rect x="${x}" y="30" width="16" height="${h}" rx="3" style="fill:url(#bg-${lbl})"/>`;
+  const g=(id,a,b)=>`<linearGradient id="bg-${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`;
+  return sv(232,`<defs>${g("1","#F08A6E","#E86F5A")+g("2s","#F6C4A6","#E46A52")+g("2p","#F2E6DC","#C8584A")+g("3","#E9E2D2","#5C3A2C")}</defs>`+
+   skinBlock(10,30,190,18,74,64,30)+vs("M70 26 L72 120",2,"#4A3426","#2A1C14",false)+`<ellipse cx="72" cy="122" rx="6" ry="8" style="fill:#C8977A;stroke:#7A5440;stroke-width:.8"/>`+art("M20 112 C70 108 120 114 196 110",2.2,false)+vein("M20 118 C70 116 120 120 196 118",2.2,false)+
+   tx(16,43,"Épiderme","st-b st-dark")+tx(16,64,"Derme","st-b st-dark")+tx(16,142,"Hypoderme (graisse)","st-b st-dark")+tx(16,206,"Muscle","st-b","start")+
+   `<path d="M218 30 h16 v14 a8 6 0 0 1 -16 0 Z" style="fill:url(#bg-1)"/>`+`<path d="M244 30 h16 v38 h-16 Z" style="fill:url(#bg-2s)"/><ellipse cx="252" cy="28" rx="10" ry="6" style="fill:#FBE9D8;stroke:#D9A98A;stroke-width:.8;opacity:.9"/>`+
+   `<path d="M270 30 h16 v92 h-16 Z" style="fill:url(#bg-2p)"/><path d="M296 30 h16 v160 h-16 Z" style="fill:url(#bg-3)"/>`+fl("M298 34 l12 6 M298 48 l12 -4 M298 60 l12 5",'#3A2418',1)+
+   tx(225,212,"1er","st-b","middle")+tx(251,212,"2e S","st-b","middle")+tx(277,212,"2e P","st-b","middle")+tx(303,212,"3e","st-b","middle")+
+   tx(318,226,"S : superficiel · P : profond","st-sub","end")+tx(160,18,"Plus la brûlure est profonde, moins elle fait mal","st-sub","middle"),
+   "Couches de la peau et profondeur des brûlures selon le degré");},
+ occlusion:()=>sv(190,
+  `<path d="M18 92 C18 60 40 58 70 60 C100 62 124 58 146 70 L146 116 C124 128 100 124 70 126 C40 128 18 124 18 92 Z" style="fill:url(#rg-intest);stroke:#B57A66;stroke-width:1.2"/>`+
+  `<path d="M22 100 L142 100 L142 114 C122 124 100 120 70 122 C44 124 26 118 22 100 Z" style="fill:#E1C77A;opacity:.85"/><path d="M22 100 H142" style="stroke:#B49B4E;stroke-width:1.2"/>`+fl("M40 64 C44 78 44 108 40 122 M70 61 C74 78 74 108 70 125 M100 62 C104 78 104 108 100 124 M126 64 C130 80 130 106 126 120",'#C38A74',1.2)+
+  og("M146 74 C152 70 166 70 170 76 C174 86 174 100 170 110 C166 116 152 116 146 112 C142 100 142 86 146 74 Z","myo",false,{s:"#6E1F1A"})+
+  vs("M170 92 C210 92 250 92 306 92",14,"#E8C3B1","#B57A66",false)+fl("M200 86 v12 M230 86 v12 M260 86 v12 M290 86 v12",'#C38A74',1)+
+  tx(80,80,"gaz","st-b st-dark","middle")+tx(80,113,"liquide","st-b st-dark","middle")+
+  tx(80,148,"En amont : intestin dilaté","st-b","middle")+tx(80,162,"gaz et liquide s'accumulent","st-sub","middle")+tx(158,58,"Obstacle","st-acc st-b","middle")+
+  tx(240,120,"En aval : vide","st-b","middle")+tx(240,134,"arrêt des matières","st-sub","middle")+tx(240,148,"et des gaz","st-sub","middle")+
+  tx(160,184,"Vomissements, ventre gonflé, douleurs, plus rien ne passe","st-sub","middle"),
+  "Occlusion intestinale : intestin dilaté en amont de l'obstacle"),
+ thrombose:()=>{const LEG="M60 150 C58 170 62 190 64 206 C62 216 66 224 72 230 C80 236 104 238 112 234 C116 230 110 226 100 222 C92 218 90 210 92 200 C96 184 98 166 98 150 Z";
+  return sv(260,
+   og("M120 30 C100 32 88 52 88 78 C88 98 96 112 116 110 C126 108 128 96 128 80 C128 60 128 40 120 30 Z","lung",false,{s:"#A85A54"})+og("M200 30 C220 32 232 52 232 78 C232 98 224 112 204 110 C194 108 192 96 192 80 C192 60 192 40 200 30 Z","lung",false,{s:"#A85A54"})+tx(160,20,"Poumons","st-b","middle")+
+   og("M160 92 C164 86 176 86 178 94 C180 104 170 114 162 118 C156 112 150 104 152 96 C154 92 157 92 160 92 Z","myo",false,{s:"#6E1F1A"})+vein("M156 112 C150 130 120 140 84 148",4.4,false)+vs("M156 100 C146 92 136 84 124 80",4,"#5D73BB","#33447E",false)+
+   og(LEG,"skin",false,{s:"#B98868"})+vein("M80 150 C80 172 80 196 80 214",4,false)+`<ellipse cx="80" cy="200" rx="5.5" ry="12" style="fill:#6E1E1A;stroke:#4A100D;stroke-width:.8"/>`+
+   tx(106,210,"Caillot dans une veine","st-b")+tx(106,224,"du mollet : phlébite","st-sub")+
+   AR("M80 184 C80 160 100 150 130 140 C150 132 156 118 152 104 C146 92 136 86 128 82","#B4513A",1.8)+`<circle cx="126" cy="82" r="4.5" style="fill:#6E1E1A"/>`+
+   tx(178,150,"Un fragment migre","st-acc st-b")+tx(178,164,"vers les poumons :","st-acc")+tx(178,178,"embolie pulmonaire","st-acc st-b"),
+   "Du caillot du mollet à l'embolie pulmonaire");}
+});
+
+Object.assign(SCH,{
+ sites:()=>{const S=1.12,X=100,Y=4,P=(x,y)=>HP(X,Y,S,x,y);const zone=(x,y,rx,ry,c)=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" style="fill:${c};fill-opacity:.42;stroke:${c};stroke-width:1.2;stroke-dasharray:3 2"/>`;
+  const [ax,ay]=P(213,84),[bx2,by]=P(178,121),[cx2,cy]=P(186,170);
+  return sv(280,HB(X,Y,S,zone(110,84,5.5,14,"#3E7CC4")+zone(210,84,5.5,14,"#3E7CC4")+zone(160,121,19,12,"#C8574A")+`<circle cx="160" cy="118" r="2.4" style="fill:var(--surface);stroke:#B98868;stroke-width:.8"/>`+zone(139,170,7,16,"#D9A23A")+zone(181,170,7,16,"#D9A23A"))+
+   LL(ax,ay,182,70)+tx(186,66,"Bras (face externe)","st-b")+tx(186,80,"absorption intermédiaire","st-sub")+
+   LL(bx2,by,182,128)+tx(186,124,"Abdomen","st-b")+tx(186,138,"absorption la plus rapide","st-sub")+tx(186,152,"à 2 cm du nombril","st-sub")+
+   LL(cx2,cy,182,195)+tx(186,191,"Cuisses","st-b")+tx(186,205,"absorption plus lente","st-sub")+
+   tx(186,236,"Fesses : possible aussi","st-sub")+tx(186,252,"Changer de point\nà chaque fois","st-acc st-b"),"Sites d'injection sous-cutanée de l'insuline");},
+ pouls:()=>{const S=1.12,X=160,Y=6,P=(x,y)=>HP(X,Y,S,x,y);
+  const art2=`<g style="opacity:.75">${art("M160 50 V140 M160 140 C168 146 174 150 180 156 C184 176 186 196 187 226 M160 56 C148 58 136 60 124 64 C118 80 114 100 108 140 M156 46 L154 30",1.4,false)}</g>`;
+  const pts=[[153,42,"Carotidien","urgence",66,36,"end"],[111,104,"Huméral","pli du coude",66,90,"end"],[103,141,"Radial","routine",66,144,"end"],[170,84,"Apical","pointe du cœur",240,58,"start"],[174,149,"Fémoral","pli de l'aine",240,146,"start"],[186,229,"Pédieux","dessus du pied",240,234,"start"]];
+  return sv(290,HB(X,Y,S,art2)+pts.map(([x,y,l,sub,lx,ly,a])=>{const [px,py]=P(x,y);return LL(a==="end"?lx+4:lx-4,ly+2,px,py)+dot(px,py)+tx(lx,ly,l,"st-b",a)+tx(lx,ly+13,sub,"st-sub",a);}).join(""),"Les sites de prise du pouls sur une silhouette");},
+ wallace:()=>{const S=1.12,X=210,Y=6,P=(x,y)=>HP(X,Y,S,x,y);
+  const div=fl("M152 46 L168 46 M116 58 L124 90 M204 58 L196 90 M122 146 L198 146 M160 146 L160 236",'#8E5A45',1.1,";stroke-dasharray:3 3");
+  const lab=(x,y,t,sub)=>{const [px,py]=P(x,y);return tx(px,py,t,"st-b st-dark","middle")+(sub?tx(px,py+13,sub,"st-dark","middle"):"");};
+  return sv(290,HB(X,Y,S,div)+lab(160,28,"9 %")+lab(160,98,"18 %","avant")+(([x1,y1],[x2,y2])=>tx(x1,y1,"9 %","st-b","end")+tx(x2,y2,"9 %","st-b"))(P(92,112),P(228,112))+lab(135,172,"18 %")+lab(185,172,"18 %")+
+   tx(10,26,"Tête et cou : 9 %","st-sub")+tx(10,40,"Chaque bras : 9 %","st-sub")+tx(10,54,"Tronc : 18 % avant","st-sub")+tx(10,68,"+ 18 % arrière","st-sub")+tx(10,82,"Chaque jambe : 18 %","st-sub")+tx(10,96,"Périnée : 1 %","st-sub")+
+   tx(10,250,"Paume du patient ≈ 1 %","st-acc st-b")+tx(10,264,"pour les petites surfaces","st-sub"),"Règle des 9 de Wallace chez l'adulte");},
+ brassard:()=>sv(200,
+  `<path d="M0 124 H320 V134 H0 Z" style="fill:url(#rg-gray);stroke:#B8AE9F;stroke-width:.8"/><path d="M40 134 V196 M280 134 V196" style="stroke:#B8AE9F;stroke-width:3"/>`+tx(160,163,"bras posé sur un support","st-sub","middle")+
+  og("M20 98 C60 94 130 96 186 100 C214 102 238 104 256 104 C270 104 282 102 292 106 C300 110 300 120 290 122 C270 124 250 122 230 122 C190 122 130 124 60 124 C40 124 24 122 20 116 Z","skin",false,{s:"#B98868"})+
+  fl("M282 108 l10 2 M280 114 l12 1 M278 120 l10 0",'#B98868',.8)+fl("M186 104 C190 110 190 116 186 122",'#C9946F',.9)+
+  `<path d="M10 110 H316" style="stroke:#B4513A;stroke-width:1.4;stroke-dasharray:5 4"/>`+tx(316,90,"hauteur du cœur","st-acc st-b","end")+
+  `<path d="M70 92 C70 90 146 90 146 92 L148 128 C148 130 68 130 68 128 Z" style="fill:url(#rg-cuff);stroke:#2E5478;stroke-width:1"/>`+fl("M74 100 H142 M74 120 H142",'#9DBBD6',1)+tx(108,114,"brassard","st-b","middle")+
+  vs("M108 92 C108 66 150 52 206 50",2.6,"#4A4F57","#2A2E33",false)+`<rect x="206" y="30" width="44" height="34" rx="6" style="fill:url(#rg-plastic);stroke:#8E9BA6;stroke-width:1"/><rect x="211" y="35" width="34" height="16" rx="2" style="fill:#2E3A44"/>`+`<text x="228" y="47" text-anchor="middle" style="fill:#9EF0B8;font-size:9px;font-weight:700;font-family:monospace">120/80</text>`+tx(256,44,"tensiomètre","st-sub")+
+  tx(160,148,"2 cm au-dessus du pli du coude","st-sub","middle")+tx(12,30,"Patient assis, dos appuyé,","st-sub")+tx(12,44,"jambes décroisées, sans parler","st-sub"),
+  "Mesure de la tension : brassard sur le bras soutenu à hauteur du cœur"),
+ oxymetre:()=>sv(182,
+  og("M10 94 L190 94 C222 94 232 78 228 70 C224 60 212 56 196 56 L10 56 Z","skin",false,{s:"#B98868"})+`<path d="M200 60 C214 60 222 66 222 74 C220 80 210 82 200 80 Z" style="fill:#F6E1D6;stroke:#C9A08A;stroke-width:.8"/>`+fl("M120 60 C124 70 124 82 120 92 M150 60 C154 70 154 82 150 92",'#C9946F',.8)+
+  `<path d="M148 30 C148 26 240 26 240 30 L240 56 L148 56 Z" style="fill:url(#rg-plastic);stroke:#8E9BA6;stroke-width:1"/><path d="M148 94 L240 94 L240 120 C240 124 148 124 148 120 Z" style="fill:url(#rg-plastic);stroke:#8E9BA6;stroke-width:1"/><path d="M234 56 L240 56 L240 94 L234 94 Z" style="fill:#AEB9C3"/>`+
+  `<circle cx="184" cy="58" r="3" style="fill:#FF3B30"/><path d="M184 60 L180 92 M184 60 L188 92" style="stroke:#FF3B30;stroke-width:1.2;stroke-opacity:.65;stroke-dasharray:3 2"/><rect x="178" y="92" width="12" height="4" rx="1" style="fill:#2E3A44"/>`+
+  tx(160,18,"Le capteur fait passer une lumière à travers le doigt","st-sub","middle")+
+  `<rect x="226" y="126" width="88" height="40" rx="8" style="fill:#2E3A44;stroke:#1C252C;stroke-width:1"/><text x="244" y="152" style="fill:#9EF0B8;font-size:13px;font-weight:700;font-family:monospace">98 %</text><path d="M282 150 l5 0 3 -8 4 14 3 -6 6 0" style="fill:none;stroke:#9EF0B8;stroke-width:1.8"/>`+
+  tx(12,124,"Doigt propre et chaud","st-b")+tx(12,138,"sans vernis","st-sub")+tx(12,158,"Courbe de pouls régulière","st-acc")+tx(12,172,"= valeur fiable","st-acc"),"Oxymètre de pouls sur un doigt"),
+ urines:()=>{const jar=(x,col,l,s,dots)=>`<path d="M${x-18} 32 h36 l-2 62 a8 8 0 0 1 -8 8 h-16 a8 8 0 0 1 -8 -8 Z" style="fill:#F4F8FB;fill-opacity:.6;stroke:#9AA7B2;stroke-width:1"/><path d="M${x-17.4} 46 h34.8 l-1.6 48 a7 7 0 0 1 -7 7 h-17.6 a7 7 0 0 1 -7 -7 Z" style="fill:${col};opacity:.92"/><ellipse cx="${x}" cy="46" rx="17.4" ry="2.2" style="fill:#fff;opacity:.35"/><path d="M${x-12} 50 v40" style="stroke:#fff;stroke-width:3;stroke-opacity:.4;stroke-linecap:round"/>`+
+   `<rect x="${x-20}" y="22" width="40" height="11" rx="2" style="fill:url(#rg-plastic);stroke:#8E9BA6;stroke-width:.8"/>${fl(`M${x-16} 24 v7 M${x-10} 24 v7 M${x-4} 24 v7 M${x+2} 24 v7 M${x+8} 24 v7 M${x+14} 24 v7`,"#AEB9C3",.8)}${dots?`<circle cx="${x-6}" cy="62" r="2.4" fill="#fff" opacity=".8"/><circle cx="${x+5}" cy="74" r="2" fill="#fff" opacity=".8"/><circle cx="${x-2}" cy="86" r="2.4" fill="#fff" opacity=".8"/><circle cx="${x+7}" cy="58" r="1.6" fill="#fff" opacity=".8"/>`:""}`+tx(x,120,l,"st-b","middle")+tx(x,134,s,"st-sub","middle");
+  return sv(150,jar(32,"#F3EBB0","Clair","normal")+jar(95,"#E9C350","Foncé","peu d'eau")+jar(158,"#C47E2E","Ambré","déshydraté")+jar(221,"#C04A3E","Rouge","sang ?")+jar(284,"#D6C578","Trouble","infection ?",true),"Couleurs des urines et leur signification");},
+ pupilles:()=>{const E=(x,cy,rI,pr,sc=1)=>{const w=34*sc,h=16*sc;return `<path d="M${x-w} ${cy} C${x-w*.6} ${cy-h*1.5} ${x+w*.6} ${cy-h*1.5} ${x+w} ${cy} C${x+w*.6} ${cy+h*1.4} ${x-w*.6} ${cy+h*1.4} ${x-w} ${cy} Z" style="fill:url(#rg-eyew);stroke:#B98868;stroke-width:1.2"/>`+
+   `<circle cx="${x}" cy="${cy}" r="${rI}" style="fill:url(#rg-iris);stroke:#2E5478;stroke-width:.8"/>`+fl(Array.from({length:12},(_,i)=>{const a=i*Math.PI/6;return `M${(x+Math.cos(a)*(pr+1)).toFixed(1)} ${(cy+Math.sin(a)*(pr+1)).toFixed(1)} L${(x+Math.cos(a)*(rI-1)).toFixed(1)} ${(cy+Math.sin(a)*(rI-1)).toFixed(1)}`;}).join(" "),"#2E5478",.5)+
+   `<circle cx="${x}" cy="${cy}" r="${pr}" style="fill:#14181C"/><circle cx="${x-rI*.35}" cy="${cy-rI*.35}" r="${Math.max(1.4,rI*.14)}" style="fill:#fff;opacity:.85"/>`+fl(`M${x-w} ${cy} C${x-w*.6} ${cy-h*1.5} ${x+w*.6} ${cy-h*1.5} ${x+w} ${cy}`,"#8E5A45",1.6);};
+  return sv(130,E(38,50,17,6)+tx(38,100,"Normale","st-b","middle")+tx(38,114,"réactive","st-sub","middle")+E(112,50,17,2.4)+tx(112,100,"Myosis","st-b","middle")+tx(112,114,"petite","st-sub","middle")+E(186,50,17,13)+tx(186,100,"Mydriase","st-b","middle")+tx(186,114,"dilatée","st-sub","middle")+
+   E(250,50,9,2.4,.55)+E(292,50,9,7,.55)+tx(271,100,"Anisocorie","st-acc st-b","middle")+tx(271,114,"inégales : alerte","st-acc","middle"),"Taille des pupilles : normale, myosis, mydriase, anisocorie");},
+ tubes:()=>{const t=(x,cap,n,l,fill)=>`<path d="M${x-9} 36 V96 a9 9 0 0 0 18 0 V36 Z" style="fill:#F4F8FB;fill-opacity:.7;stroke:#9AA7B2;stroke-width:1"/>${fill?`<path d="M${x-8.4} 70 V96 a8.4 8.4 0 0 0 16.8 0 V70 Z" style="fill:${fill};opacity:.9"/>`:""}<rect x="${x-8.4}" y="52" width="16.8" height="20" style="fill:#fff;opacity:.85"/>${fl(`M${x-6} 57 h12 M${x-6} 62 h9 M${x-6} 67 h11`,"#9AA7B2",.7)}<path d="M${x-6} 40 v52" style="stroke:#fff;stroke-width:2.4;stroke-opacity:.5;stroke-linecap:round"/>`+
+   `<path d="M${x-11} 22 h22 v14 h-22 Z" style="fill:${cap};stroke:rgba(0,0,0,.25);stroke-width:.8"/>${fl(`M${x-8} 24 v10 M${x-4} 24 v10 M${x} 24 v10 M${x+4} 24 v10 M${x+8} 24 v10`,"rgba(0,0,0,.18)",1)}`+tx(x,16,String(n),"st-b","middle")+tx(x,122,l,"st-sub","middle");
+  return sv(150,`<path d="M18 42 h28 v54 a8 8 0 0 1 -8 8 h-12 a8 8 0 0 1 -8 -8 Z" style="fill:#F4F8FB;fill-opacity:.7;stroke:#9AA7B2;stroke-width:1"/><path d="M19 76 h26 v20 a7 7 0 0 1 -7 7 h-12 a7 7 0 0 1 -7 -7 Z" style="fill:#F2D9A6"/><rect x="20" y="28" width="24" height="14" rx="3" style="fill:#5D7896"/><path d="M50 42 h20 v52 a6 6 0 0 1 -6 6 h-8 a6 6 0 0 1 -6 -6 Z" style="fill:#F4F8FB;fill-opacity:.7;stroke:#9AA7B2;stroke-width:1"/><rect x="51" y="28" width="18" height="14" rx="3" style="fill:#8E5BA6"/>`+tx(44,16,"1","st-b","middle")+tx(44,122,"Hémocultures","st-sub","middle")+
+   t(102,"#5B9BD5",2,"Citrate","#A7262A")+t(146,"#D9534F",3,"Sec","#A7262A")+t(190,"#4F9F5E",4,"Héparine","#A7262A")+t(234,"#8E5BB5",5,"EDTA","#A7262A")+t(278,"#9AA3AB",6,"Fluorure","#A7262A")+
+   tx(160,142,"Coagulation · Biochimie · Biochimie · NFS · Glycémie","st-sub","middle"),"Ordre de prélèvement des tubes");},
+ fistule:()=>sv(190,
+  og("M10 72 C80 64 180 58 256 56 C292 54 312 70 312 92 C312 114 292 128 256 126 C180 124 80 120 10 114 Z","skin",false,{s:"#B98868"})+fl("M256 60 C270 70 272 110 256 122",'#C9946F',.9)+
+  vs("M14 82 C70 80 120 78 160 80 C180 82 190 86 196 90",8,"#6E86C8","#3E539A",false)+fl("M40 80 q8 -6 16 0 M80 79 q8 -6 16 0 M120 78 q8 -6 16 0",'#3E539A',1)+art("M14 102 C90 100 150 96 196 92",3.6,false)+
+  `<circle cx="196" cy="91" r="7" style="fill:url(#rg-nerve);stroke:#A9831B;stroke-width:1"/>`+fl("M206 84 q4 7 0 14 M212 80 q6 11 0 22 M218 76 q8 15 0 30",'#B4513A',1.1)+
+  tx(206,30,"Fistule : artère reliée","st-b")+tx(206,44,"à une veine","st-sub")+LL(198,84,212,48)+
+  tx(14,140,"Veine (grossit, sert à la dialyse)","st-blue st-b")+tx(14,156,"Artère","st-acc st-b")+
+  tx(14,178,"Ce bras : ni tension, ni prise de sang, ni perfusion","st-acc st-b")+tx(232,108,"frémissement","st-dark")+tx(232,122,"à vérifier","st-dark"),"Fistule artério-veineuse au bras"),
+ platre:()=>sv(220,
+  og("M188 92 C200 88 214 88 224 90 C232 92 234 98 236 100 L266 100 C272 100 274 106 268 108 L240 110 L272 112 C278 112 278 118 272 120 L240 122 L268 124 C274 124 274 130 268 132 L238 134 L262 136 C268 136 268 142 262 142 L232 144 C222 146 206 146 188 142 Z","skin",false,{s:"#B98868"})+
+  `<path d="M206 88 C210 78 220 70 232 68 C238 68 240 74 234 78 C226 82 220 88 218 92 Z" style="fill:url(#rg-skin);stroke:#B98868;stroke-width:.9"/>`+[[266,104],[270,116],[266,128],[260,139]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="3" ry="2.2" style="fill:#F9E6DC;stroke:#C9A08A;stroke-width:.6"/>`).join("")+
+  `<path d="M20 86 C20 80 26 78 34 78 L192 82 C198 82 200 88 200 112 C200 136 198 144 192 144 L34 148 C26 148 20 146 20 140 Z" style="fill:url(#rg-plaster);stroke:#B9B2A4;stroke-width:1.4"/>`+fl("M40 80 L48 146 M70 80 L78 147 M100 81 L108 147 M130 81 L138 146 M160 82 L168 145",'#DCD5C8',1.2)+`<path d="M186 82 C192 84 196 96 196 112 C196 128 192 140 186 144" style="fill:none;stroke:#E9E4DA;stroke-width:4"/>`+tx(105,117,"plâtre","st-dark st-b","middle")+
+  dot(268,104,"#B4513A")+
+  tx(10,24,"À vérifier sur les doigts, plusieurs fois par jour :","st-b")+tx(10,44,"Couleur : rosés, pas pâles ni bleus","st-sub")+tx(10,58,"Chaleur : chauds","st-sub")+
+  tx(10,166,"Mobilité : le patient bouge les doigts","st-sub")+tx(10,180,"Sensibilité : pas de fourmillements","st-sub")+tx(10,194,"Œdème : pas de gonflement qui augmente","st-sub")+
+  tx(10,214,"Douleur qui augmente = urgence (syndrome des loges)","st-acc st-b"),"Surveillance des extrémités sous un plâtre"),
+ perfuseur:()=>sv(250,
+  `<path d="M70 2 v10" style="stroke:#8E9BA6;stroke-width:2"/><path d="M42 14 C42 10 98 10 98 14 L98 86 C98 94 86 98 70 98 C54 98 42 94 42 86 Z" style="fill:#EAF4FB;fill-opacity:.8;stroke:#8EA9BF;stroke-width:1.2"/><path d="M43 30 L97 30 L97 86 C97 93 85 97 70 97 C55 97 43 93 43 86 Z" style="fill:#CFE6F5;opacity:.85"/>`+fl("M88 40 h8 M90 52 h6 M88 64 h8 M90 76 h6",'#7FA2BD',1)+`<rect x="50" y="44" width="36" height="20" rx="2" style="fill:#fff;opacity:.85"/>`+tx(68,58,"500 mL","st-b st-dark","middle")+`<path d="M47 18 v66" style="stroke:#fff;stroke-width:3;stroke-opacity:.5;stroke-linecap:round"/>`+
+  vs("M70 98 L70 112",4,"#F4F8FB","#9AA7B2",false)+`<path d="M58 112 h24 v44 a8 8 0 0 1 -8 8 h-8 a8 8 0 0 1 -8 -8 Z" style="fill:#F4F8FB;fill-opacity:.8;stroke:#9AA7B2;stroke-width:1"/><path d="M59 146 h22 v10 a7 7 0 0 1 -7 7 h-8 a7 7 0 0 1 -7 -7 Z" style="fill:#CFE6F5"/><path d="M70 116 v6" style="stroke:#9AA7B2;stroke-width:2"/><path d="M70 126 c-3 4 -3 8 0 8 c3 0 3 -4 0 -8 Z" style="fill:#9FC9E8;stroke:#5C8DB5;stroke-width:.6"/>`+
+  vs("M70 164 L70 232",3,"#F4F8FB","#9AA7B2",false)+`<path d="M58 182 h24 v30 h-24 Z" style="fill:url(#rg-plastic);stroke:#8E9BA6;stroke-width:1"/><circle cx="70" cy="197" r="7" style="fill:#3E7CC4;stroke:#2A578C;stroke-width:1"/>`+fl("M65 193 h10 M64 197 h12 M65 201 h10","#9EC3E6",.8)+AR("M70 228 L70 246","#B4513A",2)+
+  LL(100,50,136,50)+tx(140,46,"Poche","st-b")+tx(140,60,"volume à passer (mL)","st-sub")+
+  LL(84,134,136,124)+tx(140,120,"Chambre compte-gouttes","st-b")+tx(140,134,"on compte les gouttes","st-sub")+tx(140,148,"pendant 1 minute","st-sub")+
+  LL(80,197,136,192)+tx(140,188,"Molette (régulateur)","st-b")+tx(140,202,"règle le débit","st-sub")+
+  tx(140,230,"Standard : 20 gouttes = 1 mL","st-acc st-b")+tx(140,244,"Précision : 60 gouttes = 1 mL","st-sub"),"Perfuseur par gravité : poche, chambre compte-gouttes, molette")
+});
