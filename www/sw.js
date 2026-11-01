@@ -58,6 +58,7 @@ const FILES=[
  "js/contenus/images-pallia.js",
  "js/contenus/images-transv.js",
  "js/pathos-maps.js",
+ "js/schemas-real.js",
  "js/pathos.js",
  "js/data.js",
  "js/render.js",
