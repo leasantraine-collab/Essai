@@ -420,3 +420,35 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .px-order li::before{content:counter(po);position:absolute;left:10px;top:50%;transform:translateY(-50%);width:26px;height:26px;border-radius:50%;background:var(--brand);color:var(--on-brand);display:grid;place-items:center;font-weight:700;font-size:.82rem}
 .px-order li:not(:last-child)::after{content:"";position:absolute;left:22px;bottom:-17px;width:2px;height:16px;background:var(--line-2)}
 .px-order li:last-child{margin-bottom:0}
+/* ---------- Pathologies : comprendre en images ---------- */
+.px-story{background:color-mix(in srgb,var(--c) 22%,var(--surface));border:1px solid color-mix(in srgb,var(--c) 45%,var(--line));border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:8px;line-height:1.65}
+.px-story .cv-lab{color:var(--ink)}
+.px-story p{margin:0}
+.px-tag{font-family:var(--f-display);font-size:1.08rem;font-weight:650;line-height:1.35}
+.px-corr{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:4px 14px 6px;display:flex;flex-direction:column}
+.px-corr>div{display:grid;grid-template-columns:minmax(0,1fr) 18px minmax(0,1fr);gap:8px;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:.93rem;line-height:1.4}
+.px-corr>div.px-corr-h{border-top:0;padding:10px 0 4px;font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.px-corr>div:not(.px-corr-h)>span:first-child{font-weight:700}
+.px-corr i{font-style:normal;color:var(--muted);text-align:center;font-weight:700}
+.px-filmbox{display:flex;flex-direction:column;gap:12px}
+.px-filmbox>.cv-lab{color:var(--ink)}
+.px-film{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.px-film li{display:grid;grid-template-columns:44px minmax(0,1fr);gap:12px;position:relative;padding-bottom:20px}
+.px-film li::after{content:"";position:absolute;left:21px;top:48px;bottom:8px;width:2px;background:var(--line-2,var(--line))}
+.px-film li::before{content:"";position:absolute;left:16px;bottom:2px;border:6px solid transparent;border-top:7px solid var(--line-2,var(--line));border-bottom:0}
+.px-film li:last-child{padding-bottom:0}
+.px-film li:last-child::after,.px-film li:last-child::before{display:none}
+.px-pic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--fx-coral,#C9694A) var(--k,0%),var(--c));color:var(--sticker-ink)}
+.px-pic svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.px-st{display:flex;flex-direction:column;gap:2px;line-height:1.45;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:9px 12px;min-width:0}
+.px-st small{font-size:.66rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.px-film li:last-child .px-st{border-color:color-mix(in srgb,var(--fx-coral,#C9694A) 50%,var(--line))}
+.px-film.mini li{grid-template-columns:32px minmax(0,1fr);gap:10px;padding-bottom:12px}
+.px-film.mini .px-pic{width:32px;height:32px;border-radius:10px}
+.px-film.mini .px-pic svg{width:18px;height:18px}
+.px-film.mini .px-st{background:none;border:0;padding:5px 0 0;font-size:.93rem}
+.px-film.mini li::after{left:15px;top:35px;bottom:6px}
+.px-film.mini li::before{left:10px;bottom:1px}
+.px-r.film .cv-lab{color:var(--ink)}
+.px-fex .pf-fb:empty{display:none}
+.px-fex .px-ex small{grid-column:2}

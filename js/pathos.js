@@ -39,13 +39,79 @@ function vSpe(s){
 }
 const plainTxt=h=>String(h||"").replace(/<[^>]+>/g," ").replace(/\*\*|==/g,"").replace(/\s+/g," ").trim();
 const pList=(a,cls="fv-list")=>a&&a.length?`<div class="fv-panel"><ul class="${cls}">${a.map(x=>`<li>${pmd(x)}</li>`).join("")}</ul></div>`:"";
+/* ---------- Comprendre en images : histoire, correspondances, film du mécanisme ---------- */
+const PXPIC={
+ virus:'<circle cx="12" cy="12" r="5"/><path d="M12 2.5v4M12 17.5v4M2.5 12h4M17.5 12h4M5.3 5.3l2.8 2.8M15.9 15.9l2.8 2.8M18.7 5.3l-2.8 2.8M8.1 15.9l-2.8 2.8"/>',
+ bact:'<rect x="3.5" y="8" width="13" height="8" rx="4"/><path d="M16.5 11c2 0 2.2-2 4-2M16.5 13c2 0 2.2 2 4 2M8 11h.01M11.5 13h.01"/>',
+ caillot:'<path d="M2.5 7h19M2.5 17h19"/><circle cx="10" cy="12" r="2.6"/><circle cx="14.2" cy="11.2" r="2"/><circle cx="13.5" cy="14" r="1.6"/>',
+ tumeur:'<circle cx="9" cy="10" r="4.2"/><circle cx="15.6" cy="9.4" r="3"/><circle cx="13.2" cy="16.2" r="3.4"/><path d="M9 10h.01M15.6 9.4h.01M13.2 16.2h.01"/>',
+ cellule:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/>',
+ adn:'<path d="M7 3c0 6 10 6 10 12s-10 3-10 6M17 3c0 6-10 6-10 12s10 3 10 6M8.5 6.5h7M8.5 17.5h7M10 12h4"/>',
+ bebe:'<circle cx="12" cy="9" r="5"/><path d="M10.2 8.6h.01M13.8 8.6h.01M10.4 11.2c1 .8 2.2.8 3.2 0M6.5 21c.5-3.5 2.7-5.5 5.5-5.5s5 2 5.5 5.5"/>',
+ thermo:'<path d="M10 4a2 2 0 0 1 4 0v9.5a4 4 0 1 1-4 0z"/><path d="M12 8.5v7.5"/>',
+ bouclier:'<path d="M12 3l7.5 3v5.5c0 4.5-3.2 8-7.5 9.5-4.3-1.5-7.5-5-7.5-9.5V6z"/><path d="M8.8 12l2.2 2.2 4.2-4.4"/>',
+ hormone:'<rect x="3.5" y="6" width="17" height="12" rx="2"/><path d="M4 7l8 6 8-6"/>',
+ sucre:'<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/>',
+ sang:'<path d="M12 3c3.5 4.5 6 7.7 6 10.5a6 6 0 0 1-12 0C6 10.7 8.5 7.5 12 3z"/>',
+ feu:'<path d="M12 3c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-3.8 2.5-5 .3 1.8 1.2 2.8 2.5 3 0-3-.3-5.5 0-8z"/>',
+ eclair:'<path d="M13 2.5L5 13.5h6l-1 8 8-11h-6z"/>',
+ bouche:'<path d="M2.5 6.5c5 0 6 3.5 9.5 3.5s4.5-3.5 9.5-3.5M2.5 17.5c5 0 6-3.5 9.5-3.5s4.5 3.5 9.5 3.5"/><path d="M11 12h2"/>',
+ eau:'<path d="M3 9c2-2 4-2 6 0s4 2 6 0 4-2 6 0M3 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>',
+ coeur:'<path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10C19.5 15.4 12 20 12 20z"/>',
+ poumon:'<path d="M12 3.5v8.5M12 12c-1.2-1-2.2-1.2-3.2-.8M12 12c1.2-1 2.2-1.2 3.2-.8"/><path d="M8.5 7.5C6 8 4 12 4 16.5c0 2 1.5 3 3.5 2.5S10 17 10 15v-5c0-1.5-.5-2.7-1.5-2.5zM15.5 7.5C18 8 20 12 20 16.5c0 2-1.5 3-3.5 2.5S14 17 14 15v-5c0-1.5.5-2.7 1.5-2.5z"/>',
+ cerveau:'<path d="M11.5 5.5a3 3 0 0 0-5.5 1.3A3 3 0 0 0 4 12a3 3 0 0 0 2 4.8 3 3 0 0 0 5.5 1.2zM12.5 5.5a3 3 0 0 1 5.5 1.3A3 3 0 0 1 20 12a3 3 0 0 1-2 4.8 3 3 0 0 1-5.5 1.2z"/>',
+ os:'<path d="M7.5 5a2 2 0 0 0-3 2.5 2 2 0 0 0 2 3l7.5 7.5a2 2 0 0 0 3 2 2 2 0 0 0 2.5-3 2 2 0 0 0-3-2L9 7.5a2 2 0 0 0-1.5-2.5z"/>',
+ rein:'<path d="M10 5C6 4 3.5 8 4 12.5S7.5 20 10.5 19c2-.7 1.5-3 .5-4.5s-1-4 .5-5.5S12.5 5.8 10 5z"/><path d="M12 12h3.5c1.5 0 2 1.5 2 3v4.5"/>',
+ peau:'<path d="M3 8h18M3 13h18M3 18h18"/><path d="M8 8v5M15 13v5M12 3.5c0 1.5 0 3 0 4.5"/>',
+ oeil:'<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>',
+ oreille:'<path d="M7.5 9a4.5 4.5 0 1 1 8.2 2.6c-1.5 1.8-2.7 2.6-2.7 4.6a2.5 2.5 0 0 1-5 0"/><path d="M10.2 9.8a1.8 1.8 0 1 1 3 1.3"/>',
+ ventre:'<path d="M9 3v4.5c0 2-4 2.2-4 7 0 4 3 6.5 7 6.5s7-2.2 7-5.2-3-4-5-3-1.8 3.2.4 3"/>',
+ pilule:'<path d="M5.2 13.8l8.6-8.6a3.9 3.9 0 0 1 5.5 5.5l-8.6 8.6a3.9 3.9 0 0 1-5.5-5.5zM9.5 9.5l5 5"/>',
+ alerte:'<path d="M12 3.5L2.5 20h19z"/><path d="M12 10v4.5M12 17.3v.01"/>',
+ plus:'<path d="M12 19.5V5M6 11l6-6 6 6"/>',
+ moins:'<path d="M12 4.5V19M6 13l6 6 6-6"/>',
+ muscle:'<path d="M4 15c2-6 6-9 10-9 3 0 5 2 5 4.5S17 15 14 15c-2 0-3-1-3-2.5"/><path d="M4 15c3 2.5 9 3.5 15 1"/>',
+ vaisseau:'<path d="M3 8c4-2 6 2 9 0s5-2 9 0M3 16c4-2 6 2 9 0s5-2 9 0"/><path d="M9 12h5M12 10l2 2-2 2"/>',
+ soin:'<rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M12 8v8M8 12h8"/>',
+ ok:'<circle cx="12" cy="12" r="8.5"/><path d="M8 12.3l2.8 2.8L16.2 9.5"/>',
+ esprit:'<path d="M7 16.5a5 5 0 0 1-1.5-9.5 5.5 5.5 0 0 1 10.3-1.6A4.5 4.5 0 1 1 17 14.5c-.6 0-1.2-.1-1.7-.3A4.8 4.8 0 0 1 7 16.5z"/><circle cx="7.5" cy="19.5" r="1.2"/><circle cx="4.5" cy="21.5" r=".6"/>',
+ nuit:'<path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/>',
+ muet:'<path d="M6 16V11a6 6 0 0 1 9.5-4.9M18 10.5V16l1.5 2H5.5M10 20.5a2 2 0 0 0 4 0M3.5 3.5l17 17"/>',
+ film:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M3 15h18M7.5 5v4M12 5v4M16.5 5v4M7.5 15v4M12 15v4M16.5 15v4"/>',
+ dot:'<circle cx="12" cy="12" r="3.5"/>'};
+const PXW="(?:^|[^a-zœ])";
+const PXPIC_RE=[["virus","virus|viral"],["bact","bacteri|microbe|germe|infect|pus(?:[^a-z]|$)|abces"],["caillot","caillot|thromb|embol"],["tumeur","cancer|tumeur|metasta|maligne"],
+ ["adn",PXW+"genet|heredit|"+PXW+"gene(?:[^a-z]|$)|chromosom"],["bebe","fœtus|foetus|bebe|nouveau-ne|nourrisson|grossesse|placenta|accouch"],["thermo","fievre|temperature|frisson"],
+ ["bouclier","anticorps|immunit|defense|globules blancs|lymphocyte|auto-immun"],["hormone","hormone|insuline|thyro|cortisol|messager|adrenaline"],["sucre","sucre|glucose|glycem"],
+ ["sang","saign|hemorrag|"+PXW+"sang(?:[^a-z]|$)|sanguin|hemoglobin|globules rouges|anemi"],["feu","inflamm|irrit|brul|enflamm"],["eclair","douleur|douloureu|decharge|convuls|electri|"+PXW+"nerf|myeline|influx|"+PXW+"racine"],
+ ["bouche","bouch|obstru|retreci|etroit|bloqu|comprim|ecras|coince"],["eau","œdem|oedem|liquide|"+PXW+"eau(?:[^a-z]|$)|gonfle|ascite|epanchement|urine|hydrat"],["coeur","cœur|coeur|cardiaque|pompe|"+PXW+"valve|ventricul|oreillette|palpitation"],
+ ["poumon","poumon|respir|oxygen|alveol|bronch|essouffl|"+PXW+"air(?:[^a-z]|$)|mucus|"+PXW+"cils|crachat|"+PXW+"toux|expector"],["cerveau","cerveau|cerebr|neurone|conscience|memoire"],["os",PXW+"os(?:[^a-z]|$)|osseu|fractur|articul|cartilag"],
+ ["rein",PXW+"rein|renal|filtr"],["peau","peau|cutane|plaie|cicatri"],["oeil","œil|oeil|vision|retine|cristallin"],["oreille","oreille|audition|auditi|tympan"],
+ ["ventre","intestin|estomac|digest|selles|foie|bile"],["muscle","muscle|musculaire|paralys|faiblesse|boiter|crampe|raideur|contracture"],["muet","silenc|aucun symptome|sans symptome|inapercu|longtemps peu"],["ok","guerison|guerit|regress|disparai|rentre dans l|cede"],["esprit","angoiss|anxi|panique|"+PXW+"peur|stress|emotion|triste|honte|culpabil|humeur|desespoir|delire|hallucin|obsession|pensee|repli"],["nuit","sommeil|fatigue|somnol|insomni|"+PXW+"nuit"],["pilule","medicament|toxique|alcool|tabac|drogue"],["soin","chirurgi|operat|remplac|greffe|dialyse|antibiot|antivir|traitement|ponction|drainage|lavement|sondage|stent|thrombolys|thrombectom|angioplast|transfus|vaccin|perfusion|reeducation|kine|injection|implant|laser|pyloromyotom|exerese|ablation|prothese|resucr|refroidi|rechauff|massage|defibrill|surveillance|bilan|corset|platre|anticoagul|insuline injectee"],["alerte","mort|necros|meurt|danger|urgence|choc|arret|deces|grave"],
+ ["vaisseau","arter|vaisseau|"+PXW+"veine|capillaire|aorte|atherome|plaque|cholesterol|valvule"],["plus","augment|monte|exces|trop(?:[^a-z]|$)|accumul|grossit"],["moins","baisse|diminu|manque|chute|insuffisan|perte"],["cellule","cellule"]].map(([k,r])=>[new RegExp(r),k]);
+const pxStep=t=>String(t).replace(/^[a-z]+\|/,"");
+function pxPicKey(t){const m=String(t).match(/^([a-z]+)\|/);if(m&&PXPIC[m[1]])return m[1];const f=fold(plainTxt(t));for(const [re,k] of PXPIC_RE)if(re.test(f))return k;return "dot";}
+const pxPicSvg=k=>`<svg viewBox="0 0 24 24" aria-hidden="true">${PXPIC[k]||PXPIC.dot}</svg>`;
+function pxFilm(steps,mini){const n=steps.length;
+ return `<ol class="px-film${mini?" mini":""}">${steps.map((s,i)=>`<li style="--k:${n>1?Math.round(i/(n-1)*85):0}%"><span class="px-pic">${pxPicSvg(pxPicKey(s))}</span><span class="px-st">${mini?"":`<small>${i===0?"Point de départ":i===n-1?"Résultat":"Étape "+(i+1)}</small>`}<span>${pmd(pxStep(s))}</span></span></li>`).join("")}</ol>`;}
+/* Le slogan (p.a) n'est affiché que si l'histoire ne le reprend pas déjà dans sa première phrase. */
+function pxTagDup(a,h){const w=t=>new Set(fold(plainTxt(t)).split(/[^a-zœ]+/).filter(x=>x.length>3));const A=w(a),H=w(String(h).split(/[.:!?]\s/)[0]+" "+String(h).split("\n")[0]);if(!A.size)return true;let n=0;A.forEach(x=>{if(H.has(x))n++;});return n/A.size>=.5;}
+function pxImages(p){const I=PIMG[p.i];if(!I)return "";
+ return `${I.h?`<div class="px-story"><span class="cv-lab">${SVG.bulb}Imaginez…</span>${p.a&&!pxTagDup(p.a,I.h)?`<p class="px-tag">${pmd(p.a)}</p>`:""}${I.h.split("\n").map(x=>`<p>${pmd(x)}</p>`).join("")}</div>`:""}
+ ${I.hc&&I.hc.length?`<div class="px-corr" role="table" aria-label="Correspondances entre l'image et le corps"><div class="px-corr-h" role="row"><span role="columnheader">Dans l'image</span><span></span><span role="columnheader">Dans le corps</span></div>${I.hc.map(([a,b])=>`<div role="row"><span role="cell">${pmd(a)}</span><i aria-hidden="true">→</i><span role="cell">${pmd(b)}</span></div>`).join("")}</div>`:""}
+ ${I.hs&&I.hs.length?`<div class="px-filmbox"><span class="cv-lab">${pxPicSvg("film")}Le film de la maladie</span>${pxFilm(I.hs)}</div>`:""}`;}
+function pxFilmEx(p){const I=PIMG[p.i];if(!I||!I.hs||I.hs.length<3)return "";const n=I.hs.length,opts=pxShuffle([...Array(n).keys()],pxRand(p.i+"film"));
+ return `<div class="cv-verif px-fex" id="pf-box"><span class="cv-lab">${pxPicSvg("film")}Remettre le film dans l'ordre</span><p class="muted">Sans remonter dans le cours, retrouvez l'ordre des étapes du mécanisme.</p>
+  <div class="px-exo">${[...Array(n).keys()].map(i=>`<label class="px-ex"><span class="px-n">${i+1}</span><select data-pf="${i}" aria-label="Étape ${i+1}"><option value="">Choisir…</option>${opts.map(o=>`<option value="${o}">${esc(plainTxt(pxStep(I.hs[o])))}</option>`).join("")}</select></label>`).join("")}</div>
+  <div class="pf-fb"></div><button class="btn block" data-act="px-film-check" data-k="${p.i}">Vérifier</button></div>`;}
 function vPatho(id){
  const p=PBY[id];if(!p)return notFound();
  const S=SPE[p.s],mode=state.pxMode||"recap",done=pxDone().includes(id);
  const links=(p.f||[]).map(x=>{const f=FICHES.find(y=>y.id===x),c=f?null:COURS.find(y=>y.id===x&&!y.pro),it=f||c;return it?`<a class="chip" href="#${f?"fiche":"cours"}/${x}">${esc(it.titre)}</a>`:"";}).join("");
  const qs=QUIZ.filter(q=>q.pid===id),same=PATHOS.filter(x=>x.s===p.s),k=same.indexOf(p),next=same[k+1];
  const secs=[["Définition",`<p class="fv-lead">${pmd(p.d)}</p>`],
-  ["Comprendre le mécanisme",`${(p.m||"").split("\n").map(x=>`<p class="cv-p">${pmd(x)}</p>`).join("")}${p.a?`<div class="cv-box cv-ana"><span class="cv-lab">${SVG.bulb}Pour comprendre</span><p>${pmd(p.a)}</p></div>`:""}${p.z?pmFig(p.z,"En couleur : la zone concernée."):""}`],
+  ...(PIMG[p.i]?[["Comprendre en images",pxImages(p)]]:[]),
+  [PIMG[p.i]?"Le mécanisme expliqué":"Comprendre le mécanisme",`${(p.m||"").split("\n").map(x=>`<p class="cv-p">${pmd(x)}</p>`).join("")}${p.a&&!PIMG[p.i]?`<div class="cv-box cv-ana"><span class="cv-lab">${SVG.bulb}Pour comprendre</span><p>${pmd(p.a)}</p></div>`:""}${p.z?pmFig(p.z,"En couleur : la zone concernée."):""}`],
   ["Causes et facteurs de risque",pList(p.c)],
   ["Signes cliniques",`${pList(p.sg)}${p.al&&p.al.length?`<div class="cv-box cv-trap"><span class="cv-lab">${SVG.warn}Signes de gravité : alerter</span><ul>${p.al.map(x=>`<li>${pmd(x)}</li>`).join("")}</ul></div>`:""}`],
   ["Examens",p.ex&&p.ex.length?`<div class="fv-panel"><div class="fv-tbl">${p.ex.map(x=>`<div><span>${pmd(x[0])}</span><span>${pmd(x[1])}</span></div>`).join("")}</div></div>`:""],
@@ -60,6 +126,7 @@ function vPatho(id){
  if(mode==="recap"){
   body=`<div class="px-recap">
    <div class="px-r def"><span class="cv-lab">${SVG.info}Définition</span><p>${pmd(p.d)}</p></div>
+   ${PIMG[p.i]&&PIMG[p.i].hs?`<div class="px-r film"><span class="cv-lab">${pxPicSvg("film")}Le mécanisme en un coup d'œil</span>${pxFilm(PIMG[p.i].hs,true)}</div>`:""}
    ${p.z?pmFig(p.z):""}
    <div class="px-grid">
     <div class="px-r"><span class="cv-lab">Causes</span><ul>${(p.c||[]).slice(0,5).map(x=>`<li>${pmd(x)}</li>`).join("")}</ul></div>
@@ -76,6 +143,7 @@ function vPatho(id){
   toc=`<nav class="fv-toc" aria-label="Parties du cours">${secs.map((s,i)=>`<a href="#patho" data-sec="p-${i+1}"><b>${i+1}</b>${esc(s[0])}</a>`).join("")}</nav>`;
   body=secs.map((s,i)=>`<section class="fv-sec" id="p-${i+1}"><div class="fv-sh"><span class="fv-num">${String(i+1).padStart(2,"0")}</span><h2>${s[0]}</h2></div>${s[1]}</section>`).join("")+
    (p.r?`<div class="fv-key"><h3>${SVG.bulb}À retenir</h3><p>${pmd(p.r)}</p></div>`:"")+
+   pxFilmEx(p)+
    (qs.length?`<div class="cv-verif"><span class="cv-lab">${SVG.check}Vérifier ses connaissances</span>${qs.slice(0,3).map(q=>`<details><summary>${esc(q.q.length>150?q.q.slice(0,150)+"…":q.q)}</summary><p>${esc(q.o[q.a])}</p></details>`).join("")}</div>`:"");
  }
  return `<article class="fv px" style="--c:${S.c}">${hero}${toc}<div class="fv-body"><div class="px-head">${seg}</div>${body}
@@ -100,6 +168,9 @@ function pxMakeQuiz(){
   mk(`À quelle pathologie correspond cette définition : « ${pxMask(p.d.replace(/^\*\*[^*]+\*\*\s*:\s*/,""),p)} »`,p.n,others.map(x=>x.n),`${p.n} : ${plainTxt(p.d)}`);
   if(p.m)mk(`${p.n} : quel mécanisme est en cause ?`,pxMask(m1(p),p),pxShuffle(pool.filter(x=>x.m),r).map(x=>pxMask(m1(x),x)),plainTxt(m1(p)));
   if(p.r)mk(`${p.n} : quelle est l'idée essentielle à retenir ?`,pxMask(p.r,p),pxShuffle(pool.filter(x=>x.r),r).map(x=>pxMask(x.r,x)),plainTxt(p.r));
+  const I=PIMG[p.i];
+  if(I&&I.hc&&I.hc.length>=4){const k=Math.floor(r()*I.hc.length),row=I.hc[k];mk(`Dans l'image qui explique « ${p.n} », que représente « ${plainTxt(row[0])} » ?`,plainTxt(row[1]),pxShuffle(I.hc.filter((x,j)=>j!==k).map(x=>plainTxt(x[1])),r),`Dans l'image, ${plainTxt(row[0])} correspond à : ${plainTxt(row[1])}.`);}
+  if(I&&I.hs&&I.hs.length>=5){const st=I.hs.map(x=>plainTxt(pxStep(x))),k=Math.floor(r()*(st.length-1));mk(`${p.n} : dans le film de la maladie, quelle étape vient juste après « ${st[k]} » ?`,st[k+1],pxShuffle(st.filter((x,j)=>j!==k&&j!==k+1),r),`L'ordre : ${st.join(" → ")}.`);}
   const M=p.z&&PMAPS[p.z[0]];
   if(M&&p.zq!==0){const good=M.zones[p.z[1]],bads=pxShuffle(Object.keys(M.zones).filter(k=>!p.z.includes(k)),r).map(k=>M.zones[k]);
    mk(`${p.n} : quelle structure est principalement atteinte ?`,good,bads,`${p.n} touche surtout : ${p.z.slice(1).map(k=>M.zones[k]).join(", ")}.`);}
@@ -198,11 +269,18 @@ function pathoAct(b,a){const k=b.dataset.k;
  if(a==="px-exo"){state.exo=k;state.exoAns=null;state.train="schemas";if(route().v==="entrainer")render();return;}
  if(a==="px-exo-check"){const E=PEXOS.find(e=>e.id===state.exoAns.id);if(Object.keys(state.exoAns.a).filter(i=>state.exoAns.a[i]).length<(E.map?E.keys.length:E.steps.length)){toast("Complétez toutes les cases");return;}state.exoAns.done=true;haptic();render();return;}
  if(a==="px-exo-reset"){state.exoAns=null;render();return;}
+ if(a==="px-film-check"){const box=document.getElementById("pf-box"),I=PIMG[k];if(!box||!I)return;const sel=[...box.querySelectorAll("select")];
+  if(sel.some(x=>!x.value)){toast("Complétez toutes les étapes");return;}
+  let sc=0;sel.forEach((x,i)=>{const ok=+x.value===i,l=x.closest(".px-ex");if(ok)sc++;l.classList.add(ok?"good":"wrong");x.disabled=true;if(!ok)l.insertAdjacentHTML("beforeend",`<small>Réponse : ${esc(plainTxt(pxStep(I.hs[i])))}</small>`);});
+  const n=sel.length;box.querySelector(".pf-fb").innerHTML=`<div class="feedback ${sc===n?"ok":"ko"}"><b>${sc===n?"Parfait !":`${sc} bonne${sc>1?"s":""} réponse${sc>1?"s":""} sur ${n}`}</b><span>${sc===n?"Vous avez compris l'enchaînement du mécanisme.":"Relisez le film de la maladie, puis recommencez."}</span></div>`;
+  b.textContent="Recommencer";b.dataset.act="px-film-reset";haptic();return;}
+ if(a==="px-film-reset"){render();return;}
 }
 function pathoInput(t){
  if(t.id==="pxq"){state.pxq=t.value;const tmp=document.createElement("div");tmp.innerHTML=vSpe(route().arg);const nl=tmp.querySelector("#px-list"),ol=document.getElementById("px-list");if(nl&&ol)ol.innerHTML=nl.innerHTML;return true;}
  if(t.dataset.px!=null&&state.exoAns){state.exoAns.a[+t.dataset.px]=t.value;return true;}
+ if(t.dataset.pf!=null)return true;
  return false;
 }
-function pxIdx(){return PATHOS.map(p=>({t:"p",it:{id:p.i,titre:p.n,cat:"patho",theme:SPE[p.s].nom},txt:plainTxt([(p.nn||[]).join(" "),p.d,p.m,(p.c||[]).join(" "),(p.sg||[]).join(" "),(p.tt||[]).join(" "),(p.ri||[]).join(" "),p.r].join(" "))}));}
+function pxIdx(){return PATHOS.map(p=>({t:"p",it:{id:p.i,titre:p.n,cat:"patho",theme:SPE[p.s].nom},txt:plainTxt([(p.nn||[]).join(" "),p.d,p.m,PIMG[p.i]&&PIMG[p.i].h,(p.c||[]).join(" "),(p.sg||[]).join(" "),(p.tt||[]).join(" "),(p.ri||[]).join(" "),p.r].join(" "))}));}
 pxMakeQuiz();

@@ -1,7 +1,7 @@
 /* Carnet IFSI — service worker de la version web installable (PWA).
    Réseau d'abord : en ligne, l'appli charge toujours la dernière version publiée ;
    hors ligne, elle se sert de la copie gardée en cache. */
-const V="carnet-ifsi-v21";
+const V="carnet-ifsi-v22";
 const FILES=[
  "./",
  "index.html",
@@ -36,6 +36,27 @@ const FILES=[
  "js/contenus/pathos-urg.js",
  "js/contenus/pathos-pallia.js",
  "js/contenus/pathos-transv.js",
+ "js/contenus/images-cardio.js",
+ "js/contenus/images-pneumo.js",
+ "js/contenus/images-neuro.js",
+ "js/contenus/images-gastro.js",
+ "js/contenus/images-endoc.js",
+ "js/contenus/images-nephro.js",
+ "js/contenus/images-hemato.js",
+ "js/contenus/images-infectio.js",
+ "js/contenus/images-rhumato.js",
+ "js/contenus/images-dermato.js",
+ "js/contenus/images-gyneco.js",
+ "js/contenus/images-psy.js",
+ "js/contenus/images-pedia.js",
+ "js/contenus/images-geria.js",
+ "js/contenus/images-ophtalmo.js",
+ "js/contenus/images-orl.js",
+ "js/contenus/images-onco.js",
+ "js/contenus/images-chir.js",
+ "js/contenus/images-urg.js",
+ "js/contenus/images-pallia.js",
+ "js/contenus/images-transv.js",
  "js/pathos-maps.js",
  "js/pathos.js",
  "js/data.js",
