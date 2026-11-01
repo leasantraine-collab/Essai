@@ -469,17 +469,20 @@ button.px-card{border:0;width:100%;text-align:left;font:inherit;cursor:pointer}
 .px-spehead small{display:block;color:var(--muted);font-size:.8rem;margin-top:2px}
 .px-spebtns{display:flex;gap:8px;flex-wrap:wrap}
 .px-spebtns .btn{padding:8px 12px;font-size:.84rem;min-height:0;width:auto}
-/* Réviser › Par UE et pages UE groupées */
+/* Pages UE groupées par thème */
 .ue-note{font-size:.86rem;line-height:1.45;margin:0 0 2px}
-.ue-grp{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-.ue-grp-h{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;padding:2px 2px}
-.ue-grp-h .code{font-family:var(--f-mono,monospace);font-size:.74rem;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--surface-2);color:var(--accent);white-space:nowrap}
-.ue-grp-h>span:nth-child(2){flex:1;min-width:0}
-.ue-grp-h b{display:block;font-size:.95rem;line-height:1.3}
-.ue-grp-h small{display:block;color:var(--muted);font-size:.76rem}
 .ue-sub{display:flex;flex-direction:column;gap:8px;margin-top:6px}
 .ue-sub-h{display:flex;align-items:center;gap:8px;font-weight:650;font-size:.92rem}
 .ue-sub-h .dot{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
 .ue-sub-h .muted{margin-left:auto;font-weight:400}
-.px-card .chev,.ue-grp-h .chev{width:16px;height:16px;flex:none;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.ue-grp-h .chev{stroke:var(--line-2)}
+/* Programme › Pathologies par UE */
+.ue-pg{border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);overflow:hidden}
+.ue-pg>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.ue-pg>summary::-webkit-details-marker{display:none}
+.ue-pg>summary .code{font-family:var(--f-mono,monospace);font-size:.74rem;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--surface-2);color:var(--accent);white-space:nowrap}
+.ue-pg>summary>span:nth-child(2){flex:1;min-width:0}
+.ue-pg>summary b{display:block;font-size:.95rem;line-height:1.3}
+.ue-pg>summary small{display:block;color:var(--muted);font-size:.76rem;margin-top:2px}
+.ue-pg>.list{border:0;border-top:1px solid var(--line);border-radius:0;box-shadow:none;margin:0}
+
+.px-card .chev{width:16px;height:16px;flex:none;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
