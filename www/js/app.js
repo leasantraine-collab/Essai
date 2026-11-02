@@ -40,7 +40,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.29 · 2 novembre 2026";
+const APP_VERSION="1.30 · 2 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -371,26 +371,24 @@ function ueSections(list,t,code){
  if(groups.length<2||list.length<8)return `<div class="list">${list.map(i=>itemRow(i,t)).join("")}</div>`;
  return groups.map(([n,c,l])=>`<div class="ue-sub"><div class="ue-sub-h" style="--c:${c}"><span class="dot"></span><span>${esc(n)}</span><span class="muted">${l.length}</span></div><div class="list">${l.map(i=>itemRow(i,t)).join("")}</div></div>`).join("");
 }
-function linked(code){const r=state.ueRef,has=it=>it.ue&&(it.ue[r]||[]).includes(code);return {f:FICHES.filter(has),c:COURS.filter(has),q:QUIZ.filter(has)};}
 function vProgramme(){
  const R=UE[state.ueRef],list=R.list.filter(u=>u[3].includes(state.sem));
  return `<div class="stack-lg">${vh("Programme","Réviser dans l'ordre des cours")}
   <div class="seg" role="group" aria-label="Votre année">${Object.entries(UE).map(([k,v])=>`<button data-act="ue-ref" data-k="${k}" aria-pressed="${state.ueRef===k}">${v.label}<br><small style="font-weight:400;opacity:.8">${v.sub}</small></button>`).join("")}</div>
   <p class="muted">${esc(R.note)}</p>
   <div class="chips" role="group" aria-label="Semestre">${[1,2,3,4,5,6].map(s=>`<button class="chip" data-act="sem" data-k="${s}" aria-pressed="${state.sem===s}">Semestre ${s}</button>`).join("")}</div>
-  <div class="list">${list.map(u=>{const L=linked(u[0]),n=L.f.length+L.c.filter(c=>!c.pro).length;
-   return `<a class="li ue-li" href="#ue/${encodeURIComponent(u[0])}"><span class="code">${u[0]}</span><span><span class="t">${esc(u[1])}</span><span class="s">${n||L.q.length?`${plural(n,"contenu")}${L.q.length?" · "+plural(L.q.length,"question"):""}`:"Contenus à venir"}</span></span>${chev}</a>`}).join("")}</div>
+  <div class="list">${list.map(u=>{const L=ueContent(u[0],state.ueRef),sm=ueSummary(L);
+   return `<a class="li ue-li" href="#ue/${encodeURIComponent(u[0])}"><span class="code">${u[0]}</span><span><span class="t">${esc(u[1])}</span><span class="s">${sm||"Contenus à venir"}</span></span>${chev}</a>`}).join("")}</div>
   ${ueProcBlock()}</div>`;
 }
 function vUE(code){
  const R=UE[state.ueRef],u=R.list.find(x=>x[0]===code);if(!u)return notFound();
- const L=linked(u[0]);
+ const L=ueContent(u[0],state.ueRef),sm=ueSummary(L);
  return `<div class="stack-lg">${backBtn("Programme")}
-  <header class="vh"><span class="eyebrow">UE ${u[0]} · ${esc(R.groups[u[2]])}</span><h1>${esc(u[1])}</h1><p class="muted">Enseignée en ${u[3].map(s=>"S"+s).join(", ")} · ${esc(R.sub)}</p></header>
-  ${L.c.length?`<section class="stack-sm"><h2>Cours</h2>${ueSections(L.c,"c",u[0])}</section>`:""}
-  ${L.f.length?`<section class="stack-sm"><h2>Fiches</h2>${ueSections(L.f,"f",u[0])}</section>`:""}
+  <header class="vh"><span class="eyebrow">UE ${u[0]} · ${esc(R.groups[u[2]])}</span><h1>${esc(u[1])}</h1><p class="muted">Enseignée en ${u[3].map(s=>"S"+s).join(", ")} · ${esc(R.sub)}</p>${sm?`<p class="ue-sum">${esc(sm)}</p>`:""}</header>
   ${L.q.length?`<button class="btn block" data-act="ue-quiz" data-k="${esc(u[0])}">${IC.play}Quiz de cette UE · ${plural(L.q.length,"question")}</button>`:""}
-  ${!L.c.length&&!L.f.length&&!L.q.length?`<div class="empty">Les contenus de cette UE arrivent bientôt.</div>`:""}</div>`;
+  ${ueBody(u[0],state.ueRef)}
+  ${!sm?`<div class="empty">Les contenus de cette UE arrivent bientôt.</div>`:""}</div>`;
 }
 
 /* ---------- Recherche ---------- */
@@ -522,7 +520,7 @@ app.addEventListener("click",ev=>{
  else if(a==="quiz-next"){const z=state.quiz;z.i++;z.answered=null;
   if(z.i>=z.order.length){const s=stats();if(s.quizBest==null||z.score>s.quizBest){s.quizBest=z.score;store.set("stats",s);}}
   render();window.scrollTo(0,0);}
- else if(a==="ue-pg"){const o=state.uePg||(state.uePg={});o[k]=!b.parentElement.open;}
+ else if(a==="ue-pg"){const o=state.uePg||(state.uePg={});o[k]=!b.parentElement.open;if(o[k]&&b.parentElement.classList.contains("ue-grp")){ev.preventDefault();const y=window.scrollY;render();window.scrollTo(0,y);}}
  else if(a==="ue-ref"){state.ueRef=k;store.set("ueRef",k);render();}
  else if(a==="sem"){state.sem=+k;store.set("sem",+k);render();}
  else if(a==="ue-quiz"){const r=state.ueRef;launchQuiz(quizIdx(q=>(q.ue[r]||[]).includes(k)),"Quiz UE "+k);}

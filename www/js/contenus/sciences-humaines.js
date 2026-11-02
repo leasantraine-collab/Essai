@@ -52,24 +52,6 @@ CV("ethique-c","role","Éthique et déontologie infirmière","35 min","1.3|A.2",
  ],
  ["Éthique = réflexion ; déontologie = devoirs professionnels ; droit = loi","Autonomie, bienfaisance, non-malfaisance, justice","Code de déontologie infirmier de 2016 ; Ordre national des infirmiers","Décision éthique : collégiale et argumentée"]),
 
-CV("recherche-c","role","La démarche de recherche et le mémoire","40 min","3.4 5.6|E.1","flask",
- ["Comprendre l'intérêt de la **recherche en soins infirmiers**","Formuler une **question de départ** puis une problématique","Mener une **recherche documentaire**","Choisir un outil d'enquête","Lire un article et connaître les **niveaux de preuve**"],
- [
- {h:"Pourquoi la recherche ?",chip:"Pourquoi",b:[
-  {t:"p",ps:["La recherche permet de fonder les soins sur des **données probantes** (evidence-based nursing) plutôt que sur l'habitude. Le **mémoire de fin d'études** (travail d'initiation à la recherche) entraîne l'étudiant à questionner une situation professionnelle avec méthode."]}]},
- {h:"Les étapes du mémoire",chip:"Étapes",b:[
-  {t:"etapes",items:["**Situation d'appel** vécue en stage, qui a questionné.","**Question de départ** : claire, ouverte, réalisable.","**Exploration** : lectures, entretiens exploratoires.","**Cadre de référence** : concepts et auteurs.","**Problématique** puis question de recherche ou hypothèse.","**Enquête** : entretiens, questionnaires.","**Analyse** des résultats et discussion.","Conclusion, perspectives pour la pratique."]},
-  {t:"pieges",items:["Une question fermée (oui/non) ou trop large ne permet pas de construire un travail","Confondre ses opinions et les données : toute affirmation se **référence**"]}]},
- {h:"La recherche documentaire",chip:"Documentation",b:[
-  {t:"table",rows:[["Bases de données","PubMed, CINAHL, Cairn, BDSP, LiSSa"],["Sources fiables","HAS, Santé publique France, sociétés savantes, revues à comité de lecture"],["Mots-clés","traduire en anglais, utiliser les opérateurs AND, OR, NOT"],["Références","normes APA ou Vancouver selon l'institut"]]}]},
- {h:"Les outils et les preuves",chip:"Preuves",b:[
-  {t:"duo",items:[{tag:"Qualitatif",tone:"blue",txt:"**Entretiens** semi-directifs",sub:"comprendre un vécu, des représentations"},{tag:"Quantitatif",tone:"amber",txt:"**Questionnaires**, mesures",sub:"mesurer, comparer, chiffrer"}]},
-  {t:"table",rows:[["Niveau 1 (preuve forte)","méta-analyses, essais randomisés de bonne qualité"],["Niveau 2","essais de moindre puissance, études de cohorte"],["Niveau 3","études cas-témoins"],["Niveau 4 (faible)","séries de cas, avis d'experts"]],note:"Classement inspiré de la gradation de la HAS (grades A, B, C, AE)."},
-  {t:"liste",items:["Lire un article : titre, résumé, introduction, méthode, résultats, discussion (structure **IMRaD**)","Respecter l'**éthique** de l'enquête : consentement, anonymat, autorisation"]},
-  {t:"retenir",txt:"Une bonne question de départ est **ouverte**, précise et ancrée dans la pratique. Toute affirmation se **référence** à une source fiable."}]}
- ],
- ["Recherche = soins fondés sur des preuves","Situation d'appel → question de départ → problématique → enquête","PubMed, CINAHL, HAS ; mots-clés en anglais","Qualitatif = entretiens ; quantitatif = questionnaires","IMRaD et niveaux de preuve"]),
-
 X("socio-anthropo","role","Sciences humaines","Sociologie et anthropologie de la santé","1.1|B.2","face",[
  [{t:"table",n:"01",h:"Les notions clés",chip:"Notions",rows:[["Culture","manières de penser, de croire et d'agir partagées par un groupe"],["Représentations","idées qu'une personne se fait de la maladie, du corps, du soin"],["Rôle et statut","place occupée dans un groupe et comportements attendus"],["Norme","règle de conduite implicite ou explicite d'un groupe"],["Stigmatisation","étiquette négative posée sur une personne (maladie mentale, VIH, obésité)"],["Socialisation","apprentissage des normes, en famille puis à l'école, au travail"]]}],
  [{t:"liste",n:"02",h:"Culture et soin",chip:"Culture et soin",items:["Le rapport à la **douleur**, à la nudité, à l'alimentation, à la mort varie selon les cultures et les personnes","Les **rites** de fin de vie et funéraires sont à respecter","Éviter l'ethnocentrisme : juger l'autre à partir de sa propre culture","Ne pas réduire une personne à sa culture d'origine : demander plutôt que supposer","Recourir à un **interprète** professionnel plutôt qu'à un enfant de la famille"]},
