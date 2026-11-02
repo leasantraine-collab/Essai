@@ -12,7 +12,7 @@ Object.assign(SCH,{
   let h=`<path d="M30 ${base} L240 ${base}" style="stroke:#8A97A6;stroke-width:1.2"/><path d="M30 ${base} L30 30" style="stroke:#8A97A6;stroke-width:1.2"/>`;
   cols.forEach(([a,b],i)=>{const x=36+i*54,r=lv[i],cx=x+19;
    h+=`<rect x="${x}" y="${base-r}" width="38" height="${r}" rx="4" style="fill:${i===3?"#EBB9AE":"#BFD9EA"}"/>`;
-   for(let k=0;k<i;k++){const hi=lv[k],lo=lv[k+1];h+=`<rect x="${x}" y="${base-hi}" width="38" height="${hi-lo}" rx="3" style="fill:${loss[k][1]};stroke:#8A97A6;stroke-width:.8;stroke-dasharray:3 2"/>`+AT(cx,base-(hi+lo)/2+4,loss[k][0],"st-b st-dark","middle");}
+   for(let k=0;k<i;k++){const hi=lv[k],lo=lv[k+1];h+=`<rect x="${x}" y="${base-hi}" width="38" height="${hi-lo}" rx="3" style="fill:${loss[k][1]};stroke:#8A97A6;stroke-width:.8;stroke-dasharray:3 2"/>`+AT(cx,k===2?base-lo-5:base-(hi+lo)/2+4,loss[k][0],"st-b st-dark","middle");}
    h+=AT(cx,base+16,a,"st-sub","middle")+AT(cx,base+29,b,"st-sub","middle");});
   h+=`<path d="M30 ${seuil} L240 ${seuil}" style="stroke:#C8372D;stroke-width:1.6;stroke-dasharray:5 4"/>`+AT(244,seuil-4,"Seuil de","st-b st-acc")+AT(244,seuil+10,"défaillance","st-b st-acc")+AT(38,24,"Réserve fonctionnelle d'un organe","st-sub");
   return sv(262,h+`${AT(160,246,"1 vieillissement + 2 maladie chronique + 3 facteur aigu","st-sub","middle")}${AT(160,259,"(infection, déshydratation, médicament) = décompensation","st-acc","middle")}`,"Le modèle 1 + 2 + 3 de Bouchon");}
