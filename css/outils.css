@@ -112,6 +112,9 @@ body.tb-on{overflow:hidden}
 .pa-p b{font-size:1rem}
 .pa-p small{color:var(--ink-2);font-size:.86rem;line-height:1.4}
 .pa-f{font-size:.78rem;color:var(--muted);font-weight:600}
+.pa-ex{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin:4px 0 2px}
+.pa-ex-l{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-right:2px}
+.pa-ex i{font-style:normal;font-size:.8rem;font-weight:600;line-height:1.25;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
 .pa-ul{display:flex;flex-direction:column;gap:6px;font-size:.9rem;line-height:1.45;padding-left:0;list-style:none}
 .pa-ul li{position:relative;padding-left:16px}
 .pa-ul li::before{content:"";position:absolute;left:2px;top:.62em;width:6px;height:6px;border-radius:50%;background:var(--accent)}
