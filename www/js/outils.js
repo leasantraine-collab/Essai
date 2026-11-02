@@ -223,20 +223,24 @@ const PA_Q=[
  ["odeur","Mauvaise odeur ?",[["non","Non"],["oui","Oui"]]],
  ["peau","Peau autour fragile ou macérée ?",[["non","Non"],["oui","Oui"]]]
 ];
+/* [nom, rôle, fréquence de réfection, exemples de noms commerciaux (France, liste non exhaustive)] */
 const PA_P={
- hydrogel:["Hydrogel","réhydrate et ramollit la nécrose ou la fibrine pour faciliter la détersion","tous les 1 à 3 jours"],
- alginate:["Alginate","très absorbant et hémostatique ; se mèche dans les cavités","tous les jours ou tous les 2 jours, selon la saturation"],
- hydrofibre:["Hydrofibre","très absorbante, gélifie au contact de l'exsudat","tous les 1 à 3 jours, selon la saturation"],
- mousse:["Hydrocellulaire (mousse)","absorbe un exsudat modéré à abondant, protège le bourgeonnement","tous les 2 à 4 jours, jusqu'à 7 jours selon la saturation"],
- mousseFine:["Hydrocellulaire fin","absorption faible à modérée, protection","tous les 3 à 7 jours"],
- hydrocol:["Hydrocolloïde","maintient un milieu humide sur une plaie peu exsudative ; occlusif","tous les 3 à 7 jours, quand la bulle approche du bord"],
- hydrocolMince:["Hydrocolloïde mince","protège l'épidermisation","tous les 3 à 7 jours"],
- interface:["Interface (maille, tulle siliconé)","non adhérente : protège le bourgeon et la peau fragile","tous les 2 à 4 jours, selon le pansement secondaire"],
- film:["Film transparent","protection, surveillance visuelle, pansement secondaire","jusqu'à 7 jours"],
- argent:["Pansement à l'argent","antibactérien local en cas d'infection ou de forte colonisation ; durée limitée","selon la saturation ; réévaluer son intérêt après 2 semaines au plus"],
- charbon:["Pansement au charbon","absorbe les odeurs","selon le pansement primaire"],
- compresse:["Compresses stériles","pansement secondaire simple","selon le pansement primaire"],
- sec:["Compresse sèche ou interface","garder la nécrose sèche et protégée","selon la prescription"]
+ hydrogel:["Hydrogel","réhydrate et ramollit la nécrose ou la fibrine pour faciliter la détersion","tous les 1 à 3 jours","Purilon®, Intrasite Gel®, Duoderm Hydrogel®, Hydrosorb® (plaque)"],
+ alginate:["Alginate","très absorbant et hémostatique ; se mèche dans les cavités","tous les jours ou tous les 2 jours, selon la saturation","Algostéril®, Urgosorb®, Melgisorb Plus®, Biatain Alginate®, Kaltostat®"],
+ hydrofibre:["Hydrofibre","très absorbante, gélifie au contact de l'exsudat","tous les 1 à 3 jours, selon la saturation","Aquacel Extra®, Aquacel Ribbon® (mèche), Exufiber®, UrgoClean® (fibres poly-absorbantes)"],
+ mousse:["Hydrocellulaire (mousse)","absorbe un exsudat modéré à abondant, protège le bourgeonnement","tous les 2 à 4 jours, jusqu'à 7 jours selon la saturation","Mepilex®, Mepilex Border®, Allevyn®, Biatain®, Aquacel Foam®, UrgoTul Absorb®"],
+ mousseFine:["Hydrocellulaire fin","absorption faible à modérée, protection","tous les 3 à 7 jours","Mepilex Lite®, Mepilex Border Lite®, Allevyn Thin®, Biatain Silicone Lite®"],
+ hydrocol:["Hydrocolloïde","maintient un milieu humide sur une plaie peu exsudative ; occlusif","tous les 3 à 7 jours, quand la bulle approche du bord","Comfeel Plus®, Duoderm E®, Algoplaque®, Hydrocoll®"],
+ hydrocolMince:["Hydrocolloïde mince","protège l'épidermisation","tous les 3 à 7 jours","Comfeel Plus Transparent®, Duoderm Extra Mince®, Algoplaque Film®"],
+ hyal:["Acide hyaluronique","favorise le bourgeonnement et l'épidermisation des plaies superficielles et des brûlures superficielles","tous les jours ou tous les 2 jours","Ialuset® compresses, Ialuset® crème (avec une interface ou une compresse)"],
+ nosf:["Matrice anti-protéases (TLC-NOSF)","accélère la cicatrisation des ulcères de jambe et du pied diabétique non infectés","tous les 2 à 4 jours, selon la saturation","UrgoStart®, UrgoStart Plus®, UrgoStart Plus Border®"],
+ interface:["Interface (maille, tulle siliconé)","non adhérente : protège le bourgeon et la peau fragile","tous les 2 à 4 jours, selon le pansement secondaire","Urgotul®, Adaptic Touch®, Mepitel One®, Physiotulle® ; tulle vaseliné type Jelonet® (adhère davantage)"],
+ film:["Film transparent","protection, surveillance visuelle, pansement secondaire","jusqu'à 7 jours","Tegaderm®, Opsite Flexigrid®, Hydrofilm®, Mepore Film®"],
+ postop:["Pansement post-opératoire","pansement sec adhésif ou film absorbant : protège la cicatrice et laisse surveiller","laisser 24 à 48 heures sans y toucher, puis selon le protocole","Cosmopor E®, Mepore®, Opsite Post-Op®, Mepilex Border Post-Op®, Aquacel Surgical®"],
+ argent:["Pansement à l'argent","antibactérien local en cas d'infection ou de forte colonisation ; durée limitée","selon la saturation ; réévaluer son intérêt après 2 semaines au plus","Aquacel Ag+ Extra®, UrgoTul Ag®, Mepilex Ag®, Biatain Ag®, Acticoat®, Melgisorb Ag®"],
+ charbon:["Pansement au charbon","absorbe les odeurs","selon le pansement primaire","Actisorb® (charbon et argent), Carboflex®, Askina Carbosorb®"],
+ compresse:["Compresses stériles","pansement secondaire simple","selon le pansement primaire","compresses stériles non tissées, maintenues par un film ou une bande (Mepore®, Cosmopor®)"],
+ sec:["Compresse sèche ou interface","garder la nécrose sèche et protégée","selon la prescription","compresses stériles sèches, ou interface type Urgotul® / Adaptic Touch®"]
 };
 function paReco(a){
  const P=new Set(),S=new Set(),alert=[],todo=[],avoid=[];
@@ -246,9 +250,12 @@ function paReco(a){
   else if(hi){P.add("alginate");P.add("hydrofibre");S.add("mousse");todo.push("Détersion mécanique progressive de la nécrose ramollie, après antalgie, sans faire saigner.");}
   else{P.add("hydrogel");S.add("film");todo.push("Détersion mécanique progressive une fois la nécrose ramollie par l'hydrogel.");}}
  else if(a.coul==="jaune"){if(hi){P.add("alginate");P.add("hydrofibre");S.add("mousse");}else{P.add("hydrogel");S.add("film");}todo.push("Détersion mécanique de la fibrine à chaque réfection si possible, sans faire saigner.");}
- else if(a.coul==="rouge"){if(a.exs==="abondant"){P.add("alginate");P.add("hydrofibre");S.add("mousse");}else if(a.exs==="modere")P.add("mousse");else{P.add("hydrocol");P.add("interface");}}
- else if(a.coul==="rose"){if(hi)P.add("mousseFine");else{P.add("hydrocolMince");P.add("film");P.add("interface");}}
- if(a.inf==="oui"){["hydrocol","hydrocolMince","film"].forEach(k=>{P.delete(k);S.delete(k);});
+ else if(a.coul==="rouge"){if(a.exs==="abondant"){P.add("alginate");P.add("hydrofibre");S.add("mousse");}else if(a.exs==="modere")P.add("mousse");else{P.add("hydrocol");P.add("interface");P.add("hyal");}
+  if((a.type==="veineux"||a.type==="diab")&&a.exs!=="abondant")P.add("nosf");}
+ else if(a.coul==="rose"){if(hi)P.add("mousseFine");else{P.add("hydrocolMince");P.add("film");P.add("interface");P.add("hyal");}}
+ if(a.type==="brulure"&&(a.coul==="rouge"||a.coul==="rose")){P.add("interface");if(!hi)P.add("hyal");}
+ if(a.type==="chir"&&(a.coul==="rouge"||a.coul==="rose")&&a.exs!=="abondant"&&a.cav!=="oui"){const keep=[...P].filter(k=>k!=="hyal");P.clear();P.add("postop");keep.forEach(k=>P.add(k));}
+ if(a.inf==="oui"){["hydrocol","hydrocolMince","film","hyal","nosf","postop"].forEach(k=>{P.delete(k);S.delete(k);});
   if(!P.has("sec")){P.add("argent");if(!P.size||(P.size===1))P.add("interface");}
   avoid.push("Les pansements occlusifs (hydrocolloïde, film) sur une plaie infectée.");
   alert.push("Signes d'infection : prévenir le médecin (traitement général si fièvre ou infection qui s'étend). Prélèvement seulement sur prescription. Réfection quotidienne au début pour surveiller.");}
@@ -257,7 +264,7 @@ function paReco(a){
  if(a.odeur==="oui")S.add("charbon");
  if(a.peau==="oui"){todo.push("Protéger la peau autour de la plaie (film protecteur cutané en spray ou lingette) ; préférer des pansements siliconés peu adhésifs.");if(hi)todo.push("Peau macérée : choisir un pansement plus absorbant ou rapprocher les réfections.");avoid.push("Les adhésifs forts et les sparadraps sur une peau fragile.");}
  if(a.exs==="abondant"&&(a.cav==="oui"||["escarre","veineux","chir"].includes(a.type)))todo.push("Plaie très exsudative ou complexe : la thérapie par pression négative peut être discutée avec le médecin.");
- if(a.type==="diab")avoid.push("Les hydrocolloïdes et pansements occlusifs sur un pied diabétique.");
+ if(a.type==="diab"){["hydrocol","hydrocolMince"].forEach(k=>P.delete(k));avoid.push("Les hydrocolloïdes et pansements occlusifs sur un pied diabétique.");}
  if(a.type==="arteriel")avoid.push("La compression et la détersion agressive sans avis vasculaire.");
  if(!S.size&&[...P].some(k=>["hydrogel","alginate","hydrofibre","argent"].includes(k)))S.add("compresse");
  const C={chir:"Plaie opératoire : sans complication, pansement sec stérile ou film laissé 24 à 48 heures, surveillance de l'infection du site opératoire. Le protocole du chirurgien prime.",
@@ -283,7 +290,7 @@ function otPansement(){
   <div class="pa-cards three" role="group" aria-label="Particularités">${[["inf","Signes d'infection","rougeur qui s'étend (plus de 2 cm), chaleur, pus, douleur qui augmente"],["sang","Saignement","spontané ou au moindre contact"],["cav","Creuse, décollement","profondeur, berges décollées à explorer au stylet stérile"],["odeur","Mauvaise odeur","persistante après le nettoyage"],["peau","Peau fragile ou macérée","blanchâtre, ramollie, fripée, ou très fine"]].map(([k,t,d])=>card("ot-pa-flag",k,"",t,d,a[k]==="oui")).join("")}</div></div>
   <p class="ot-hint pa-note">Illustrations dessinées pour aider à reconnaître chaque aspect : la réalité varie selon la peau, la localisation et l'éclairage. Évaluez toujours après nettoyage, sous une bonne lumière.</p>`;
  let res=`<div class="callout"><b>Choisissez au moins la couleur du fond et l'exsudat</b> pour obtenir une orientation.</div>`;
- if(a.coul&&a.exs){const r=paReco(a),card=k=>`<div class="pa-p"><b>${PA_P[k][0]}</b><small>${PA_P[k][1]}</small><span class="pa-f">Réfection : ${PA_P[k][2]}</span></div>`;
+ if(a.coul&&a.exs){const r=paReco(a),card=k=>`<div class="pa-p"><b>${PA_P[k][0]}</b><small>${PA_P[k][1]}</small>${PA_P[k][3]?`<span class="pa-ex"><span class="pa-ex-l">Exemples</span>${PA_P[k][3].split(/, | ; /).map(x=>`<i>${esc(x)}</i>`).join("")}</span>`:""}<span class="pa-f">Réfection : ${PA_P[k][2]}</span></div>`;
   res=`<section class="sheet-body pa-res" aria-live="polite"><span class="eyebrow">Orientation</span>
    <div class="stack-sm"><h3>Pansement primaire, au contact de la plaie</h3>${r.P.map(card).join("")}</div>
    ${r.S.length?`<div class="stack-sm"><h3>Pansement secondaire ou associé</h3>${r.S.map(card).join("")}</div>`:""}
@@ -292,6 +299,7 @@ function otPansement(){
    ${r.todo.length?`<div class="stack-sm"><h3>Pendant le soin</h3><ul class="clean pa-ul">${r.todo.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
    ${r.avoid.length?`<div class="stack-sm"><h3>À éviter</h3><ul class="clean pa-ul">${r.avoid.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>`:""}
    <div class="stack-sm"><h3>Toujours</h3><ul class="clean pa-ul"><li>Nettoyer au sérum physiologique (ou à l'eau du robinet pour une plaie chronique) ; pas d'antiseptique systématique sur une plaie chronique.</li><li>Évaluer et tracer à chaque réfection : dimensions, couleur, exsudat, berges, douleur, photo datée.</li><li>Prévenir la douleur : antalgique avant le soin si besoin.</li><li>Réévaluer le choix quand l'aspect de la plaie change.</li></ul></div>
+   <p class="ot-hint">Noms commerciaux cités à titre d'exemples, sans préférence ni liste exhaustive : chaque établissement a son propre référencement. Vérifiez la classe du pansement sur l'emballage.</p>
    <p class="ot-hint">Les infirmiers peuvent prescrire certains pansements (dispositifs médicaux), sauf indication contraire du médecin. Le choix final suit la prescription, le protocole du service ou l'avis de l'infirmier référent plaies et cicatrisation.</p>
   </section>`;}
  return `<div class="stack-lg">${q}<button type="button" class="link" data-act="ot-pa-reset">Recommencer</button>${res}
