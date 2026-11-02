@@ -13,9 +13,11 @@ const OT_IC={
  transmissions:OI('<path d="M4 4.5h16V15H10l-5 4v-4H4z"/><path d="M8 8.5h8M8 11.5h5"/>'),
  reperes:OI('<path d="M4 4v16h16"/><path d="M8 16v-5M12 16V7M16 16v-8"/>'),
  notes:OI('<path d="M4 20h4L19.5 8.5l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>'),
+ urgences:OI('<path d="M12 20.5s-8-4.9-8-10.6A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 8 2.7c0 5.7-8 10.6-8 10.6z"/><path d="M6.5 12.5h3l1.3-2.6 1.9 5 1.3-2.4h3.5"/>'),
  copy:OI('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>')
 };
 const TOOLS=[
+ {id:"urgences",n:"Urgences (AFGSU)",s:"Urgences",c:"#C8372D",d:"Fiches réflexes : arrêt cardiaque, étouffement, hémorragie, malaises, traumatismes, situations exceptionnelles",lead:"Les fiches réflexes du programme de l'AFGSU niveau 2, pour réagir vite : urgences vitales, urgences potentielles, risques collectifs."},
  {id:"planning",n:"Planning",s:"Planning",c:"#2A5D85",d:"Agenda de la semaine, plan de révisions automatique, export vers l'agenda du téléphone",lead:"Organisez vos cours, révisions, partiels et stages. Le plan de révisions répartit les séances jusqu'à l'évaluation."},
  {id:"pansement",n:"Choix du pansement",s:"Pansement",c:"#B55E3A",d:"Quelques questions sur la plaie pour orienter vers la bonne classe de pansement",lead:"Décrivez la plaie : l'outil propose une classe de pansement, la fréquence de réfection et les points de vigilance."},
  {id:"tfe",n:"Aide au TFE",s:"TFE",c:"#6E5196",d:"Étapes du mémoire, question de départ, équation de recherche, références APA, rétroplanning",lead:"Avancez pas à pas dans votre travail de fin d'études. Tout est enregistré sur cet appareil."},
@@ -70,6 +72,7 @@ function vOutils(){
 }
 function vOutil(arg){
  const [id,...rest]=(arg||"").split("/"),t=TOOLS.find(x=>x.id===id);if(!t)return vOutils();
+ if(id==="urgences"&&rest.length&&rest[0])return `<div class="stack-lg ot ot-urgences">${otUrgences(rest.join("/"))}</div>`;
  return `<div class="stack-lg ot ot-${id}">${backBtn("Outils")}${vh("Boîte à outils",esc(t.n),esc(t.lead))}${OT_VIEWS[id](rest.join("/"))}</div>`;
 }
 
@@ -600,12 +603,13 @@ function otNotes(){
   <p class="disclaimer">Les notes restent sur cet appareil et sont incluses dans la sauvegarde (Réglages). Aucune donnée permettant d'identifier un patient.</p>`;
 }
 
-const OT_VIEWS={planning:otPlanning,pansement:otPansement,tfe:otTfe,calculs:otCalculs,scores:otScores,chrono:otChrono,transmissions:otTransmissions,reperes:otReperes,notes:otNotes};
+const OT_VIEWS={urgences:otUrgences,planning:otPlanning,pansement:otPansement,tfe:otTfe,calculs:otCalculs,scores:otScores,chrono:otChrono,transmissions:otTransmissions,reperes:otReperes,notes:otNotes};
 
 /* ---------- Événements ---------- */
 function outilAct(b,a){
  const k=b.dataset.k,id=b.dataset.id;
  if(a==="ot-copy"){otCopy(k||"");return;}
+ if(a==="ot-af-quiz"){launchQuiz(QUIZ.map((q,i)=>q.af?i:-1).filter(i=>i>=0),"Quiz urgences AFGSU");return;}
  /* Planning */
  if(a==="ot-ag-week"){state.agWeek=k==="0"?mondayOf(todayISO()):addDays(state.agWeek||mondayOf(todayISO()),7*(+k));render();}
  else if(a==="ot-ag-new"){state.agForm=true;state.agGen=false;state.agDay=k||todayISO();render();setTimeout(()=>{const i=document.getElementById("ag-t");if(i){i.focus({preventScroll:true});i.scrollIntoView({block:"center"});}},40);}
@@ -671,6 +675,7 @@ function outilInput(t){
  if(p[0]==="cx"){const c=state.cx||(state.cx={});(c[p[1]]||(c[p[1]]={}))[p[2]]=val;const o=document.getElementById("cx-res"),cx=CX.find(x=>x.id===p[1]);if(o&&cx)o.innerHTML=cxRes(cx);return;}
  if(p[0]==="sc"){const s=state.sc||(state.sc={});(s[p[1]]||(s[p[1]]={}))[p[2]]=val;const o=document.getElementById("sc-res");if(o)o.innerHTML=scoreRes(p[1]);return;}
  if(p[0]==="tx"){const T=txd();T[T.mode][p[1]]=val;store.set("txd",T);const o=document.getElementById("tx-prev");if(o)o.textContent=txText(T);return;}
+ if(p[0]==="af"){const s=afStore();s[p[1]]=val;store.set("afgsu",s);if(p[1]==="date"){const y=window.scrollY;render();window.scrollTo(0,y);}return;}
  if(p[0]==="rp"){state.rpq=val;const o=document.getElementById("rp-out");if(o)o.innerHTML=rpHTML(val);return;}
  if(p[0]==="note"){const L=notesL(),n=L.find(x=>x.id===state.noteId);if(!n)return;n[p[1]]=val;n.u=Date.now();store.set("notes",L);
   const m=document.getElementById("note-saved");if(m){m.textContent="Enregistré ✓";clearTimeout(outilInput.n);outilInput.n=setTimeout(()=>{m.textContent="Enregistré"},1200);}return;}

@@ -41,7 +41,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.34 · 2 novembre 2026";
+const APP_VERSION="1.35 · 2 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -160,6 +160,7 @@ function vAccueil(){
    <button class="icon-btn" data-act="nav" data-h="reglages" aria-label="Réglages">${IC.gear}</button></header>
   ${examCard()}
   <button class="search-pill" data-act="nav" data-h="recherche">${IC.search}Rechercher une fiche, un cours, une notion…</button>
+  ${afHome()}
   <section class="dash">${ring(pct)}
    <div class="dash-txt"><span class="k">Ma progression</span><h2>${doneItems()} sur ${totalItems} contenus révisés</h2>
     <div class="dash-stats"><span><b>${s.exTot?Math.round(s.exOk/s.exTot*100)+"%":"–"}</b>calculs justes</span><span><b>${s.quizBest==null?"–":s.quizBest}</b>meilleur quiz</span></div></div></section>
@@ -315,6 +316,7 @@ function vStages(){
  const done=store.get("check",[]);
  return `<div class="stack-lg">${vh("Stages","Arriver préparé·e dans chaque service",`Compte à rebours, infos pratiques, check-list, posture et repères pour ${STAGES.length} services.`)}
   ${stageCountdown()}
+  ${afBanner()}
   ${carnetCard()}
   ${feuillesCard()}
   ${stageForm()}
