@@ -299,18 +299,18 @@ function otPansement(){
    3. AIDE AU TFE
    ===================================================================== */
 const TFE_STEPS=[
- ["Choisir une situation d'appel","Une situation vécue en stage qui vous a étonné·e ou questionné·e, décrite de façon factuelle et anonyme.","recherche-c"],
- ["Formuler la question de départ","Claire (une seule idée), ouverte, faisable, pertinente pour la profession.","recherche-c"],
- ["Recherche documentaire","Mots-clés en français et en anglais, bases de données, fiches de lecture avec les références complètes.","lecture-article-c"],
- ["Entretiens exploratoires","Rencontrer deux ou trois professionnels pour confronter le thème au terrain.",""],
- ["Cadre conceptuel","Définir les concepts clés avec des auteurs de référence et les articuler.","recherche-c"],
- ["Problématique et question de recherche","Ce qui fait problème entre théorie et terrain, puis la question (ou l'hypothèse) retenue.","recherche-c"],
- ["Outil d'enquête","Guide d'entretien ou questionnaire testé ; autorisations demandées ; consentement et anonymat prévus.",""],
- ["Enquête et retranscription","Entretiens réalisés, enregistrés avec accord, retranscrits et anonymisés.",""],
- ["Analyse et discussion","Grille d'analyse par thèmes, confrontation aux auteurs, limites de l'étude.",""],
- ["Rédaction et mise en forme","Introduction, conclusion, sommaire automatique, bibliographie normée, annexes, résumé en anglais.","ecrits-c"],
- ["Relecture et dépôt","Orthographe, respect des consignes de l'IFSI, sources citées, dépôt dans les délais.","ecrits-c"],
- ["Préparer la soutenance","Diaporama sobre, une dizaine de minutes, questions probables du jury.","anglais-2-c"]
+ ["Choisir une situation d'appel","Une situation vécue en stage qui vous a étonné·e ou questionné·e, décrite de façon factuelle et anonyme.","tfe-appel"],
+ ["Formuler la question de départ","Claire (une seule idée), ouverte, faisable, pertinente pour la profession.","tfe-question"],
+ ["Recherche documentaire","Mots-clés en français et en anglais, bases de données, fiches de lecture avec les références complètes.","tfe-documentation"],
+ ["Entretiens exploratoires","Rencontrer deux ou trois professionnels pour confronter le thème au terrain.","tfe-exploratoire"],
+ ["Cadre conceptuel","Définir les concepts clés avec des auteurs de référence et les articuler.","tfe-cadre"],
+ ["Problématique et question de recherche","Ce qui fait problème entre théorie et terrain, puis la question (ou l'hypothèse) retenue.","tfe-problematique"],
+ ["Outil d'enquête","Guide d'entretien ou questionnaire testé ; autorisations demandées ; consentement et anonymat prévus.","tfe-outil"],
+ ["Enquête et retranscription","Entretiens réalisés, enregistrés avec accord, retranscrits et anonymisés.","tfe-enquete"],
+ ["Analyse et discussion","Grille d'analyse par thèmes, confrontation aux auteurs, limites de l'étude.","tfe-analyse"],
+ ["Rédaction et mise en forme","Introduction, conclusion, sommaire automatique, bibliographie normée, annexes, résumé en anglais.","tfe-redaction"],
+ ["Relecture et dépôt","Orthographe, respect des consignes de l'IFSI, sources citées, dépôt dans les délais.","tfe-relecture"],
+ ["Préparer la soutenance","Diaporama sobre, une dizaine de minutes, questions probables du jury.","tfe-soutenance"]
 ];
 const TFE_SUJET=[["appel","Situation d'appel","Décrivez les faits : où, quand, qui (sans nom), ce qui s'est passé, ce qui vous a interpellé·e."],["theme","Thème","Ex. le refus de soin chez la personne âgée"],["qd","Question de départ","Ex. En quoi la relation soignant-soigné influence-t-elle…"],["concepts","Concepts clés et auteurs","Ex. relation de soin (Hesbeen), consentement, autonomie"],["qr","Question de recherche ou hypothèse",""],["journal","Carnet de bord","Idées, lectures, contacts, rendez-vous avec la guidance"]];
 const TFE_MILES=[[.1,"Question de départ validée"],[.25,"Recherche documentaire et entretiens exploratoires"],[.45,"Cadre conceptuel et problématique"],[.55,"Outil d'enquête prêt et testé"],[.7,"Enquête terminée et retranscrite"],[.85,"Analyse et discussion rédigées"],[.95,"Rédaction terminée, relecture"],[1,"Dépôt du mémoire"]];
@@ -367,7 +367,7 @@ function otTfe(){
     <ol class="tfe-miles">${miles.map(([d,l])=>`<li><span>${esc(parseD(d).toLocaleDateString("fr-FR",{day:"numeric",month:"short"}))}</span>${esc(l)}</li>`).join("")}</ol>
     <button type="button" class="btn ghost block" data-act="ot-tfe-plan">${OT_IC.planning}Ajouter ces étapes à mon planning</button>`;}}
  return `<section class="sheet-body"><div class="tfe-top">${ring(pct,84)}<div><span class="eyebrow">Mon avancement</span><h2>${done} étape${done>1?"s":""} sur ${TFE_STEPS.length}</h2><p class="muted">Cochez chaque étape terminée.</p></div></div>
-   <ol class="tfe-steps">${TFE_STEPS.map(([t,d,c],i)=>`<li class="${T.steps[i]?"ok":""}"><label class="chk"><input type="checkbox" data-act="ot-tfe-step" data-i="${i}" ${T.steps[i]?"checked":""}><span><b>${i+1}. ${esc(t)}</b><small>${esc(d)}${c?` <a href="#cours/${c}">Voir le cours</a>`:""}</small></span></label></li>`).join("")}</ol></section>
+   <ol class="tfe-steps">${TFE_STEPS.map(([t,d,c],i)=>`<li class="${T.steps[i]?"ok":""}"><label class="chk"><input type="checkbox" data-act="ot-tfe-step" data-i="${i}" ${T.steps[i]?"checked":""}><span><b>${i+1}. ${esc(t)}</b><small>${esc(d)}${c?` <a href="#cours/${c}">Cours de l'étape</a>`:""}</small></span></label></li>`).join("")}</ol></section>
   <section class="stack-sm"><div class="section-title"><h2>Mon sujet</h2><span class="muted" id="tfe-saved">Enregistré sur cet appareil</span></div>
    <div class="cd-form sheet-body">${TFE_SUJET.map(([k,l,ph])=>otField("tfe-"+k,l,`<textarea id="tfe-${k}" data-ot="tfe.${k}" rows="${k==="appel"||k==="journal"?4:2}" placeholder="${esc(ph)}">${esc(T.s[k]||"")}</textarea>`)+(k==="qd"?`<ul class="clean qd-check" id="qd-check" aria-live="polite">${qdCheck(T.s.qd)}</ul>`:"")).join("")}
     <details class="ot-det"><summary>Les critères d'une bonne question de départ</summary><ul class="clean pa-ul"><li><b>Claire</b> : une seule idée, sans jargon ni termes ambigus.</li><li><b>Ouverte</b> : on ne connaît pas la réponse, pas de oui/non.</li><li><b>Faisable</b> : en temps et en accès au terrain pour un étudiant.</li><li><b>Pertinente</b> : utile pour la pratique infirmière, sans jugement des personnes.</li></ul></details></div></section>
@@ -384,8 +384,8 @@ function otTfe(){
   <section class="stack-sm"><div class="section-title"><h2>Rétroplanning</h2></div>
    <div class="cd-form sheet-body"><div class="cd-row">${otField("tfe-rendu","Date de rendu du mémoire",`<input id="tfe-rendu" type="date" data-ot="tfe.rendu" value="${esc(T.rendu)}">`)}${otField("tfe-sout","Date de soutenance",`<input id="tfe-sout" type="date" data-ot="tfe.sout" value="${esc(T.sout)}">`)}</div>
     <div id="tfe-plan">${plan||`<p class="muted">Indiquez la date de rendu pour obtenir des échéances intermédiaires.</p>`}</div></div></section>
-  <div class="list"><a class="li" href="#cours/recherche-c"><span class="ic tb-ic" style="--c:#6E5196">${OT_IC.tfe}</span><span><span class="t">Cours : la démarche de recherche et le mémoire</span><span class="s">De la situation d'appel à la soutenance</span></span>${chev}</a>
-   <a class="li" href="#cours/ecrits-c"><span class="ic tb-ic" style="--c:#6E5196">${OT_IC.tfe}</span><span><span class="t">Cours : écrits professionnels et universitaires</span><span class="s">Plan, argumentation, normes APA</span></span>${chev}</a></div>`;
+  <div class="list"><a class="li" href="#cours/tfe-0"><span class="ic tb-ic" style="--c:#6E5196">${OT_IC.tfe}</span><span><span class="t">Cours : le mémoire de A à Z</span><span class="s">Attendus, calendrier, évaluation, les 12 étapes</span></span>${chev}</a>
+   <button type="button" class="li" data-act="go-cat" data-k="tfe"><span class="ic tb-ic" style="--c:#6E5196">${OT_IC.tfe}</span><span><span class="t">Tous les cours du mémoire</span><span class="s">Un cours détaillé par étape, quiz du mémoire</span></span>${chev}</button></div>`;
 }
 function eqOut(fr,en){
  if(!fr&&!en)return `<p class="muted">L'équation apparaît ici quand vous remplissez au moins un concept.</p>`;

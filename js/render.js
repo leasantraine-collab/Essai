@@ -522,7 +522,7 @@ function cvBlock(s){
  return fvBlock(s);
 }
 function cvRender(c){
- const cat=CAT[c.cat],done=studied().includes(c.id),list=COURS.filter(x=>x.chap),k=list.findIndex(x=>x.id===c.id),next=list[k+1];
+ const cat=CAT[c.cat],done=studied().includes(c.id),list=COURS.filter(x=>x.chap),k=list.findIndex(x=>x.id===c.id),next=c.cat==="tfe"?list.slice(k+1).find(x=>x.cat==="tfe"):list[k+1];
  const num=i=>String(i+1).padStart(2,"0");
  const toc=c.chap.map((ch,i)=>`<a href="#cours" data-sec="c-${i+1}"><b>${num(i)}</b>${esc(ch.chip||ch.h)}</a>`).join("");
  const body=c.chap.map((ch,i)=>`<section class="fv-sec" id="c-${i+1}"><div class="fv-sh"><span class="fv-num">${num(i)}</span><h2>${md(ch.h)}</h2></div>${ch.b.map(cvBlock).join("")}</section>`).join("");
@@ -544,7 +544,7 @@ function cvRender(c){
     <p class="muted">Relisez l'essentiel, répondez aux questions de chaque chapitre sans regarder, puis passez au quiz.</p>
     <div class="row2"><button class="btn ${done?"ghost":"ok"}" data-act="cv-done" data-id="${c.id}">${done?"Retirer des cours étudiés":"J'ai étudié ce cours"}</button>
     ${QUIZ.some(q=>q.cat===c.cat)?`<button class="btn ghost" data-act="fv-quiz" data-k="${c.cat}">Quiz ${esc(cat.nom)}</button>`:""}</div>
-    ${next?`<button class="card cat fv-next" style="--c:${CAT[next.cat].c}" data-act="cours" data-id="${next.id}"><span class="eyebrow">Cours suivant</span><h3>${esc(next.titre)}</h3></button>`:""}
+    ${next?`<button class="card cat fv-next" style="--c:${CAT[next.cat].c}" data-act="cours" data-id="${next.id}"><span class="eyebrow">${c.cat==="tfe"?"Étape suivante":"Cours suivant"}</span><h3>${esc(next.titre)}</h3></button>`:""}
    </div>
   </div></article>`;
 }

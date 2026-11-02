@@ -36,11 +36,12 @@ const CAT_IC={
  exam:I('<path d="M4 4v16h16"/><path d="M7 14l3-3 3 2 5-6"/>'),
  role:I('<path d="M12 3v18M5 7h14M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0zM8 21h8"/>'),
  anat:I('<path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7a4.3 4.3 0 0 1 7.5 3c0 5.4-7.5 10-7.5 10z"/>'),
- situ:I('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/>')
+ situ:I('<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/>'),
+ tfe:I('<path d="M5 3h9l5 5v13H5z"/><path d="M14 3v5h5"/><path d="M8.5 14l2.5 2.5 4.5-5"/>')
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.33 · 2 novembre 2026";
+const APP_VERSION="1.34 · 2 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -496,7 +497,7 @@ app.addEventListener("click",ev=>{
  if(a==="nav"){nav(b.dataset.h);}
  else if(a==="back"||a==="fiche-back"||a==="cours-back"){goBack();}
  else if(a==="go-cat"){ev.preventDefault();
-  if(k==="stage")nav("stages");else if(k==="patho"){state.filter="patho";state.favOnly=false;nav("reviser");}else if(k==="calcul")nav("entrainer/calculs");else if(k==="quiz")nav("entrainer/quiz");
+  if(k==="stage")nav("stages");else if(k==="tfe"){state.filter="tfe";state.favOnly=false;nav("reviser/cours");}else if(k==="patho"){state.filter="patho";state.favOnly=false;nav("reviser");}else if(k==="calcul")nav("entrainer/calculs");else if(k==="quiz")nav("entrainer/quiz");
   else if(k==="calcul-fiches"){state.filter="calcul";state.favOnly=false;nav("reviser/fiches");}
   else{state.filter=k;state.favOnly=false;nav("reviser/"+(FICHES.some(f=>f.cat===k)?"fiches":"cours"));}}
  else if(a==="rev"){state.rev=k;store.set("rev",k);location.replace("#reviser/"+k);}

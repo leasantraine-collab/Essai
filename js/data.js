@@ -12,6 +12,7 @@ const CATS=[
  {id:"voca",nom:"Vocabulaire médical",c:"#F6E3A1",desc:"Préfixes, suffixes, abréviations, terminologie"},
  {id:"stage",nom:"Stage IDE",c:"#CDBFE8",desc:"Préparation, objectifs, posture, analyse de situation"},
  {id:"methode",nom:"Révisions et méthodes",c:"#9FD8D2",desc:"Mémorisation active, répétition espacée, planning"},
+ {id:"tfe",nom:"Mémoire (TFE)",c:"#E6AFD8",desc:"Le mémoire de fin d'études étape par étape, de la situation d'appel à la soutenance"},
  {id:"calcul",nom:"Calculs et dosages",c:"#F7C9A9",desc:"Conversions, débits, concentrations, doses"},
  {id:"quiz",nom:"Quiz et exercices",c:"#D6D9DC",desc:"QCM, questions flash, cas cliniques"},
  {id:"exam",nom:"Examens et surveillance",c:"#9DB0C4",desc:"Constantes, biologie, signes d'alerte"},
