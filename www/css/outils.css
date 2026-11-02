@@ -263,3 +263,18 @@ body.tb-on{overflow:hidden}
 .af-pn.r{text-align:right}
 .af-pn small{color:var(--muted);font-size:.72rem}
 .af-pn b{font-size:.84rem;line-height:1.25}
+
+/* ---------- Historique des stages ---------- */
+.sh-sum{display:flex;flex-direction:column;gap:12px}
+.sh-types{display:flex;flex-wrap:wrap;gap:6px}
+.sh-type{font-size:.82rem;padding:5px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--bg)}
+.sh-type.ok{border-color:transparent;background:var(--ok-soft);color:var(--ok);font-weight:600}
+.sh-objs{display:flex;flex-direction:column;gap:8px}
+.sh-objs li{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.sh-objs li .tag{flex:none}
+.sh-bil{display:flex;flex-direction:column;gap:8px}
+.sh-bil p{margin:2px 0 0}
+.sh-just{border-left:4px solid var(--ok)}
+.sh-add form{margin-top:10px}
+.sh-sum .cn-kpi{grid-template-columns:repeat(3,minmax(0,1fr))}
+.sh-goals{font-size:.92rem}

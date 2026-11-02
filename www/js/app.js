@@ -41,7 +41,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.35 · 2 novembre 2026";
+const APP_VERSION="1.36 · 2 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -78,7 +78,7 @@ applyTheme();
 
 /* ---------- Routage ---------- */
 const ROOTS=["accueil","reviser","entrainer","stages","programme"];
-const PARENT={outil:"outils",outils:"accueil",med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const PARENT={"stage-hist":"stages",outil:"outils",outils:"accueil",med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 function route(){const [v,...rest]=decodeURIComponent(location.hash.slice(1)).split("/");return {v:VIEWS[v]?v:"accueil",arg:rest.join("/")};}
 function nav(h){if(location.hash==="#"+h)render(true);else location.hash=h;}
 let depth=0;
@@ -122,7 +122,8 @@ function stageCountdown(){
  const s=stageInfo(),start=at(s.debut,s.arrivee||"07:00"),end=s.fin?at(s.fin,"23:59"):null,now=Date.now(),title=s.service?esc(s.service):"Mon prochain stage";
  if(!start) return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Compte à rebours</span><h2>${title}</h2><p class="muted">Renseignez la date de début ci-dessous pour lancer le compte à rebours.</p></section>`;
  if(now<start) return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Début du stage · ${jMoins(start)}</span><h2>${title}</h2>${cdBox(start)}<p class="cd-date">${IC.cal}${esc(fmtFull(start))}${end?` · jusqu'au ${esc(fmtShort(end))}`:""}</p></section>`;
- if(end&&now>end) return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Stage terminé</span><h2>${title}</h2><p class="muted">Pensez à compléter votre portfolio et à <a class="link" href="#carnet/imprimer">imprimer votre carnet de suivi</a>. Quand vous connaissez votre prochain stage, effacez ces informations et le carnet pour repartir de zéro.</p><button class="btn ghost block" data-act="stage-new">Préparer un nouveau stage</button></section>`;
+ if(end&&now>end){const auto=!s.noAuto&&s.fin?shDay(addDays(s.fin,SH_GRACE+1)):"";
+  return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Stage terminé</span><h2>${title}</h2><p class="muted">Finissez vos bilans et votre portfolio, puis <a class="link" href="#carnet/imprimer">imprimez votre carnet de suivi</a>. ${auto?`Le stage sera rangé automatiquement dans votre historique le ${esc(auto)}, avec tout son carnet.`:"Ce stage a été rouvert depuis l'historique : archivez-le quand vous avez terminé."}</p><button class="btn block" data-act="sh-archive">Archiver maintenant et préparer le prochain stage</button></section>`;}
  const tot=end?Math.max(1,Math.round((day0(end)-day0(start))/DAY)+1):null,jour=Math.round((day0(now)-day0(start))/DAY)+1;
  return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Stage en cours${tot?` · jour ${Math.min(jour,tot)} sur ${tot}`:""}</span><h2>${title}</h2>
   ${tot?`<div class="progress"><i style="width:${Math.min(100,jour/tot*100)}%"></i></div>`:""}${end?`<p class="muted">Fin du stage dans</p>${cdBox(end)}`:`<p class="muted">Ajoutez la date de fin pour suivre l'avancée du stage.</p>`}</section>`;
@@ -141,8 +142,10 @@ function stageForm(){
    <div class="cd-row">${f("tuteur","Tuteur ou tutrice",'placeholder="Nom" maxlength="60" autocomplete="off"')}${f("cadre","Cadre de santé",'placeholder="Nom" maxlength="60" autocomplete="off"')}</div>
    <div class="cd-row">${f("tel","Téléphone du service",'type="tel" placeholder="04 00 00 00 00" maxlength="30"')}<label for="sf-sem">Semestre<select id="sf-sem" data-sf="sem"><option value="">–</option>${[1,2,3,4,5,6].map(n=>`<option ${s.sem==="S"+n?"selected":""}>S${n}</option>`).join("")}</select></label></div>
    ${t("tenue","Tenue et matériel à prévoir","Tenues fournies ? Chaussures, montre, stylos, carnet…")}
+   ${shLastGoals()}
    ${t("objectifs","Mes objectifs de stage","Ex. réaliser une prise en charge globale de 2 patients")}
    ${t("notes","Notes","Pathologies fréquentes du service, vocabulaire, questions à poser…")}
+   ${shHasContent()?`<button class="link" data-act="sh-archive" type="button">Ranger ce stage dans l'historique et repartir de zéro</button>`:""}
   </div></section>`;
 }
 
@@ -313,10 +316,12 @@ function vEntrainer(arg){
 
 /* ---------- Stages ---------- */
 function vStages(){
+ shAutoArchive();
  const done=store.get("check",[]);
  return `<div class="stack-lg">${vh("Stages","Arriver préparé·e dans chaque service",`Compte à rebours, infos pratiques, check-list, posture et repères pour ${STAGES.length} services.`)}
   ${stageCountdown()}
   ${afBanner()}
+  ${shParcours()}
   ${carnetCard()}
   ${feuillesCard()}
   ${stageForm()}
@@ -443,8 +448,8 @@ function vReglages(){
 }
 
 /* ---------- Rendu ---------- */
-const VIEWS={outils:vOutils,outil:vOutil,med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
-const TAB={med:"reviser",soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const VIEWS={outils:vOutils,outil:vOutil,med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,"stage-hist":vStageHist,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
+const TAB={"stage-hist":"stages",med:"reviser",soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 let lastKey=null;
 const SCROLL={};
 function render(top){
@@ -475,6 +480,7 @@ app.addEventListener("submit",ev=>{if(ev.target.id==="calc-form"){ev.preventDefa
  else if(ev.target.id.startsWith("cn-")){ev.preventDefault();carnetSubmit(ev.target);}
  else if(ev.target.id.startsWith("pl-")){ev.preventDefault();plSubmit(ev.target);}
  else if(ev.target.id.startsWith("ot-")){ev.preventDefault();outilSubmit(ev.target);}
+ else if(ev.target.id==="sh-add-form"){ev.preventDefault();histSubmit(ev.target);}
  else if(ev.target.id==="exam-form"){ev.preventDefault();const nom=document.getElementById("ex-nom").value.trim(),date=document.getElementById("ex-date").value,heure=document.getElementById("ex-heure").value||"08:00";
   if(!nom||!date){toast("Indiquez un intitulé et une date");return;}
   store.set("exams",[...exams(),{id:Date.now().toString(36),nom,date,heure}]);haptic();toast("Partiel ajouté");render();setTimeout(()=>{const i=document.getElementById("ex-nom");i&&i.focus()},0);}});
@@ -491,6 +497,7 @@ app.addEventListener("click",ev=>{
  const b=ev.target.closest("[data-act]");if(!b)return;
  const a=b.dataset.act,k=b.dataset.k,id=b.dataset.id;
  if(a.startsWith("ot-")){outilAct(b,a);return;}
+ if(a.startsWith("sh-")){histAct(b,a);return;}
  if(a.startsWith("cn-")){carnetAct(b,a);return;}
  if(a.startsWith("fs-")){feuilleAct(b,a);return;}
  if(a.startsWith("px-")){pathoAct(b,a);return;}
@@ -595,5 +602,6 @@ async function forceUpdate(){
  location.reload();
 }
 tbInit();
+try{shAutoArchive();}catch(e){}
 render(true);
 try{const sp=plug("SplashScreen");sp&&setTimeout(()=>sp.hide(),120);}catch(e){}
