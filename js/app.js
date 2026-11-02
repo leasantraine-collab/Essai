@@ -40,7 +40,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.31 · 2 novembre 2026";
+const APP_VERSION="1.32 · 2 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -77,7 +77,7 @@ applyTheme();
 
 /* ---------- Routage ---------- */
 const ROOTS=["accueil","reviser","entrainer","stages","programme"];
-const PARENT={med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const PARENT={outil:"outils",outils:"accueil",med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 function route(){const [v,...rest]=decodeURIComponent(location.hash.slice(1)).split("/");return {v:VIEWS[v]?v:"accueil",arg:rest.join("/")};}
 function nav(h){if(location.hash==="#"+h)render(true);else location.hash=h;}
 let depth=0;
@@ -170,6 +170,8 @@ function vAccueil(){
     <button class="qa" data-act="quiz-wrong" ${nW?"":"disabled style='opacity:.55'"}><span class="ic acc">${IC.redo}</span><b>Mes erreurs</b><small>${nW?plural(nW,"question")+" à revoir":"Aucune pour l'instant"}</small></button>
     <button class="qa" data-act="favs"><span class="ic">${IC.star}</span><b>Favoris</b><small>${plural(favs().length,"élément")}</small></button>
    </div></section>
+  <section class="stack-sm"><div class="section-title"><h2>Boîte à outils</h2><a href="#outils">Tout voir</a></div>
+   <div class="ot-mini">${["planning","pansement","tfe","calculs"].map(id=>{const t=TOOLS.find(x=>x.id===id);return `<a href="#outil/${id}"><span class="ic tb-ic" style="--c:${t.c}">${OT_IC[id]}</span>${esc(t.s)}</a>`;}).join("")}</div></section>
   <section class="stack-sm"><div class="section-title"><h2>Réviser par thème</h2><a href="#reviser">Tout voir</a></div>
    <div class="cats">${CATS.map(c=>{const n=FICHES.filter(f=>f.cat===c.id).length+FULL_COURS.filter(x=>x.cat===c.id).length;
     const sub=c.id==="stage"?"Préparation":c.id==="calcul"?"Exercices illimités":c.id==="quiz"?QUIZ.length+" questions":c.id==="patho"?PATHOS.length+" pathologies par spécialité":(c.id==="soins"||c.id==="exam")&&soCatN(c.id)?`${soCatN(c.id)} fiches ${c.id==="exam"?"de surveillance":"de soins"} + ${plural(n,"contenu")}`:c.id==="thera"&&mdN()?`${mdN()} classes thérapeutiques + ${plural(n,"contenu")}`:plural(n,"contenu");
@@ -438,7 +440,7 @@ function vReglages(){
 }
 
 /* ---------- Rendu ---------- */
-const VIEWS={med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
+const VIEWS={outils:vOutils,outil:vOutil,med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
 const TAB={med:"reviser",soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 let lastKey=null;
 const SCROLL={};
@@ -452,7 +454,7 @@ function render(top){
  /* Retour d'une fiche, d'un cours ou d'une pathologie vers la liste Réviser : on retrouve la position dans la liste. */
  if(moved)window.scrollTo(0,["reviser","programme","ue"].includes(r.v)&&/^(patho|soin|med|fiche|cours)\//.test(lastKey||"")&&SCROLL[key]!=null?SCROLL[key]:0);
  lastKey=key;
- fvBind();pxBind();
+ fvBind();pxBind();tbSync(r);
  if(r.v==="recherche"){const q=document.getElementById("q");if(q&&top&&!state.q)setTimeout(()=>q.focus(),60);}
 }
 
@@ -469,6 +471,7 @@ function launchQuiz(list,label){if(!list.length){toast("Aucune question disponib
 app.addEventListener("submit",ev=>{if(ev.target.id==="calc-form"){ev.preventDefault();checkCalc(false);}
  else if(ev.target.id.startsWith("cn-")){ev.preventDefault();carnetSubmit(ev.target);}
  else if(ev.target.id.startsWith("pl-")){ev.preventDefault();plSubmit(ev.target);}
+ else if(ev.target.id.startsWith("ot-")){ev.preventDefault();outilSubmit(ev.target);}
  else if(ev.target.id==="exam-form"){ev.preventDefault();const nom=document.getElementById("ex-nom").value.trim(),date=document.getElementById("ex-date").value,heure=document.getElementById("ex-heure").value||"08:00";
   if(!nom||!date){toast("Indiquez un intitulé et une date");return;}
   store.set("exams",[...exams(),{id:Date.now().toString(36),nom,date,heure}]);haptic();toast("Partiel ajouté");render();setTimeout(()=>{const i=document.getElementById("ex-nom");i&&i.focus()},0);}});
@@ -479,10 +482,12 @@ app.addEventListener("input",ev=>{const t=ev.target;if(t.id==="q"){state.q=t.val
  else if(t.dataset.sf)saveStageField(t);
  else if(t.dataset.cn)carnetInput(t);
  else if(t.dataset.fs)feuilleInput(t);
+ else if(t.dataset.ot!=null)outilInput(t);
  else pathoInput(t);});
 app.addEventListener("click",ev=>{
  const b=ev.target.closest("[data-act]");if(!b)return;
  const a=b.dataset.act,k=b.dataset.k,id=b.dataset.id;
+ if(a.startsWith("ot-")){outilAct(b,a);return;}
  if(a.startsWith("cn-")){carnetAct(b,a);return;}
  if(a.startsWith("fs-")){feuilleAct(b,a);return;}
  if(a.startsWith("px-")){pathoAct(b,a);return;}
@@ -551,6 +556,7 @@ app.addEventListener("change",ev=>{
 /* ---------- Natif ---------- */
 if(isNative){
  try{const A=plug("App");A&&A.addListener("backButton",()=>{
+  if(tbOpen){tbToggle(false);return;}
   if(document.querySelector(".zoom")){document.querySelector(".zoom").remove();return;}
   const r=route();if(r.v==="entrainer"&&state.quiz){state.quiz=null;render(true);return;}
   if(r.v==="accueil")A.exitApp();else if(ROOTS.includes(r.v))location.replace("#accueil");else goBack();});}catch(e){}
@@ -585,5 +591,6 @@ async function forceUpdate(){
   if(navigator.serviceWorker){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.update().catch(()=>{})));}}catch(e){}
  location.reload();
 }
+tbInit();
 render(true);
 try{const sp=plug("SplashScreen");sp&&setTimeout(()=>sp.hide(),120);}catch(e){}
