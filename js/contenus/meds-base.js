@@ -7,27 +7,27 @@
    u éducation du patient · c conduite à tenir · r point essentiel · x erreur fréquente · q question · o option (* = bonne réponse) · ex explication
    f liens (id de fiche ou cours, s:id de soin, p:id de pathologie) */
 const MD_SECS=[
- ["dou","Antalgiques et douleur","2.11 2.4|B.3","gauge"],
- ["anes","Anesthésie, réanimation et urgences","2.11 4.3|B.3","alert"],
- ["atb","Antibiotiques","2.11 2.5 2.10|B.3","thermo"],
- ["avir","Antiviraux, antifongiques et antiparasitaires","2.11 2.5 2.10|B.3","flask"],
- ["coag","Anticoagulants, antiagrégants et hémostase","2.11 2.8|B.3","drop"],
- ["cardio","Cardiologie et vasculaire","2.11 2.8|B.3","heart"],
- ["hydro","Solutés et équilibre hydroélectrolytique","2.11 4.4|B.3","drop"],
- ["pneumo","Pneumologie et allergologie","2.11 2.8|B.3","lungs"],
- ["gastro","Gastro-entérologie et hépatologie","2.11 2.8|B.3","gut"],
- ["diab","Diabétologie","2.11 2.7|B.3","finger"],
- ["endo","Endocrinologie et os","2.11 2.7|B.3","gland"],
- ["neuro","Neurologie","2.11 2.7|B.3","brain"],
- ["psy","Psychiatrie et addictologie","2.11 2.6|B.3","face"],
- ["hemato","Hématologie","2.11 2.5|B.3","drop"],
- ["immuno","Immunologie, rhumatologie et vaccins","2.11 2.5|B.3","flask"],
- ["onco","Oncologie","2.11 2.9|B.3","tube"],
- ["uro","Urologie et néphrologie","2.11 2.8|B.3","kidney"],
- ["gyneco","Gynécologie et obstétrique","2.11 2.2|B.3","baby"],
- ["pedia","Pédiatrie et néonatalogie","2.11 2.4|B.3","baby"],
- ["dermato","Dermatologie et plaies","2.11 4.4|B.3","peau"],
- ["ophorl","Ophtalmologie et ORL","2.11|B.3","eye"]
+ ["dou","Antalgiques et douleur","2.11 2.4|B.1 B.3","gauge"],
+ ["anes","Anesthésie, réanimation et urgences","2.11 4.3|B.1 B.3","alert"],
+ ["atb","Antibiotiques","2.11 2.5 2.10|B.1 B.3","thermo"],
+ ["avir","Antiviraux, antifongiques et antiparasitaires","2.11 2.5 2.10|B.1 B.3","flask"],
+ ["coag","Anticoagulants, antiagrégants et hémostase","2.11 2.8|B.1 B.3","drop"],
+ ["cardio","Cardiologie et vasculaire","2.11 2.8|B.1 B.3","heart"],
+ ["hydro","Solutés et équilibre hydroélectrolytique","2.11 4.4|B.1 B.3","drop"],
+ ["pneumo","Pneumologie et allergologie","2.11 2.8|B.1 B.3","lungs"],
+ ["gastro","Gastro-entérologie et hépatologie","2.11 2.8|B.1 B.3","gut"],
+ ["diab","Diabétologie","2.11 2.7|B.1 B.3","finger"],
+ ["endo","Endocrinologie et os","2.11 2.7|B.1 B.3","gland"],
+ ["neuro","Neurologie","2.11 2.7|B.1 B.3","brain"],
+ ["psy","Psychiatrie et addictologie","2.11 2.6|B.1 B.3","face"],
+ ["hemato","Hématologie","2.11 2.5|B.1 B.3","drop"],
+ ["immuno","Immunologie, rhumatologie et vaccins","2.11 2.5|B.1 B.3","flask"],
+ ["onco","Oncologie","2.11 2.9|B.1 B.3","tube"],
+ ["uro","Urologie et néphrologie","2.11 2.8|B.1 B.3","kidney"],
+ ["gyneco","Gynécologie et obstétrique","2.11 2.2|B.1 B.3","baby"],
+ ["pedia","Pédiatrie et néonatalogie","2.11 2.4|B.1 B.3","baby"],
+ ["dermato","Dermatologie et plaies","2.11 4.4|B.1 B.3","peau"],
+ ["ophorl","Ophtalmologie et ORL","2.11|B.1 B.3","eye"]
 ];
 const MD_SEC={};MD_SECS.forEach(([id,nom,u,ico],n)=>{MD_SEC[id]={id,nom,u,ico,n};});
 const MEDS=[],MDBY={};
