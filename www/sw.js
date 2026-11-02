@@ -109,6 +109,8 @@ const FILES=[
  "js/contenus/ue-c15.js",
  "js/contenus/ue-c16.js",
  "js/contenus/ue-c17.js",
+ "js/contenus/ue-c18.js",
+ "js/contenus/ue-c19.js",
  "js/contenus/complements.js",
  "js/contenus/icones.js",
  "js/contenus/pathologies-1.js",
