@@ -52,7 +52,7 @@ const ueGroup=(k,c,title,n,rows)=>{const open=(state.uePg||{})[k];
 /* Contenus d'une UE : cours complets en tête, puis soins, médicaments, pathologies, fiches. */
 function ueBody(code,r){const L=ueContent(code,r),dS=soDone(),dM=mdDone(),dP=pxDone(),k=r+code;
  const sec=(t,sub,h)=>h?`<section class="stack-sm"><div class="section-title"><h2>${t}</h2></div>${sub?`<p class="muted ue-note">${sub}</p>`:""}${h}</section>`:"";
- return sec("Cours complets",L.full.length?"Cours détaillés en chapitres, avec schémas, exemples, pièges et quiz.":"",L.full.length?ueSections(L.full,"c",code):"")+
+ return (["4.3","B.3"].includes(code)?afBanner():"")+sec("Cours complets",L.full.length?"Cours détaillés en chapitres, avec schémas, exemples, pièges et quiz.":"",L.full.length?ueSections(L.full,"c",code):"")+
   sec("Autres cours","",L.autres.length?`<div class="list">${L.autres.map(i=>itemRow(i,"c")).join("")}</div>`:"")+
   sec("Soins et techniques",L.nSo?`${L.nSo} soins, chacun avec fiche récap et cours détaillé.`:"",L.so.map(([s,l])=>ueGroup(k+"so"+s,SO_COL(s),SO_SEC[s].nom,l.length,()=>l.map(o=>soRow(o,false,dS)).join(""))).join(""))+
   sec("Médicaments",L.nMd?`${L.nMd} grandes fiches de classes thérapeutiques.`:"",L.md.map(([s,l])=>ueGroup(k+"md"+s,MD_COL(s),MD_SEC[s].nom,l.length,()=>l.map(o=>mdRow(o,false,dM)).join(""))).join(""))+
