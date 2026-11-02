@@ -268,10 +268,16 @@ function paReco(a){
 }
 function otPansement(){
  const a=state.pa||(state.pa={inf:"non",sang:"non",cav:"non",odeur:"non",peau:"non"});
- const q=PA_Q.slice(0,3).map(([k,l,opts])=>`<div class="pa-q"><h3>${l}</h3>
-  <div class="chips wrapchips" role="group" aria-label="${esc(l)}">${opts.map(([v,t,c])=>`<button type="button" class="chip" data-act="ot-pa" data-k="${k}" data-v="${v}" aria-pressed="${a[k]===v}"${c?` style="--c:${c}"`:""}>${c?"<i></i>":""}${t}</button>`).join("")}</div></div>`).join("")
-  +`<div class="pa-q pa-flags"><h3>Particularités, si présentes</h3><small class="ot-hint">Infection : rougeur qui s'étend, chaleur, œdème, pus, odeur, douleur qui augmente.</small>
-  <div class="chips wrapchips" role="group" aria-label="Particularités">${[["inf","Signes d'infection"],["sang","Saignement"],["cav","Plaie creuse, décollement"],["odeur","Mauvaise odeur"],["peau","Peau autour fragile ou macérée"]].map(([k,t])=>`<button type="button" class="chip" data-act="ot-pa-flag" data-k="${k}" aria-pressed="${a[k]==="oui"}">${t}</button>`).join("")}</div></div>`;
+ paDefs();
+ const D={type:{chir:"incision, agrafes ou fils",trauma:"écorchure, coupure, morsure",escarre:"sur un appui osseux",veineux:"cheville, peau brune autour",arteriel:"pied ou orteils, très douloureux",diab:"sous le pied, peu douloureux",brulure:"rougeur, cloque (phlyctène)",tumorale:"masse qui bourgeonne, saigne"},
+  coul:{noir:"Tissu mort, noir ou brun, sec et dur (ramolli s'il est humide)",jaune:"Dépôt jaune, plus ou moins adhérent, parfois filamenteux",rouge:"Tissu rouge vif, granuleux, humide, qui saigne au contact",rose:"Nouvelle peau rose nacrée qui avance depuis les bords"},
+  exs:{sec:"Compresse sèche, plaie mate",faible:"Tache sur moins d'un quart de la compresse",modere:"Tache sur un quart à trois quarts",abondant:"Compresse saturée, fuite, peau macérée"}};
+ const card=(act,k,v,label,desc,on)=>`<button type="button" class="pa-card" data-act="${act}" data-k="${k}"${v?` data-v="${v}"`:""} aria-pressed="${on}"><span class="pa-pic" aria-hidden="true">${paImg(v||k)}</span><span class="pa-cap"><b>${label}</b>${desc?`<small>${desc}</small>`:""}</span></button>`;
+ const q=PA_Q.slice(0,3).map(([k,l,opts])=>`<div class="pa-q"><h3>${l}</h3>${k==="coul"?`<small class="ot-hint">Si la plaie a plusieurs couleurs, choisissez le tissu à traiter en priorité : le noir avant le jaune, le jaune avant le rouge.</small>`:k==="exs"?`<small class="ot-hint">Regardez le pansement retiré : la surface tachée donne la quantité d'exsudat.</small>`:""}
+  <div class="pa-cards ${k==="type"?"three":"two"}" role="group" aria-label="${esc(l)}">${opts.map(([v,t])=>card("ot-pa",k,v,t,D[k][v],a[k]===v)).join("")}</div></div>`).join("")
+  +`<div class="pa-q pa-flags"><h3>Particularités, si présentes</h3><small class="ot-hint">Plusieurs choix possibles.</small>
+  <div class="pa-cards three" role="group" aria-label="Particularités">${[["inf","Signes d'infection","rougeur qui s'étend (plus de 2 cm), chaleur, pus, douleur qui augmente"],["sang","Saignement","spontané ou au moindre contact"],["cav","Creuse, décollement","profondeur, berges décollées à explorer au stylet stérile"],["odeur","Mauvaise odeur","persistante après le nettoyage"],["peau","Peau fragile ou macérée","blanchâtre, ramollie, fripée, ou très fine"]].map(([k,t,d])=>card("ot-pa-flag",k,"",t,d,a[k]==="oui")).join("")}</div></div>
+  <p class="ot-hint pa-note">Illustrations dessinées pour aider à reconnaître chaque aspect : la réalité varie selon la peau, la localisation et l'éclairage. Évaluez toujours après nettoyage, sous une bonne lumière.</p>`;
  let res=`<div class="callout"><b>Choisissez au moins la couleur du fond et l'exsudat</b> pour obtenir une orientation.</div>`;
  if(a.coul&&a.exs){const r=paReco(a),card=k=>`<div class="pa-p"><b>${PA_P[k][0]}</b><small>${PA_P[k][1]}</small><span class="pa-f">Réfection : ${PA_P[k][2]}</span></div>`;
   res=`<section class="sheet-body pa-res" aria-live="polite"><span class="eyebrow">Orientation</span>
