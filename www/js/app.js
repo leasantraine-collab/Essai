@@ -41,7 +41,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.36 · 2 novembre 2026";
+const APP_VERSION="1.37 · 2 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -78,7 +78,7 @@ applyTheme();
 
 /* ---------- Routage ---------- */
 const ROOTS=["accueil","reviser","entrainer","stages","programme"];
-const PARENT={"stage-hist":"stages",outil:"outils",outils:"accueil",med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const PARENT={perso:"accueil","stage-hist":"stages",outil:"outils",outils:"accueil",med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 function route(){const [v,...rest]=decodeURIComponent(location.hash.slice(1)).split("/");return {v:VIEWS[v]?v:"accueil",arg:rest.join("/")};}
 function nav(h){if(location.hash==="#"+h)render(true);else location.hash=h;}
 let depth=0;
@@ -151,37 +151,15 @@ function stageForm(){
 
 /* ---------- Accueil ---------- */
 function vAccueil(){
- const s=stats(),pct=totalItems?Math.round(doneItems()/totalItems*100):0,h=new Date().getHours();
+ shAutoArchive();
+ const h=new Date().getHours(),nm=hwGet().name;
  const date=new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
- const last=store.get("last",null);let resume="";
- if(last){const it=last.t==="f"?FICHES.find(x=>x.id===last.id):COURS.find(x=>x.id===last.id);
-  if(it)resume=`<section class="stack-sm"><div class="section-title"><h2>Reprendre</h2></div>
-   <a class="card resume" href="#${last.t==="f"?"fiche":"cours"}/${it.id}" style="--c:${CAT[it.cat].c}"><span class="ic">${CAT_IC[it.cat]}</span><span><span class="eyebrow">${last.t==="f"?"Fiche":"Cours"} · ${esc(CAT[it.cat].nom)}</span><h3>${esc(it.titre)}</h3></span><svg class="chev" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--line-2);fill:none;stroke-width:2.2"><path d="M9 6l6 6-6 6"/></svg></a></section>`;}
- const nW=wrongs().length;
+ const body=hwHome();
  return `<div class="stack-lg">
-  <header class="vh-row"><div class="hello"><span class="date">${esc(date)}</span><h1>${h<5||h>=18?"Bonsoir":"Bonjour"}</h1></div>
-   <button class="icon-btn" data-act="nav" data-h="reglages" aria-label="Réglages">${IC.gear}</button></header>
-  ${examCard()}
-  <button class="search-pill" data-act="nav" data-h="recherche">${IC.search}Rechercher une fiche, un cours, une notion…</button>
-  ${afHome()}
-  <section class="dash">${ring(pct)}
-   <div class="dash-txt"><span class="k">Ma progression</span><h2>${doneItems()} sur ${totalItems} contenus révisés</h2>
-    <div class="dash-stats"><span><b>${s.exTot?Math.round(s.exOk/s.exTot*100)+"%":"–"}</b>calculs justes</span><span><b>${s.quizBest==null?"–":s.quizBest}</b>meilleur quiz</span></div></div></section>
-  ${resume}
-  <section class="stack-sm"><div class="section-title"><h2>S'entraîner</h2></div>
-   <div class="quick">
-    <button class="qa" data-act="quiz-quick"><span class="ic">${IC.bolt}</span><b>Quiz express</b><small>10 questions au hasard</small></button>
-    <button class="qa" data-act="nav" data-h="entrainer/calculs"><span class="ic acc">${IC.flask}</span><b>Calcul de dose</b><small>Énoncés illimités</small></button>
-    <button class="qa" data-act="quiz-wrong" ${nW?"":"disabled style='opacity:.55'"}><span class="ic acc">${IC.redo}</span><b>Mes erreurs</b><small>${nW?plural(nW,"question")+" à revoir":"Aucune pour l'instant"}</small></button>
-    <button class="qa" data-act="favs"><span class="ic">${IC.star}</span><b>Favoris</b><small>${plural(favs().length,"élément")}</small></button>
-   </div></section>
-  <section class="stack-sm"><div class="section-title"><h2>Boîte à outils</h2><a href="#outils">Tout voir</a></div>
-   <div class="ot-mini">${["planning","pansement","tfe","calculs"].map(id=>{const t=TOOLS.find(x=>x.id===id);return `<a href="#outil/${id}"><span class="ic tb-ic" style="--c:${t.c}">${OT_IC[id]}</span>${esc(t.s)}</a>`;}).join("")}</div></section>
-  <section class="stack-sm"><div class="section-title"><h2>Réviser par thème</h2><a href="#reviser">Tout voir</a></div>
-   <div class="cats">${CATS.map(c=>{const n=FICHES.filter(f=>f.cat===c.id).length+FULL_COURS.filter(x=>x.cat===c.id).length;
-    const sub=c.id==="stage"?"Préparation":c.id==="calcul"?"Exercices illimités":c.id==="quiz"?QUIZ.length+" questions":c.id==="patho"?PATHOS.length+" pathologies par spécialité":(c.id==="soins"||c.id==="exam")&&soCatN(c.id)?`${soCatN(c.id)} fiches ${c.id==="exam"?"de surveillance":"de soins"} + ${plural(n,"contenu")}`:c.id==="thera"&&mdN()?`${mdN()} classes thérapeutiques + ${plural(n,"contenu")}`:plural(n,"contenu");
-    return `<button class="cat-row" style="--c:${c.c}" data-act="go-cat" data-k="${c.id}"><span class="sw">${CAT_IC[c.id].replace('<svg','<svg style="width:18px;height:18px;stroke:#1A252A;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"')}</span><span><b>${esc(c.nom)}</b><small>${sub}</small></span></button>`}).join("")}</div></section>
-  <a href="#programme" class="list"><span class="li"><span class="ic">${IC.cap.replace("<svg",'<svg style="stroke:var(--brand)"')}</span><span><span class="t">Suivre le programme par UE</span><span class="s">Référentiels 2026 et 2009, semestres 1 à 6</span></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></a>
+  <header class="vh-row"><div class="hello"><span class="date">${esc(date)}</span><h1>${h<5||h>=18?"Bonsoir":"Bonjour"}${nm?` <span class="hello-nm">${esc(nm)}</span>`:""}</h1></div>
+   <div class="hello-act"><button class="icon-btn" data-act="nav" data-h="perso" aria-label="Personnaliser l'accueil">${HW_ICS.grid}</button><button class="icon-btn" data-act="nav" data-h="reglages" aria-label="Réglages">${IC.gear}</button></div></header>
+  ${body||`<div class="empty">Votre accueil est vide. Ajoutez les widgets qui vous servent : partiels, stage, question du jour, raccourcis…</div>`}
+  <button class="btn ghost block hw-perso-btn" data-act="nav" data-h="perso">${HW_ICS.grid}Personnaliser l'accueil</button>
   <p class="disclaimer">Contenus pédagogiques. Vérifiez toujours avec vos cours et les protocoles de votre établissement.</p></div>`;
 }
 
@@ -448,8 +426,8 @@ function vReglages(){
 }
 
 /* ---------- Rendu ---------- */
-const VIEWS={outils:vOutils,outil:vOutil,med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,"stage-hist":vStageHist,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
-const TAB={"stage-hist":"stages",med:"reviser",soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const VIEWS={outils:vOutils,outil:vOutil,med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,"stage-hist":vStageHist,perso:vPerso,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
+const TAB={perso:"accueil","stage-hist":"stages",med:"reviser",soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 let lastKey=null;
 const SCROLL={};
 function render(top){
@@ -492,12 +470,14 @@ app.addEventListener("input",ev=>{const t=ev.target;if(t.id==="q"){state.q=t.val
  else if(t.dataset.cn)carnetInput(t);
  else if(t.dataset.fs)feuilleInput(t);
  else if(t.dataset.ot!=null)outilInput(t);
+ else if(t.dataset.hw!=null)hwInput(t);
  else pathoInput(t);});
 app.addEventListener("click",ev=>{
  const b=ev.target.closest("[data-act]");if(!b)return;
  const a=b.dataset.act,k=b.dataset.k,id=b.dataset.id;
  if(a.startsWith("ot-")){outilAct(b,a);return;}
  if(a.startsWith("sh-")){histAct(b,a);return;}
+ if(a.startsWith("hw-")){hwAct(b,a);return;}
  if(a.startsWith("cn-")){carnetAct(b,a);return;}
  if(a.startsWith("fs-")){feuilleAct(b,a);return;}
  if(a.startsWith("px-")){pathoAct(b,a);return;}
