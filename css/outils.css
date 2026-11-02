@@ -284,7 +284,12 @@ body.tb-on{overflow:hidden}
 .hello-nm{color:var(--accent)}
 .hw-inl{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
 .resume .chev,.hw-more .chev{width:16px;height:16px;stroke:var(--line-2);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-.hw-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.hw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;align-items:stretch}
+.hw-w{position:relative;min-width:0;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.hw-L{grid-column:1/-1;margin-block:7px}
+.hw-L:first-child{margin-top:0}
+.hw-body{min-width:0;height:100%}
+.hw-S .hw-tile{height:100%;width:100%}
 .hw-tile{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:14px;min-height:122px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow);color:var(--ink);text-decoration:none;font:inherit;text-align:left;cursor:pointer;min-width:0;transition:transform .12s}
 .hw-tile:active{transform:scale(.98)}
 .hw-tile-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none}
@@ -363,3 +368,49 @@ body.hw-dragging{-webkit-user-select:none;user-select:none}
 @media (max-width:360px){.hw-row-opt,.hw-cfg{margin-left:6px}.hw-btns button{width:30px}}
 .hw-q .opt{padding:10px 12px;font-size:.93rem;gap:10px;grid-template-columns:28px minmax(0,1fr)}
 .hw-q .opt .l{width:28px;height:28px;font-size:.8rem}
+
+/* Mode édition directement sur l'accueil */
+.hw-editbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:8px;margin-inline:calc(-1 * max(18px,env(safe-area-inset-left,0px)));padding:calc(env(safe-area-inset-top,0px) + 10px) max(18px,env(safe-area-inset-right,0px)) 10px;background:color-mix(in srgb,var(--bg) 90%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.hw-eb-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.hw-eb-t b{font-size:.95rem}
+.hw-eb-t small{font-size:.74rem;color:var(--muted);line-height:1.25}
+.hw-editbar .btn{padding:9px 12px;font-size:.86rem;display:inline-flex;align-items:center;gap:5px;flex:none}
+.hw-editbar .btn svg{width:16px;height:16px}
+@media (max-width:370px){.hw-eb-add span{display:none}.hw-eb-add{padding:9px}}
+.hello-act .icon-btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.hw-foot{align-items:center;text-align:center}
+.hw-foot small{font-size:.78rem}
+.hw-grid.hw-editing{column-gap:28px;row-gap:22px}
+.hw-editing .hw-w{cursor:grab;touch-action:pan-y;animation:hw-wob .34s ease-in-out infinite alternate}
+.hw-editing .hw-w:nth-child(2n){animation-delay:-.17s;animation-direction:alternate-reverse}
+.hw-editing .hw-L{animation-name:hw-wob-l;padding:16px 12px 12px;border:1.5px dashed var(--line-2);border-radius:20px;background:color-mix(in srgb,var(--surface) 50%,transparent)}
+.hw-editing .hw-S .hw-tile{border-style:dashed;border-color:var(--line-2)}
+@keyframes hw-wob{from{rotate:-.6deg}to{rotate:.6deg}}
+@keyframes hw-wob-l{from{rotate:-.18deg}to{rotate:.18deg}}
+body.hw-dragging .hw-w{animation:none}
+body.hw-dragging{-webkit-user-select:none;user-select:none;cursor:grabbing}
+.hw-editing .hw-body.hw-cut{max-height:200px;overflow:hidden;-webkit-mask-image:linear-gradient(#000 62%,transparent);mask-image:linear-gradient(#000 62%,transparent)}
+.hw-x{position:absolute;top:-10px;left:-10px;z-index:3;width:28px;height:28px;border-radius:50%;border:2px solid var(--bg);background:var(--bad);color:#fff;display:grid;place-items:center;padding:0;cursor:pointer;box-shadow:var(--shadow)}
+.hw-x svg{width:14px;height:14px;stroke:currentColor;stroke-width:3;fill:none;stroke-linecap:round}
+.hw-badges{position:absolute;top:-10px;right:-10px;z-index:3;display:flex;gap:6px}
+.hw-badges button{width:30px;height:30px;border-radius:50%;border:2px solid var(--bg);background:var(--ink);color:var(--bg);display:grid;place-items:center;padding:0;cursor:pointer;box-shadow:var(--shadow)}
+.hw-badges svg{width:15px;height:15px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.hw-lift{z-index:60;pointer-events:none;scale:1.04;opacity:.97;animation:none!important;transition:scale .15s ease;filter:drop-shadow(0 16px 28px rgba(20,34,43,.22))}
+.hw-lift.hw-L{background:var(--bg);border-radius:20px;padding:12px;outline:2px solid var(--accent)}
+:root[data-theme="dark"] .hw-lift{filter:drop-shadow(0 16px 28px rgba(0,0,0,.6))}
+.hw-ph{border:2px dashed var(--accent);border-radius:var(--r);background:color-mix(in srgb,var(--accent) 9%,transparent)}
+.hw-ph.hw-L{grid-column:1/-1;margin-block:7px;border-radius:20px}
+.hw-stub{display:flex;align-items:center;gap:12px;padding:14px;border-radius:var(--r);background:var(--surface);border:1px solid var(--line);height:100%}
+.hw-stub .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none}
+.hw-stub b{display:block;font-size:.92rem}
+.hw-stub small{display:block;font-size:.76rem;color:var(--muted);line-height:1.3}
+.hw-new{animation:hw-pop .7s ease}
+@keyframes hw-pop{0%{scale:.92;opacity:.3}60%{scale:1.02;opacity:1}100%{scale:1}}
+.hw-sheet-bg{position:fixed;inset:0;z-index:80;background:rgba(10,18,22,.42)}
+.hw-sheet{position:fixed;left:0;right:0;bottom:0;z-index:81;max-height:78vh;display:flex;flex-direction:column;background:var(--bg);border-radius:22px 22px 0 0;box-shadow:var(--shadow-lg);padding-bottom:env(safe-area-inset-bottom,0px);max-width:720px;margin:0 auto;animation:hw-up .22s ease}
+@keyframes hw-up{from{translate:0 40px;opacity:.4}to{translate:0 0;opacity:1}}
+.hw-sheet-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px;border-bottom:1px solid var(--line)}
+.hw-sheet-h b{font-family:var(--f-display);font-size:1.2rem}
+.hw-sheet-b{overflow:auto;padding:4px 18px 22px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
+.hw-sheet-b>*{flex:none}
+@media (prefers-reduced-motion:reduce){.hw-editing .hw-w,.hw-new,.hw-sheet{animation:none}}

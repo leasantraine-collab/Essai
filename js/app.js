@@ -41,7 +41,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.37 · 2 novembre 2026";
+const APP_VERSION="1.38 · 2 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -152,15 +152,7 @@ function stageForm(){
 /* ---------- Accueil ---------- */
 function vAccueil(){
  shAutoArchive();
- const h=new Date().getHours(),nm=hwGet().name;
- const date=new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
- const body=hwHome();
- return `<div class="stack-lg">
-  <header class="vh-row"><div class="hello"><span class="date">${esc(date)}</span><h1>${h<5||h>=18?"Bonsoir":"Bonjour"}${nm?` <span class="hello-nm">${esc(nm)}</span>`:""}</h1></div>
-   <div class="hello-act"><button class="icon-btn" data-act="nav" data-h="perso" aria-label="Personnaliser l'accueil">${HW_ICS.grid}</button><button class="icon-btn" data-act="nav" data-h="reglages" aria-label="Réglages">${IC.gear}</button></div></header>
-  ${body||`<div class="empty">Votre accueil est vide. Ajoutez les widgets qui vous servent : partiels, stage, question du jour, raccourcis…</div>`}
-  <button class="btn ghost block hw-perso-btn" data-act="nav" data-h="perso">${HW_ICS.grid}Personnaliser l'accueil</button>
-  <p class="disclaimer">Contenus pédagogiques. Vérifiez toujours avec vos cours et les protocoles de votre établissement.</p></div>`;
+ return hwPage();
 }
 
 /* ---------- Réviser ---------- */
@@ -440,6 +432,7 @@ function render(top){
  /* Retour d'une fiche, d'un cours ou d'une pathologie vers la liste Réviser : on retrouve la position dans la liste. */
  if(moved)window.scrollTo(0,["reviser","programme","ue"].includes(r.v)&&/^(patho|soin|med|fiche|cours)\//.test(lastKey||"")&&SCROLL[key]!=null?SCROLL[key]:0);
  lastKey=key;
+ if(r.v!=="accueil"&&r.v!=="perso"){state.hwEdit=false;state.hwSheet=false;}
  fvBind();pxBind();tbSync(r);
  if(r.v==="recherche"){const q=document.getElementById("q");if(q&&top&&!state.q)setTimeout(()=>q.focus(),60);}
 }
