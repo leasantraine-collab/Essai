@@ -40,7 +40,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.28 · 1er novembre 2026";
+const APP_VERSION="1.29 · 2 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -77,7 +77,7 @@ applyTheme();
 
 /* ---------- Routage ---------- */
 const ROOTS=["accueil","reviser","entrainer","stages","programme"];
-const PARENT={soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const PARENT={med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 function route(){const [v,...rest]=decodeURIComponent(location.hash.slice(1)).split("/");return {v:VIEWS[v]?v:"accueil",arg:rest.join("/")};}
 function nav(h){if(location.hash==="#"+h)render(true);else location.hash=h;}
 let depth=0;
@@ -172,7 +172,7 @@ function vAccueil(){
    </div></section>
   <section class="stack-sm"><div class="section-title"><h2>Réviser par thème</h2><a href="#reviser">Tout voir</a></div>
    <div class="cats">${CATS.map(c=>{const n=FICHES.filter(f=>f.cat===c.id).length+FULL_COURS.filter(x=>x.cat===c.id).length;
-    const sub=c.id==="stage"?"Préparation":c.id==="calcul"?"Exercices illimités":c.id==="quiz"?QUIZ.length+" questions":c.id==="patho"?PATHOS.length+" pathologies par spécialité":(c.id==="soins"||c.id==="exam")&&soCatN(c.id)?`${soCatN(c.id)} fiches ${c.id==="exam"?"de surveillance":"de soins"} + ${plural(n,"contenu")}`:plural(n,"contenu");
+    const sub=c.id==="stage"?"Préparation":c.id==="calcul"?"Exercices illimités":c.id==="quiz"?QUIZ.length+" questions":c.id==="patho"?PATHOS.length+" pathologies par spécialité":(c.id==="soins"||c.id==="exam")&&soCatN(c.id)?`${soCatN(c.id)} fiches ${c.id==="exam"?"de surveillance":"de soins"} + ${plural(n,"contenu")}`:c.id==="thera"&&mdN()?`${mdN()} classes thérapeutiques + ${plural(n,"contenu")}`:plural(n,"contenu");
     return `<button class="cat-row" style="--c:${c.c}" data-act="go-cat" data-k="${c.id}"><span class="sw">${CAT_IC[c.id].replace('<svg','<svg style="width:18px;height:18px;stroke:#1A252A;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"')}</span><span><b>${esc(c.nom)}</b><small>${sub}</small></span></button>`}).join("")}</div></section>
   <a href="#programme" class="list"><span class="li"><span class="ic">${IC.cap.replace("<svg",'<svg style="stroke:var(--brand)"')}</span><span><span class="t">Suivre le programme par UE</span><span class="s">Référentiels 2026 et 2009, semestres 1 à 6</span></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></a>
   <p class="disclaimer">Contenus pédagogiques. Vérifiez toujours avec vos cours et les protocoles de votre établissement.</p></div>`;
@@ -199,20 +199,21 @@ function vReviser(arg){
  const nDone=isF?reviewed().filter(id=>FICHES.some(f=>f.id===id)).length:studied().filter(id=>FULL_COURS.some(c=>c.id===id)).length;
  const pxv=state.filter==="patho"&&!state.favOnly,pxd=pxv?pxDone().filter(id=>PBY[id]).length:0;
  const sov=(state.filter==="soins"||state.filter==="exam")&&!state.favOnly&&soCatN(state.filter)>0,son=sov?soCatN(state.filter):0;
- const desc=sov?(isF?`${son} fiches ${state.filter==="exam"?"de surveillance et d'examens":"de soins"} classées par catégorie : l'essentiel de chaque soin en une page.`:`Un cours détaillé par soin : indications, matériel illustré, réalisation pas à pas, surveillance, traçabilité et mise en situation.`):pxv?(isF?`Les ${PATHOS.length} pathologies du programme classées par spécialité : l'essentiel de chacune en une page. ${pxd} étudiée${pxd>1?"s":""}.`:`Un cours détaillé pour chacune des ${PATHOS.length} pathologies : mécanisme en images, signes, examens, traitements, rôle infirmier.`)
+ const mdv=state.filter==="thera"&&!state.favOnly&&mdN()>0;
+ const desc=mdv?(isF?`${mdN()} grandes fiches de classes thérapeutiques classées par spécialité : l'essentiel de chaque classe en une page.`:`Une fiche complète par classe : mécanisme en schéma, médicaments (DCI et noms commerciaux), effets indésirables, interactions, surveillances, éducation, conduite à tenir et quiz.`):sov?(isF?`${son} fiches ${state.filter==="exam"?"de surveillance et d'examens":"de soins"} classées par catégorie : l'essentiel de chaque soin en une page.`:`Un cours détaillé par soin : indications, matériel illustré, réalisation pas à pas, surveillance, traçabilité et mise en situation.`):pxv?(isF?`Les ${PATHOS.length} pathologies du programme classées par spécialité : l'essentiel de chacune en une page. ${pxd} étudiée${pxd>1?"s":""}.`:`Un cours détaillé pour chacune des ${PATHOS.length} pathologies : mécanisme en images, signes, examens, traitements, rôle infirmier.`)
   :isF?`L'essentiel en une page, à relire avant un partiel ou le matin d'un stage. ${nDone} / ${FICHES.length} révisées.`:`Comprendre, pas seulement retenir. ${nDone} / ${FULL_COURS.length} cours étudiés.`;
  return `<div class="stack-lg">${vh("Réviser",isF?"Fiches récap":"Cours détaillés",desc,
    `<button class="icon-btn" data-act="nav" data-h="recherche" aria-label="Rechercher">${IC.search}</button>`)}
-  ${pxv||sov?"":pxCard()}
-  <div class="seg" role="group" aria-label="Type de contenu"><button data-act="rev" data-k="fiches" aria-pressed="${isF}">Fiches · ${pxv?pxRevN(true):sov?son:FICHES.length}</button><button data-act="rev" data-k="cours" aria-pressed="${!isF}">Cours · ${pxv?pxRevN(false):sov?son:FULL_COURS.length}</button></div>
+  ${pxv||sov||mdv?"":pxCard()}
+  <div class="seg" role="group" aria-label="Type de contenu"><button data-act="rev" data-k="fiches" aria-pressed="${isF}">Fiches · ${pxv?pxRevN(true):sov?son:mdv?mdN():FICHES.length}</button><button data-act="rev" data-k="cours" aria-pressed="${!isF}">Cours · ${pxv?pxRevN(false):sov?son:mdv?mdN():FULL_COURS.length}</button></div>
   <div class="chips" role="group" aria-label="Filtrer">
    <button class="chip" data-act="fav-only" aria-pressed="${state.favOnly}">★ Favoris</button>
    <button class="chip" data-act="filter" data-k="all" aria-pressed="${state.filter==="all"}">Tout</button>
    ${present.map(c=>`<button class="chip" style="--c:${c.c}" data-act="filter" data-k="${c.id}" aria-pressed="${state.filter===c.id}"><i></i>${esc(c.nom)}</button>`).join("")}</div>
-  ${pxv?pxRev(isF):sov?soRev(state.filter,isF):cats.length?cats.map(c=>{const head=n=>`<div class="cat-head" style="--c:${c.c}"><span class="dot"></span><h2>${esc(c.nom)}</h2><span class="muted" style="margin-left:auto">${n}</span></div>`;
+  ${pxv?pxRev(isF):sov?soRev(state.filter,isF):mdv?mdRev(isF):cats.length?cats.map(c=>{const head=n=>`<div class="cat-head" style="--c:${c.c}"><span class="dot"></span><h2>${esc(c.nom)}</h2><span class="muted" style="margin-left:auto">${n}</span></div>`;
    if(c.id==="patho"&&!state.favOnly)return `<section class="stack-sm">${head(PATHOS.length)}<div class="list"><a class="li px-entry" role="button" tabindex="0" data-act="px-go" style="--c:${c.c}"><span class="bar"></span><span><span class="t">Toutes les pathologies par spécialité</span><span class="s">${PATHOS.length} ${isF?"fiches récap":"cours détaillés"} · cardio, pneumo, neuro…</span></span><span class="end">${chev}</span></a></div></section>`;
    const l=items.filter(i=>i.cat===c.id).sort((a,b)=>(b.pages||b.chap?1:0)-(a.pages||a.chap?1:0)||(a.pro?1:0)-(b.pro?1:0));
-   return `<section class="stack-sm">${head(l.length)}<div class="list">${(c.id==="soins"||c.id==="exam")&&!state.favOnly&&soCatN(c.id)?soEntry(c,isF):""}${l.map(i=>itemRow(i,t)).join("")}</div></section>`}).join("")
+   return `<section class="stack-sm">${head(l.length)}<div class="list">${(c.id==="soins"||c.id==="exam")&&!state.favOnly&&soCatN(c.id)?soEntry(c,isF):""}${c.id==="thera"&&!state.favOnly&&mdN()?mdEntry(isF):""}${l.map(i=>itemRow(i,t)).join("")}</div></section>`}).join("")
    :`<div class="empty">${state.favOnly?"Aucun favori ici. Touchez l'étoile en haut d'une fiche ou d'un cours pour l'ajouter.":"Pas encore de contenu dans cette catégorie."}</div>`}
  </div>`;
 }
@@ -398,7 +399,7 @@ const plain=h=>String(h).replace(/<[^>]+>/g," ").replace(/\*\*|==/g,"").replace(
 let IDX=null;
 function textOf(v){if(v==null)return "";if(typeof v==="string")return v;if(Array.isArray(v))return v.map(textOf).join(" ");if(typeof v==="object")return Object.entries(v).filter(([k])=>!["t","k","tone","ico","n","one","two","light","wave","blue"].includes(k)).map(([,x])=>textOf(x)).join(" ");return "";}
 function buildIdx(){
- IDX=[...pxIdx(),...soIdx(),...FICHES.map(f=>({t:"f",it:f,txt:plain(f.body||textOf(f.pages))})),...COURS.filter(c=>!c.pro).map(c=>({t:"c",it:c,txt:plain(c.chap?textOf(c.chap)+" "+textOf(c.ess):textOf(c.sections))}))];
+ IDX=[...pxIdx(),...soIdx(),...mdIdx(),...FICHES.map(f=>({t:"f",it:f,txt:plain(f.body||textOf(f.pages))})),...COURS.filter(c=>!c.pro).map(c=>({t:"c",it:c,txt:plain(c.chap?textOf(c.chap)+" "+textOf(c.ess):textOf(c.sections))}))];
  IDX.forEach(e=>{e.ft=fold(e.it.titre);e.fm=fold(e.it.theme||"")+" "+fold(CAT[e.it.cat].nom);e.fx=fold(e.txt);});
 }
 function hl(s,q){const f=fold(s),i=f.indexOf(q);if(i<0)return esc(s);return esc(s.slice(0,i))+`<mark class="hl">${esc(s.slice(i,i+q.length))}</mark>`+esc(s.slice(i+q.length));}
@@ -409,9 +410,9 @@ function results(raw){
  r.sort((a,b)=>b.sc-a.sc);
  if(!r.length)return `<div class="empty">Aucun résultat pour « ${esc(raw)} ».</div>`;
  return `<p class="muted">${plural(r.length,"résultat")}</p><div class="list">${r.slice(0,60).map(({e})=>{
-  let snip=esc(e.t==="f"?e.it.theme:e.t==="p"?"Pathologie · "+e.it.theme:"Cours · "+CAT[e.it.cat].nom);
+  let snip=esc(e.t==="f"?e.it.theme:e.t==="p"?"Pathologie · "+e.it.theme:e.t==="m"?"Classe thérapeutique · "+e.it.theme:e.t==="s"?"Soin · "+e.it.theme:"Cours · "+CAT[e.it.cat].nom);
   if(!e.ft.includes(q)){const i=e.fx.indexOf(q);if(i>=0){const a=Math.max(0,i-40),s=e.txt.slice(a,i+q.length+60);snip=(a?"…":"")+hl(s,q)+"…";}}
-  return `<a class="li" href="#${e.t==="f"?"fiche":e.t==="p"?"patho":e.t==="s"?"soin":"cours"}/${e.it.id}" style="--c:${CAT[e.it.cat].c}"><span class="bar"></span><span><span class="t">${hl(e.it.titre,q)}</span><span class="s">${snip}</span></span>${chev}</a>`}).join("")}</div>`;
+  return `<a class="li" href="#${e.t==="f"?"fiche":e.t==="p"?"patho":e.t==="s"?"soin":e.t==="m"?"med":"cours"}/${e.it.id}" style="--c:${CAT[e.it.cat].c}"><span class="bar"></span><span><span class="t">${hl(e.it.titre,q)}</span><span class="s">${snip}</span></span>${chev}</a>`}).join("")}</div>`;
 }
 function vRecherche(){
  return `<div class="stack">${backBtn("Retour")}<div class="search-bar"><label class="search-field">${IC.search}<input id="q" type="search" enterkeyhint="search" placeholder="Rechercher dans ${FICHES.length+FULL_COURS.length} contenus" value="${esc(state.q)}" autocomplete="off" aria-label="Rechercher"></label></div>
@@ -439,8 +440,8 @@ function vReglages(){
 }
 
 /* ---------- Rendu ---------- */
-const VIEWS={soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
-const TAB={soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const VIEWS={med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
+const TAB={med:"reviser",soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 let lastKey=null;
 const SCROLL={};
 function render(top){
@@ -451,7 +452,7 @@ function render(top){
  const tab=TAB[r.v]||r.v;
  document.querySelectorAll("nav.tabs a").forEach(a=>a.dataset.v===tab?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current"));
  /* Retour d'une fiche, d'un cours ou d'une pathologie vers la liste Réviser : on retrouve la position dans la liste. */
- if(moved)window.scrollTo(0,["reviser","programme","ue"].includes(r.v)&&/^(patho|soin|fiche|cours)\//.test(lastKey||"")&&SCROLL[key]!=null?SCROLL[key]:0);
+ if(moved)window.scrollTo(0,["reviser","programme","ue"].includes(r.v)&&/^(patho|soin|med|fiche|cours)\//.test(lastKey||"")&&SCROLL[key]!=null?SCROLL[key]:0);
  lastKey=key;
  fvBind();pxBind();
  if(r.v==="recherche"){const q=document.getElementById("q");if(q&&top&&!state.q)setTimeout(()=>q.focus(),60);}
@@ -488,6 +489,7 @@ app.addEventListener("click",ev=>{
  if(a.startsWith("fs-")){feuilleAct(b,a);return;}
  if(a.startsWith("px-")){pathoAct(b,a);return;}
  if(a.startsWith("so-")){soAct(b,a);return;}
+ if(a.startsWith("md-")){mdAct(b,a);return;}
  if(a==="nav"){nav(b.dataset.h);}
  else if(a==="back"||a==="fiche-back"||a==="cours-back"){goBack();}
  else if(a==="go-cat"){ev.preventDefault();
@@ -543,7 +545,7 @@ app.addEventListener("click",ev=>{
   ["reviewed","studied","stats","wrong","favs","check","last","pxdone"].forEach(x=>{try{localStorage.removeItem("ifsi_"+x)}catch(e){}});haptic("MEDIUM");toast("Progression réinitialisée");render();}
 });
 app.addEventListener("change",ev=>{
- const t=ev.target;if(t.id==="restore-file"){if(t.files&&t.files[0])restoreData(t.files[0]);t.value="";return;}if(t.dataset.sf){saveStageField(t);return;}if(t.dataset.cn){carnetInput(t);return;}if(t.dataset.fs){feuilleInput(t);return;}if(t.dataset.px!=null||t.id==="pxspe"||t.id==="sosec"){pathoInput(t);return;}if(t.dataset.act!=="check")return;
+ const t=ev.target;if(t.id==="restore-file"){if(t.files&&t.files[0])restoreData(t.files[0]);t.value="";return;}if(t.dataset.sf){saveStageField(t);return;}if(t.dataset.cn){carnetInput(t);return;}if(t.dataset.fs){feuilleInput(t);return;}if(t.dataset.px!=null||t.id==="pxspe"||t.id==="sosec"||t.id==="mdsec"){pathoInput(t);return;}if(t.dataset.act!=="check")return;
  let d=store.get("check",[]);const i=+t.dataset.i;
  d=t.checked?[...new Set([...d,i])]:d.filter(x=>x!==i);store.set("check",d);haptic();render();
 });
