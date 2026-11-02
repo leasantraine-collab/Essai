@@ -62,6 +62,7 @@ function tbSync(r){
  const cur=r.v==="outil"?(r.arg||"").split("/")[0]:"";
  document.querySelectorAll(".tb-rail a[data-tool],.tb-drawer a[data-tool]").forEach(a=>a.dataset.tool===cur?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current"));
  const h=document.querySelector(".tb-rail .tb-head");if(h){r.v==="outils"?h.setAttribute("aria-current","page"):h.removeAttribute("aria-current");}
+ document.body.classList.toggle("tb-off",r.v==="perso");
 }
 
 /* ---------- Vues ---------- */
