@@ -1,7 +1,7 @@
 /* Carnet IFSI — service worker de la version web installable (PWA).
    Réseau d'abord : en ligne, l'appli charge toujours la dernière version publiée ;
    hors ligne, elle se sert de la copie gardée en cache. */
-const V="carnet-ifsi-v32";
+const V="carnet-ifsi-v33";
 const FILES=[
  "./",
  "index.html",
@@ -80,6 +80,7 @@ const FILES=[
  "js/schemas-anat.js",
  "js/schemas-pharma.js",
  "js/schemas-ue.js",
+ "js/schemas-ue2.js",
  "js/pathos.js",
  "js/soins.js",
  "js/meds.js",
@@ -98,6 +99,19 @@ const FILES=[
  "js/contenus/ue-c5.js",
  "js/contenus/ue-c6.js",
  "js/contenus/ue-c7.js",
+ "js/contenus/ue-c8.js",
+ "js/contenus/ue-c9.js",
+ "js/contenus/ue-c10.js",
+ "js/contenus/ue-c11.js",
+ "js/contenus/ue-c12.js",
+ "js/contenus/ue-c13.js",
+ "js/contenus/ue-c14.js",
+ "js/contenus/ue-c15.js",
+ "js/contenus/ue-c16.js",
+ "js/contenus/ue-c17.js",
+ "js/contenus/ue-c18.js",
+ "js/contenus/ue-c19.js",
+ "js/contenus/ue-c20.js",
  "js/contenus/complements.js",
  "js/contenus/icones.js",
  "js/contenus/pathologies-1.js",
