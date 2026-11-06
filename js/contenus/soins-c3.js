@@ -805,6 +805,7 @@ a Pansement de plaie infectée
 a Pansement de plaie hémorragique
 d Choix du pansement adapté à l'aspect de la plaie et à son exsudat. Principe : garder la plaie **humide sans macération**.
 d Repères : **hydrocolloïde** (plaie peu exsudative, bourgeonnement, épidermisation), **hydrocellulaire** (exsudat modéré), **alginate** et **hydrofibre** (exsudat important, plaie cavitaire ; l'alginate est aussi hémostatique), **interface** (plaie fragile, ne colle pas), **charbon** (odeur), **argent** (plaie infectée ou à risque, durée limitée), **hydrogel** (plaie sèche, nécrose à ramollir).
+d Exemples courants (liste non exhaustive, selon le livret de l'établissement) : hydrocolloïde **Comfeel®, Duoderm®, Algoplaque®** ; hydrocellulaire **Mepilex®, Allevyn®, Biatain®** ; alginate **Algostéril®, Urgosorb®, Melgisorb®** ; hydrofibre **Aquacel®, Exufiber®** ; interface **Urgotul®, Adaptic Touch®, Mepitel®** ; acide hyaluronique **Ialuset®** ; argent **Aquacel Ag+®, UrgoTul Ag®** ; charbon **Actisorb®, Carboflex®** ; hydrogel **Purilon®, Intrasite Gel®**.
 i Plaies aiguës ou chroniques selon leur aspect
 ci Hydrocolloïde : pas sur une plaie infectée ni très exsudative
 ci Argent : pas en continu, pas d'examen IRM avec certains pansements argentiques
@@ -816,11 +817,11 @@ p Patient : plaie évaluée avant le choix
 p Environnement : bonne lumière
 p Matériel : friction hydroalcoolique
 e Évaluer la plaie : couleur (noir, jaune, rouge, rose), exsudat (faible, moyen, important), profondeur, odeur, infection
-e Plaie noire sèche (nécrose) : hydrogel pour ramollir, détersion selon la prescription
-e Plaie jaune (fibrine) : détersion, alginate ou hydrofibre si exsudat
-e Plaie rouge (bourgeonnement) : hydrocellulaire ou hydrocolloïde selon l'exsudat, interface si fragile
-e Plaie rose (épidermisation) : hydrocolloïde mince ou interface
-e Plaie cavitaire : mécher sans tasser (alginate, hydrofibre) puis pansement secondaire
+e Plaie noire sèche (nécrose) : hydrogel pour ramollir (Purilon®, Intrasite Gel®), détersion selon la prescription
+e Plaie jaune (fibrine) : détersion, alginate (Algostéril®, Urgosorb®) ou hydrofibre (Aquacel Extra®) si exsudat, hydrogel si elle est sèche
+e Plaie rouge (bourgeonnement) : hydrocellulaire (Mepilex®, Allevyn®, Biatain®) ou hydrocolloïde (Comfeel®, Duoderm®) selon l'exsudat, interface (Urgotul®, Adaptic Touch®) si fragile
+e Plaie rose (épidermisation) : hydrocolloïde mince (Comfeel® Transparent, Duoderm® Extra Mince), interface ou acide hyaluronique (Ialuset®)
+e Plaie cavitaire : mécher sans tasser (alginate en mèche, Aquacel Ribbon®) puis pansement secondaire
 e Réévaluer à chaque réfection et adapter
 s Évolution de la plaie, exsudat, macération des berges
 s Infection, odeur
