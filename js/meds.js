@@ -52,6 +52,7 @@ function vMed(id){
  if(mode==="recap"){
   const box=(t,a,n)=>a.length?`<div class="px-r"><span class="cv-lab">${t}</span><ul>${a.slice(0,n).map(x=>`<li>${pmd(x)}</li>`).join("")}</ul></div>`:"";
   body=`<div class="px-recap">
+   ${a4Cta("m",o.i,"Cette classe en une page : à lire ou à imprimer")}
    <div class="px-r def"><span class="cv-lab">${SVG.info}La classe</span><p>${pmd(o.d[0]||"")}</p></div>
    ${o.ma.length?`<div class="px-r"><span class="cv-lab">Mécanisme</span><p>${pmd(o.ma[0])}</p></div>`:""}
    ${o.m.length?`<div class="px-r"><span class="cv-lab">Principaux médicaments</span>${mdChips(o.m)}</div>`:""}

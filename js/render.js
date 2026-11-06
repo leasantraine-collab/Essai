@@ -536,6 +536,7 @@ function cvRender(c){
    <div class="fv-meta"><span>${c.chap.length} chapitres</span><span>≈ ${esc(c.duree)}</span>${(c.ue&&c.ue[state.ueRef]||[]).map(u=>`<span class="m">UE ${esc(u)}</span>`).join("")}</div>
   </header>
   <section class="cv-obj"><span class="cv-lab">${SVG.target}À la fin de ce cours, vous saurez</span><ul class="fv-checks">${c.obj.map(o=>`<li>${SVG.check}<span>${md(o)}</span></li>`).join("")}</ul></section>
+  ${a4Cta("c",c.id,"L'essentiel du cours en une page, à revoir ou à imprimer")}
   <nav class="fv-toc" aria-label="Chapitres du cours">${toc}</nav>
   <div class="fv-body">${body}
    <div class="fv-key"><h3>${SVG.bulb}L'essentiel du cours</h3><ul>${c.ess.map(e=>`<li>${md(e)}</li>`).join("")}</ul></div>

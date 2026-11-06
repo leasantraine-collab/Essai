@@ -41,7 +41,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.40 · 6 novembre 2026";
+const APP_VERSION="1.41 · 6 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -78,7 +78,7 @@ applyTheme();
 
 /* ---------- Routage ---------- */
 const ROOTS=["accueil","reviser","entrainer","stages","programme"];
-const PARENT={perso:"accueil","stage-hist":"stages",outil:"outils",outils:"accueil",med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const PARENT={a4:"reviser",perso:"accueil","stage-hist":"stages",outil:"outils",outils:"accueil",med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 function route(){const [v,...rest]=decodeURIComponent(location.hash.slice(1)).split("/");return {v:VIEWS[v]?v:"accueil",arg:rest.join("/")};}
 function nav(h){if(location.hash==="#"+h)render(true);else location.hash=h;}
 let depth=0;
@@ -182,15 +182,18 @@ function vReviser(arg){
  return `<div class="stack-lg">${vh("Réviser",isF?"Fiches récap":"Cours détaillés",desc,
    `<button class="icon-btn" data-act="nav" data-h="recherche" aria-label="Rechercher">${IC.search}</button>`)}
   ${pxv||sov||mdv?"":pxCard()}
-  <div class="seg" role="group" aria-label="Type de contenu"><button data-act="rev" data-k="fiches" aria-pressed="${isF}">Fiches · ${pxv?pxRevN(true):sov?son:mdv?mdN():FICHES.length}</button><button data-act="rev" data-k="cours" aria-pressed="${!isF}">Cours · ${pxv?pxRevN(false):sov?son:mdv?mdN():FULL_COURS.length}</button></div>
+  <div class="seg" role="group" aria-label="Type de contenu"><button data-act="rev" data-k="fiches" aria-pressed="${isF}">Fiches · ${pxv?pxRevN(true):sov?son:mdv?mdN():FICHES.length+FULL_COURS.length}</button><button data-act="rev" data-k="cours" aria-pressed="${!isF}">Cours · ${pxv?pxRevN(false):sov?son:mdv?mdN():FULL_COURS.length}</button></div>
   <div class="chips" role="group" aria-label="Filtrer">
    <button class="chip" data-act="fav-only" aria-pressed="${state.favOnly}">★ Favoris</button>
    <button class="chip" data-act="filter" data-k="all" aria-pressed="${state.filter==="all"}">Tout</button>
    ${present.map(c=>`<button class="chip" style="--c:${c.c}" data-act="filter" data-k="${c.id}" aria-pressed="${state.filter===c.id}"><i></i>${esc(c.nom)}</button>`).join("")}</div>
+  ${(pxv||sov||mdv)&&isF?a4List(FULL_COURS.filter(x=>x.cat===state.filter),CAT[state.filter].c):""}
   ${pxv?pxRev(isF):sov?soRev(state.filter,isF):mdv?mdRev(isF):cats.length?cats.map(c=>{const head=n=>`<div class="cat-head" style="--c:${c.c}"><span class="dot"></span><h2>${esc(c.nom)}</h2><span class="muted" style="margin-left:auto">${n}</span></div>`;
-   if(c.id==="patho"&&!state.favOnly)return `<section class="stack-sm">${head(PATHOS.length)}<div class="list"><a class="li px-entry" role="button" tabindex="0" data-act="px-go" style="--c:${c.c}"><span class="bar"></span><span><span class="t">Toutes les pathologies par spécialité</span><span class="s">${PATHOS.length} ${isF?"fiches récap":"cours détaillés"} · cardio, pneumo, neuro…</span></span><span class="end">${chev}</span></a></div></section>`;
+   if(c.id==="patho"&&!state.favOnly)return `<section class="stack-sm">${head(PATHOS.length)}<div class="list"><a class="li px-entry" role="button" tabindex="0" data-act="px-go" style="--c:${c.c}"><span class="bar"></span><span><span class="t">Toutes les pathologies par spécialité</span><span class="s">${PATHOS.length} ${isF?"fiches récap":"cours détaillés"} · cardio, pneumo, neuro…</span></span><span class="end">${chev}</span></a></div>${isF?a4List(FULL_COURS.filter(x=>x.cat==="patho"),c.c):""}</section>`;
    const l=items.filter(i=>i.cat===c.id).sort((a,b)=>(b.pages||b.chap?1:0)-(a.pages||a.chap?1:0)||(a.pro?1:0)-(b.pro?1:0));
-   return `<section class="stack-sm">${head(l.length)}<div class="list">${(c.id==="soins"||c.id==="exam")&&!state.favOnly&&soCatN(c.id)?soEntry(c,isF):""}${c.id==="thera"&&!state.favOnly&&mdN()?mdEntry(isF):""}${l.map(i=>itemRow(i,t)).join("")}</div></section>`}).join("")
+   const vis=isF&&!state.favOnly?FULL_COURS.filter(x=>x.cat===c.id):[];
+   return `<section class="stack-sm">${head(l.length+vis.length)}<div class="list">${(c.id==="soins"||c.id==="exam")&&!state.favOnly&&soCatN(c.id)?soEntry(c,isF):""}${c.id==="thera"&&!state.favOnly&&mdN()?mdEntry(isF):""}${l.map(i=>itemRow(i,t)).join("")}</div>
+    ${a4List(vis,c.c)}</section>`}).join("")
    :`<div class="empty">${state.favOnly?"Aucun favori ici. Touchez l'étoile en haut d'une fiche ou d'un cours pour l'ajouter.":"Pas encore de contenu dans cette catégorie."}</div>`}
  </div>`;
 }
@@ -418,8 +421,8 @@ function vReglages(){
 }
 
 /* ---------- Rendu ---------- */
-const VIEWS={outils:vOutils,outil:vOutil,med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,"stage-hist":vStageHist,perso:vPerso,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
-const TAB={perso:"accueil","stage-hist":"stages",med:"reviser",soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const VIEWS={outils:vOutils,outil:vOutil,med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,"stage-hist":vStageHist,perso:vPerso,a4:vA4,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
+const TAB={a4:"reviser",perso:"accueil","stage-hist":"stages",med:"reviser",soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
 let lastKey=null;
 const SCROLL={};
 function render(top){
@@ -471,6 +474,7 @@ app.addEventListener("click",ev=>{
  if(a.startsWith("ot-")){outilAct(b,a);return;}
  if(a.startsWith("sh-")){histAct(b,a);return;}
  if(a.startsWith("hw-")){hwAct(b,a);return;}
+ if(a.startsWith("a4-")){a4Act(b,a);return;}
  if(a.startsWith("cn-")){carnetAct(b,a);return;}
  if(a.startsWith("fs-")){feuilleAct(b,a);return;}
  if(a.startsWith("px-")){pathoAct(b,a);return;}

@@ -1,0 +1,163 @@
+/* Carnet IFSI — fiches visuelles d'une page (A4) */
+.a4-measure{position:absolute;left:-10000px;top:0;width:696px;visibility:hidden;pointer-events:none}
+.a4s{--ink-c:color-mix(in srgb,var(--c) 38%,#1A252A);font-family:var(--f-body);color:var(--ink);min-width:0}
+.a4s h1,.a4s h2,.a4s p,.a4s ul,.a4s ol,.a4s dl{margin:0}
+.a4s ul,.a4s ol{padding:0;list-style:none}
+.a4s svg{stroke:currentColor;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.a4-h{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;background:color-mix(in srgb,var(--c) 58%,var(--surface));color:#14222B;position:relative;overflow:hidden}
+.a4-h::after{content:"";position:absolute;right:-40px;top:-50px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.22)}
+.a4-ic{width:54px;height:54px;border-radius:16px;background:rgba(255,255,255,.72);display:grid;place-items:center;position:relative;z-index:1}
+.a4-ic svg{width:30px;height:30px;stroke:#1A252A;stroke-width:1.7}
+.a4-ic svg[viewBox="0 0 100 100"]{stroke-width:5.5}
+.a4-ic [stroke="#fff"]{stroke:#1A252A}.a4-ic [stroke="#E0866C"]{stroke:#C0563B}.a4-ic [fill="#E0866C"]{fill:#C0563B}.a4-ic [stroke="#A9BCD0"]{stroke:#7C8A94}
+.a4-ht{display:flex;flex-direction:column;gap:3px;position:relative;z-index:1;min-width:0}
+.a4-k{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3A3020;opacity:.85}
+.a4-h h1{font-family:var(--f-display);font-weight:650;line-height:1.12;color:#14222B}
+.a4-sub{line-height:1.4;color:#24323A}
+.a4-b{break-inside:avoid;-webkit-column-break-inside:avoid;page-break-inside:avoid;border:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;gap:6px}
+.a4-b h2{display:flex;align-items:center;gap:7px;font-family:var(--f-body);font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-c);line-height:1.2}
+.a4-b h2 svg{flex:none;stroke-width:2}
+.a4-n{flex:none;display:grid;place-items:center;border-radius:50%;background:var(--c);color:#1A252A;font-weight:800;letter-spacing:0}
+.a4-key{background:color-mix(in srgb,var(--c) 20%,var(--surface));border-color:color-mix(in srgb,var(--c) 70%,var(--line))}
+.a4-warn{background:var(--bad-soft);border-color:color-mix(in srgb,var(--bad) 35%,var(--line))}
+.a4-warn h2{color:var(--bad)}
+.a4-ok{background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 35%,var(--line))}
+.a4-ok h2{color:var(--ok)}
+.a4-info{background:var(--brand-soft);border-color:color-mix(in srgb,var(--brand) 25%,var(--line))}
+.a4-info h2{color:var(--brand)}
+.a4s li{position:relative;line-height:1.38}
+.a4-ul li{padding-left:14px}
+.a4-ul li::before{content:"";position:absolute;left:2px;top:.55em;width:6px;height:6px;border-radius:50%;background:var(--ink-c)}
+.a4-warn .a4-ul li::before{background:var(--bad)}
+.a4-ok .a4-ul li::before{background:var(--ok)}
+.a4-ess{counter-reset:e}
+.a4-ess li{counter-increment:e;padding-left:28px}
+.a4-ess li::before{content:counter(e);position:absolute;left:0;top:0;width:20px;height:20px;border-radius:50%;background:var(--ink-c);color:#fff;font-weight:800;font-size:.72rem;display:grid;place-items:center;line-height:1}
+.a4-steps{counter-reset:s}
+.a4-steps li{counter-increment:s;padding-left:27px}
+.a4-steps li::before{content:counter(s);position:absolute;left:0;top:.05em;width:19px;height:19px;border-radius:6px;background:var(--c);color:#1A252A;font-weight:800;font-size:.7rem;display:grid;place-items:center;line-height:1}
+.a4-know li{padding-left:22px}
+.a4-know li::before{content:"";position:absolute;left:1px;top:.22em;width:11px;height:11px;border:1.6px solid var(--ink-c);border-radius:3px}
+.a4-chips{display:flex;flex-wrap:wrap;gap:5px}
+.a4-chips span{border:1px solid var(--line);background:var(--bg);border-radius:999px;line-height:1.25}
+.a4-rows{display:flex;flex-direction:column}
+.a4-rows div{display:grid;grid-template-columns:minmax(0,38%) minmax(0,1fr);gap:8px;border-top:1px dashed var(--line)}
+.a4-rows div:first-child{border-top:0}
+.a4-rows dt{font-weight:700;color:var(--ink)}
+.a4-rows dd{margin:0;color:var(--ink-2)}
+.a4-sch{display:flex;justify-content:center}
+.a4-sch>*{width:100%;margin:0}
+.a4-sch svg{max-width:100%;height:auto;max-height:240px;display:block;margin:0 auto}
+.a4-sch.sm svg{max-height:150px}
+.a4-sch .sch-head,.a4-sch figcaption{display:none}
+.a4-sch .sch-fig{padding:0;border:0;background:none;box-shadow:none}
+.a4-sch button,.a4-sch .am-legend,.a4-sch .pm-legend{display:none}
+.a4-test{border:1.5px dashed color-mix(in srgb,var(--c) 70%,var(--line-2));display:flex;flex-direction:column;gap:6px;background:var(--surface)}
+.a4-test h2{display:flex;align-items:center;gap:7px;font-family:var(--f-body);font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-c);line-height:1.2}
+.a4-test h2 svg{stroke-width:2}
+.a4-test ol{counter-reset:q}
+.a4-test ol li{counter-increment:q;padding-left:20px}
+.a4-test ol li::before{content:counter(q) ".";position:absolute;left:0;top:0;font-weight:800;color:var(--ink-c)}
+.a4-f{display:flex;justify-content:space-between;gap:10px;color:var(--muted)}
+
+/* À l'écran : fiche qui s'adapte au téléphone */
+.a4-screen{border-radius:22px;overflow:hidden;background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow)}
+.a4-screen .a4-h{padding:18px 16px}
+.a4-screen .a4-h h1{font-size:1.45rem}
+.a4-screen .a4-sub{font-size:.92rem}
+.a4-screen .a4-cols{padding:14px 12px 4px;column-gap:12px}
+.a4-screen .a4-b{border-radius:14px;padding:12px 13px;margin-bottom:12px;font-size:.92rem}
+.a4-screen .a4-b h2{font-size:.72rem}
+.a4-screen .a4-b h2 svg{width:16px;height:16px}
+.a4-screen .a4-n{width:22px;height:22px;font-size:.74rem}
+.a4-screen li{margin:3px 0}
+.a4-screen .a4-chips span{font-size:.82rem;padding:3px 9px}
+.a4-screen .a4-rows div{padding:5px 0;font-size:.88rem}
+.a4-screen .a4-test{margin:0 12px 12px;border-radius:14px;padding:12px 13px;font-size:.92rem}
+.a4-screen .a4-test h2{font-size:.72rem}
+.a4-screen .a4-test h2 svg{width:16px;height:16px}
+.a4-screen .a4-tl li{margin:6px 0}
+.a4-screen .a4-tl details{margin-top:3px}
+.a4-screen .a4-tl summary{cursor:pointer;color:var(--brand);font-weight:650;font-size:.84rem}
+.a4-screen .a4-tl details p{margin-top:4px;padding:7px 10px;border-radius:10px;background:var(--ok-soft);color:var(--ink)}
+.a4-screen .a4-f{padding:10px 14px 14px;font-size:.72rem;flex-wrap:wrap}
+@media (min-width:700px){.a4-screen .a4-cols{columns:2}}
+@media (max-width:380px){.a4-screen .a4-ic{width:44px;height:44px}.a4-screen .a4-h{gap:10px;padding:16px 13px}}
+
+/* Page A4 (aperçu et impression) : toujours en clair, comme sur papier */
+.a4-print{--fx-bg:#EEF2F5;--fx-ink:#1C2733;--fx-sub:#56677A;--fx-line:#D3DCE4;--fx-cover:#2D3D51;--fx-cover-line:#455A73;--fx-amber:#F2C27B;--fx-coral:#B4513A;--fx-coral-soft:#F7E6E0;--fx-warn-bg:#F9EFEB;--fx-warn-line:#EBCFC6;--fx-blue:#2E5E8A;--fx-blue-bar:#8FB0D0;--fx-blue-soft:#E1EBF3;--fx-green:#2E7556;--fx-green-bar:#9CC7B5;--fx-coral-bar:#E0937A;--fx-amber-ink:#8A5A12;--fx-amber-bar:#F2C27B;--fx-note:#EEF2F5;--surface:#FFFFFF;--bg:#F7F5F0;--ink:#14222B;--ink-2:#34424A;--muted:#5F6B72;--line:#DCD7CC;--line-2:#C9C3B6;--bad:#B03E30;--bad-soft:#FAE8E4;--ok:#2C7451;--ok-soft:#E4F1E8;--brand:#123B4A;--brand-soft:#E4EDF0;--accent:#B55E3A;
+ width:696px;background:#fff;color:#14222B;font-size:calc(10.3px * var(--fs));line-height:1.3;display:flex;flex-direction:column;gap:calc(7px * var(--fs))}
+.a4-print .a4-h{border-radius:12px;padding:10px 12px;gap:11px}
+.a4-print .a4-ic{width:44px;height:44px;border-radius:12px}
+.a4-print .a4-ic svg{width:25px;height:25px}
+.a4-print .a4-k{font-size:7.6px}
+.a4-print .a4-h h1{font-size:calc(19.5px * var(--fs))}
+.a4-print .a4-sub{font-size:calc(9.6px * var(--fs))}
+.a4-print .a4-rev{position:relative;z-index:1;display:flex;flex-direction:column;gap:3px;font-size:7.5px;color:#24323A;background:rgba(255,255,255,.7);border-radius:8px;padding:5px 7px}
+.a4-print .a4-rev b{font-size:7px;letter-spacing:.08em;text-transform:uppercase}
+.a4-print .a4-rev span{display:flex;align-items:center;gap:4px}
+.a4-print .a4-rev i{width:8px;height:8px;border:1.2px solid #24323A;border-radius:2px}
+.a4-print .a4-cols{columns:2;column-gap:9px}
+.a4-print .a4-b{border-radius:9px;padding:calc(6px * var(--fs)) 8px;margin-bottom:calc(7px * var(--fs));gap:calc(4px * var(--fs))}
+.a4-print .a4-b h2,.a4-print .a4-test h2{font-size:calc(8px * var(--fs));gap:5px}
+.a4-print .a4-b h2 svg,.a4-print .a4-test h2 svg{width:11px;height:11px}
+.a4-print .a4-n{width:15px;height:15px;font-size:8px}
+.a4-print li{margin:calc(1.5px * var(--fs)) 0}
+.a4-print .a4-ul li{padding-left:11px}
+.a4-print .a4-ul li::before{width:5px;height:5px;top:.5em}
+.a4-print .a4-ess li{padding-left:20px}
+.a4-print .a4-ess li::before{width:14px;height:14px;font-size:7.5px}
+.a4-print .a4-steps li{padding-left:19px}
+.a4-print .a4-steps li::before{width:13px;height:13px;font-size:7.5px;border-radius:4px}
+.a4-print .a4-know li{padding-left:16px}
+.a4-print .a4-know li::before{width:8px;height:8px;top:.25em}
+.a4-print .a4-chips{gap:3px}
+.a4-print .a4-chips span{padding:1px 6px;font-size:.92em}
+.a4-print .a4-rows div{padding:calc(2px * var(--fs)) 0;gap:6px}
+.a4-print .a4-sch svg{max-height:190px}
+.a4-print .a4-sch.sm svg{max-height:130px}
+.a4-print .a4-test{border-radius:9px;padding:6px 9px}
+.a4-print .a4-tq{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,40%);gap:10px;align-items:start}
+.a4-print .a4-ans{transform:rotate(180deg);font-size:.86em;color:var(--ink-2);border-left:1px dashed var(--line-2);padding-left:8px}
+.a4-print .a4-ans b{display:block;font-size:.9em;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+.a4-print .a4-ans li{padding-left:14px}
+.a4-print .a4-f{font-size:7px;border-top:1px solid var(--line);padding-top:4px}
+
+/* Vue de la fiche */
+.a4-bar{display:flex;align-items:center;gap:10px}
+.a4-seg{flex:1;display:grid;grid-template-columns:1fr 1fr}
+.a4-pbtn{display:inline-flex;align-items:center;gap:7px;padding:10px 14px;flex:none}
+.a4-pbtn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.a4-prev{position:relative;overflow:hidden;padding:0}
+.a4-prev{border-radius:14px;background:color-mix(in srgb,var(--ink) 8%,var(--bg))}
+.a4-prev .a4-print{transform-origin:top left;box-shadow:0 0 0 14px #fff,0 4px 22px 14px rgba(0,0,0,.16)}
+:root[data-theme="dark"] .a4-prev .a4-print{box-shadow:0 0 0 14px #fff,0 4px 22px 14px rgba(0,0,0,.5)}
+
+/* Accès depuis un cours ou une fiche récap */
+.a4-cta{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border-radius:16px;border:1.5px dashed color-mix(in srgb,var(--accent) 55%,var(--line));background:color-mix(in srgb,var(--accent) 7%,var(--surface));color:var(--ink);text-decoration:none;margin:4px 0 2px}
+.a4-cta-ic{width:38px;height:38px;border-radius:11px;background:var(--accent);color:#fff;display:grid;place-items:center}
+.a4-cta svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.a4-cta>svg{color:var(--accent)}
+.a4-cta b{display:block;font-size:.95rem}
+.a4-cta small{display:block;color:var(--muted);font-size:.8rem;line-height:1.3}
+:root[data-theme="dark"] .a4-cta-ic{color:#24140D}
+
+@media print{
+ body.printing .print-doc.a4-doc{padding:0!important}
+ .a4-doc .a4-print{box-shadow:none!important;transform:none!important;margin:0!important}
+ .a4-doc,.a4-doc *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+.a4-list{margin-top:2px}
+.a4-lh{display:flex;align-items:center;gap:8px;padding:10px 14px;font-size:.74rem;font-weight:750;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--surface))}
+.a4-lh svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2}
+.a4-tag{background:var(--accent-soft);color:var(--accent);font-weight:800}
+
+/* Fiche à l'écran en mode sombre */
+:root[data-theme="dark"] .a4-screen{--ink-c:color-mix(in srgb,var(--c) 62%,#fff)}
+:root[data-theme="dark"] .a4-screen .a4-h{background:color-mix(in srgb,var(--c) 30%,var(--surface));color:var(--ink)}
+:root[data-theme="dark"] .a4-screen .a4-h::after{background:rgba(255,255,255,.05)}
+:root[data-theme="dark"] .a4-screen .a4-h h1{color:var(--ink)}
+:root[data-theme="dark"] .a4-screen .a4-k{color:var(--ink-c);opacity:1}
+:root[data-theme="dark"] .a4-screen .a4-sub{color:var(--ink-2)}
+:root[data-theme="dark"] .a4-screen .a4-key{background:color-mix(in srgb,var(--c) 14%,var(--surface));border-color:color-mix(in srgb,var(--c) 35%,var(--line))}
+:root[data-theme="dark"] .a4-screen .a4-ess li::before{color:#14222B}

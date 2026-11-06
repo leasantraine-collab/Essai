@@ -153,6 +153,7 @@ function vSoin(id){
  if(mode==="recap"){
   const box=(t,a,n)=>a.length?`<div class="px-r"><span class="cv-lab">${t}</span><ul>${a.slice(0,n).map(x=>`<li>${pmd(x)}</li>`).join("")}</ul></div>`:"";
   body=`<div class="px-recap">
+   ${a4Cta("s",id,"Ce soin en une page : étapes, surveillance, pièges")}
    <div class="px-r def"><span class="cv-lab">${SVG.info}Définition</span><p>${pmd(o.d[0]||"")}</p>${badges}</div>
    ${o.mat.length?`<div class="px-r"><span class="cv-lab">Matériel</span>${soMatGrid(o.mat)}</div>`:""}
    ${o.et.length?`<div class="px-r"><span class="cv-lab">Les étapes</span><ol class="so-mini">${o.et.map(x=>`<li>${pmd(x)}</li>`).join("")}</ol></div>`:""}
