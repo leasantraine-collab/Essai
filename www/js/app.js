@@ -41,7 +41,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.41 · 6 novembre 2026";
+const APP_VERSION="1.42 · 7 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -467,6 +467,7 @@ app.addEventListener("input",ev=>{const t=ev.target;if(t.id==="q"){state.q=t.val
  else if(t.dataset.fs)feuilleInput(t);
  else if(t.dataset.ot!=null)outilInput(t);
  else if(t.dataset.hw!=null)hwInput(t);
+ else if(t.dataset.vd!=null)vdInput(t);
  else pathoInput(t);});
 app.addEventListener("click",ev=>{
  const b=ev.target.closest("[data-act]");if(!b)return;
@@ -475,6 +476,7 @@ app.addEventListener("click",ev=>{
  if(a.startsWith("sh-")){histAct(b,a);return;}
  if(a.startsWith("hw-")){hwAct(b,a);return;}
  if(a.startsWith("a4-")){a4Act(b,a);return;}
+ if(a.startsWith("vd-")){vdAct(b,a);return;}
  if(a.startsWith("cn-")){carnetAct(b,a);return;}
  if(a.startsWith("fs-")){feuilleAct(b,a);return;}
  if(a.startsWith("px-")){pathoAct(b,a);return;}
