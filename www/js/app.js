@@ -41,7 +41,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.42 · 7 novembre 2026";
+const APP_VERSION="1.43 · 7 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -301,6 +301,7 @@ function vStages(){
   <section class="stack-sm"><div class="section-title"><h2>Avant le premier jour</h2><span class="muted">${done.length} / ${CHECKLIST.length}</span></div>
    <div class="progress"><i style="width:${done.length/CHECKLIST.length*100}%"></i></div>
    <div class="list" style="padding:4px 14px">${CHECKLIST.map((c,i)=>`<label class="chk"><input type="checkbox" data-act="check" data-i="${i}" ${done.includes(i)?"checked":""}><span>${esc(c)}</span></label>`).join("")}</div></section>
+  ${sacSection()}
   <section class="stack-sm"><h2>Posture professionnelle</h2><div class="sheet-body"><ul class="fv-list" style="--c:${CAT.stage.c}">${POSTURE.map(p=>`<li>${esc(p)}</li>`).join("")}</ul></div></section>
   <section class="stack-sm"><h2>Objectifs selon le semestre</h2><div class="sheet-body"><div class="fv-tbl">${OBJECTIFS.map(o=>{const [a,b]=o.split(" : ");return `<div><span>${esc(a)}</span><span>${esc(b)}</span></div>`}).join("")}</div><span class="muted">Repères indicatifs : vos objectifs se construisent avec votre formateur et votre tuteur.</span></div></section>
   ${FICHES.some(f=>f.cat==="stage"&&!f.id.startsWith("guide-"))?`<section class="stack-sm"><h2>Fiches méthode</h2><div class="list">${FICHES.filter(f=>f.cat==="stage"&&!f.id.startsWith("guide-")).map(f=>itemRow(f,"f")).join("")}</div></section>`:""}
@@ -531,7 +532,7 @@ app.addEventListener("click",ev=>{
  else if(a==="exam-done"){state.examEdit=false;render();}
  else if(a==="exam-del"){store.set("exams",exams().filter(e=>e.id!==id));haptic();toast("Partiel supprimé");render();}
  else if(a==="stage-new"){if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Toucher à nouveau pour tout effacer";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent="Préparer un nouveau stage";}},4000);return;}
-  try{["stage","check","carnet"].forEach(x=>localStorage.removeItem("ifsi_"+x))}catch(e){}haptic("MEDIUM");toast("Prêt pour le prochain stage");render();}
+  try{["stage","check","carnet","sac"].forEach(x=>localStorage.removeItem("ifsi_"+x))}catch(e){}haptic("MEDIUM");toast("Prêt pour le prochain stage");render();}
  else if(a==="reset"){const t=b.querySelector(".t");
   if(!b.dataset.armed){b.dataset.armed="1";t.textContent="Toucher à nouveau pour tout effacer";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;t.textContent="Réinitialiser ma progression";}},4000);return;}
   ["reviewed","studied","stats","wrong","favs","check","last","pxdone"].forEach(x=>{try{localStorage.removeItem("ifsi_"+x)}catch(e){}});haptic("MEDIUM");toast("Progression réinitialisée");render();}

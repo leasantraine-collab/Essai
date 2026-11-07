@@ -17,7 +17,7 @@ function shArchive(auto){
  const s=Object.assign({},stageInfo());delete s.noAuto;
  const rec={id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),archived:new Date().toISOString(),auto:!!auto,stage:s,carnet:store.get("carnet",{}),check:store.get("check",[])};
  shSave([rec,...stagesHist()]);
- try{["stage","check","carnet"].forEach(x=>localStorage.removeItem("ifsi_"+x));}catch(e){}
+ try{["stage","check","carnet","sac"].forEach(x=>localStorage.removeItem("ifsi_"+x));}catch(e){}
  return rec;
 }
 function shAutoArchive(){
@@ -87,6 +87,7 @@ function vStageHist(arg){
 
 /* ---------- Actions ---------- */
 function histAct(b,a){
+ if(a.startsWith("sh-sac")){sacAct(b,a);return;}
  const id=b.dataset.id,rec=id&&stagesHist().find(r=>r.id===id);
  if(a==="sh-archive"){const r=shArchive(false);if(!r){toast("Aucun stage à archiver");return;}state.shJust=r.id;haptic("MEDIUM");toast("Stage archivé dans l'historique");render();
   setTimeout(()=>{const el=document.getElementById("sh-parcours");el&&el.scrollIntoView({block:"start"});},60);}
@@ -112,4 +113,40 @@ function histSubmit(f){
 function shLastGoals(){
  const r=shSorted().find(x=>x.carnet&&x.carnet.bilans&&x.carnet.bilans.fin&&(x.carnet.bilans.fin.suite||"").trim());
  return r?`<div class="callout sh-goals"><b>Objectifs fixés à la fin de votre stage précédent</b> (${esc(shTitle(r))}) :<br>${esc(r.carnet.bilans.fin.suite.trim()).replace(/\n/g,"<br>")}</div>`:"";
+}
+
+/* ---------- Mon sac de stage : check-list des affaires à préparer ---------- */
+const SAC=[
+ ["Tenue",["Tenues professionnelles (si elles ne sont pas fournies)","Chaussures fermées, lavables, antidérapantes","Élastiques ou pinces à cheveux","Chaussettes de rechange"]],
+ ["Dans la poche",["Montre à trotteuse, accrochée à la tunique","Stylo 4 couleurs et stylo de secours","Petit carnet de poche","Badge ou carte d'étudiant","Petits ciseaux, stéthoscope (selon le service)"]],
+ ["Documents",["Convention de stage signée","Portfolio et feuilles d'évaluation","Feuille de présence ou d'horaires","Objectifs de stage écrits","Carnet de vaccination à jour","Attestation AFGSU (si demandée)"]],
+ ["Pratique",["Cadenas pour le casier","Repas, gourde et encas","Sac pour ramener la tenue","Trajet repéré (transports, parking)","Téléphone chargé"]],
+ ["Avant de partir",["Bijoux, bagues et montre-bracelet retirés","Ongles courts, sans vernis","Réveil réglé la veille"]]];
+const sacN=()=>SAC.reduce((n,[,l])=>n+l.length,0);
+const sacDone=()=>store.get("sac",[]).filter(k=>SAC.some(([g,l],gi)=>l.some((_,i)=>k===gi+"-"+i)));
+function sacSection(){
+ const done=sacDone(),n=sacN(),k=done.length;
+ return `<section class="stack-sm" id="sac"><div class="section-title"><h2>Mon sac de stage</h2><span class="muted" id="sac-n">${k} / ${n}</span></div>
+  <div class="progress"><i id="sac-bar" style="width:${v1s(k/n*100)}%"></i></div>
+  <details class="ot-det sac"${state.sacOpen?" open":""}><summary>Cocher les affaires à préparer</summary>
+   ${SAC.map(([g,l],gi)=>`<h3 class="sac-g">${esc(g)}</h3><div class="list" style="padding:4px 14px">${l.map((it,i)=>{const key=gi+"-"+i;return `<label class="chk"><input type="checkbox" data-act="sh-sac" data-k="${key}" ${done.includes(key)?"checked":""}><span>${esc(it)}</span></label>`;}).join("")}</div>`).join("")}
+   <div class="btn-row sac-btns"><button class="btn ghost" data-act="sh-sac-print">${IC.sheet}Imprimer la liste</button><button class="link" data-act="sh-sac-reset">Tout décocher</button></div></details>
+  <a class="list" href="#fiche/preparer-stage"><span class="li"><span class="ic tb-ic" style="--c:#9A7A2E">${IC.sheet}</span><span><span class="t">Fiche : préparer son stage efficacement</span><span class="s">Calendrier, appel au service, affaires, objectifs, premier jour</span></span>${chev}</span></a></section>`;
+}
+const v1s=n=>Math.round(n*10)/10;
+function sacAct(b,a){
+ if(a==="sh-sac"){let d=sacDone();const k=b.dataset.k;d=b.checked?[...new Set([...d,k])]:d.filter(x=>x!==k);store.set("sac",d);haptic();state.sacOpen=true;
+  const n=sacN(),el=document.getElementById("sac-n"),bar=document.getElementById("sac-bar");if(el)el.textContent=`${d.length} / ${n}`;if(bar)bar.style.width=v1s(d.length/n*100)+"%";
+  if(d.length===n)toast("Sac prêt pour le stage");}
+ else if(a==="sh-sac-reset"){if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Toucher à nouveau pour tout décocher";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent="Tout décocher";}},4000);return;}
+  store.set("sac",[]);state.sacOpen=true;haptic();toast("Liste remise à zéro");render();}
+ else if(a==="sh-sac-print"){const done=sacDone(),s=stageInfo();
+  let doc=document.getElementById("print-doc");if(doc)doc.remove();doc=document.createElement("div");doc.id="print-doc";doc.className="print-doc sac-doc";
+  doc.innerHTML=`<h1>Mon sac de stage</h1><p class="sac-sub">${esc(s.service||"Stage")}${s.debut?` · à partir du ${esc(parseD(s.debut).toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"}))}`:""}</p>
+   <div class="sac-cols">${SAC.map(([g,l],gi)=>`<section><h2>${esc(g)}</h2><ul>${l.map((it,i)=>`<li><i class="${done.includes(gi+"-"+i)?"on":""}"></i>${esc(it)}</li>`).join("")}</ul></section>`).join("")}</div>
+   <p class="sac-f">Carnet IFSI · rien aux mains ni aux poignets, cheveux attachés, arriver 10 minutes avant.</p>`;
+  document.body.appendChild(doc);document.body.classList.add("printing");
+  const done2=()=>{document.body.classList.remove("printing");const d=document.getElementById("print-doc");d&&d.remove();};
+  window.addEventListener("afterprint",done2,{once:true});
+  setTimeout(()=>{try{window.print();}catch(e){toast("Impression indisponible ici");done2();}},60);}
 }

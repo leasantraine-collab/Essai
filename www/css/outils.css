@@ -417,3 +417,20 @@ body.hw-dragging{-webkit-user-select:none;user-select:none;cursor:grabbing}
 .hw-sheet-b{overflow:auto;padding:4px 18px 22px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
 .hw-sheet-b>*{flex:none}
 @media (prefers-reduced-motion:reduce){.hw-editing .hw-w,.hw-new,.hw-sheet{animation:none}}
+
+/* Mon sac de stage */
+.sac summary{font-weight:700}
+.sac-g{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);font-family:var(--f-body);font-weight:750;margin:14px 0 6px}
+.sac-btns{margin-top:12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sac-btns .btn{display:inline-flex;align-items:center;gap:8px}
+.print-doc.sac-doc{font-family:var(--f-body);color:#111}
+.sac-doc h1{font-family:var(--f-display);font-size:22pt;margin:0 0 2mm}
+.sac-doc .sac-sub{margin:0 0 6mm;color:#555;font-size:11pt}
+.sac-doc .sac-cols{columns:2;column-gap:10mm}
+.sac-doc section{break-inside:avoid;margin-bottom:6mm}
+.sac-doc h2{font-size:12pt;margin:0 0 2mm;text-transform:uppercase;letter-spacing:.06em;color:#8A4A2C}
+.sac-doc ul{list-style:none;margin:0;padding:0}
+.sac-doc li{display:flex;align-items:flex-start;gap:3mm;font-size:11pt;line-height:1.35;margin:0 0 2.2mm}
+.sac-doc li i{flex:none;width:4mm;height:4mm;border:1.4px solid #333;border-radius:1mm;margin-top:.6mm;position:relative}
+.sac-doc li i.on::after{content:"";position:absolute;left:1.1mm;top:.2mm;width:1.2mm;height:2.4mm;border:solid #2C7451;border-width:0 .6mm .6mm 0;transform:rotate(40deg)}
+.sac-doc .sac-f{margin-top:6mm;font-size:9pt;color:#666;border-top:1px solid #ccc;padding-top:2mm}
