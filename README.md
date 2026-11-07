@@ -24,6 +24,7 @@ Elle reprend l'intégralité des contenus de l'artefact *Carnet IFSI* et les com
 - Réglages : thème auto/clair/sombre, taille du texte, référentiel
 - Fonctionne **hors ligne**, polices embarquées, aucune donnée envoyée
 - Retour matériel Android, retour haptique, barre d'état adaptée au thème
+- Notifications de rappel (planning, tâches, partiels, stage, mémoire, résumé du jour, minuteur), voir plus bas
 
 ## Structure
 
@@ -73,6 +74,14 @@ npx cap open ios       # choisir son équipe dans Signing & Capabilities, puis R
 Pour l'App Store : *Product → Archive* puis envoi via l'Organizer (compte Apple Developer : 99 $/an).
 
 Sans Mac, la version web s'installe sur l'iPhone : ouvrir le site dans Safari → Partager → *Sur l'écran d'accueil*.
+
+## Notifications
+
+Les rappels sont calculés sur l'appareil par `www/js/notifs.js` (Réglages › Notifications).
+
+- **Android et iPhone** : notifications locales programmées avec `@capacitor/local-notifications` ; elles arrivent même appli fermée. Au plus 60 rappels sont programmés à l'avance (limite d'iOS), reprogrammés à chaque ouverture et à chaque modification. Sur Android 13 et plus, l'autorisation est demandée au premier « Activer » ; deux canaux sont créés (*Rappels*, *Minuteur*), avec la petite icône `android/app/src/main/res/drawable/ic_stat_carnet.xml`. Après une mise à jour du dépôt : `npm install` puis `npx cap sync`.
+- **Web** : le navigateur ne peut pas réveiller une page à heure fixe sans serveur d'envoi. Les rappels s'affichent quand l'appli est ouverte ou en arrière-plan, ceux manqués à la réouverture, et via la synchronisation périodique du service worker quand le navigateur la propose (Chrome Android, appli installée). Sur iPhone, il faut d'abord ajouter le site à l'écran d'accueil.
+- L'export `.ics` du planning contient les mêmes alarmes : l'agenda du téléphone prévient alors même sans l'appli.
 
 ## Modifier les contenus
 

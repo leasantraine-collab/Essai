@@ -41,7 +41,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.44 · 7 novembre 2026";
+const APP_VERSION="1.45 · 7 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -78,7 +78,7 @@ applyTheme();
 
 /* ---------- Routage ---------- */
 const ROOTS=["accueil","reviser","entrainer","stages","programme"];
-const PARENT={a4:"reviser",perso:"accueil","stage-hist":"stages",outil:"outils",outils:"accueil",med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const PARENT={a4:"reviser",perso:"accueil","stage-hist":"stages",outil:"outils",outils:"accueil",med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil",notifs:"reglages"};
 function route(){const [v,...rest]=decodeURIComponent(location.hash.slice(1)).split("/");return {v:VIEWS[v]?v:"accueil",arg:rest.join("/")};}
 function nav(h){if(location.hash==="#"+h)render(true);else location.hash=h;}
 let depth=0;
@@ -293,6 +293,7 @@ function vStages(){
  const done=store.get("check",[]);
  return `<div class="stack-lg">${vh("Stages","Arriver préparé·e dans chaque service",`Compte à rebours, infos pratiques, check-list, posture et repères pour ${STAGES.length} services.`)}
   ${stageCountdown()}
+  ${ntAsk("stage")}
   ${afBanner()}
   ${shParcours()}
   ${carnetCard()}
@@ -411,6 +412,7 @@ function vReglages(){
   <div class="set-group"><span class="eyebrow">Formation</span><div class="list">
    <div class="set-row"><span>Référentiel</span><div class="seg">${Object.entries(UE).map(([k,v])=>`<button data-act="ue-ref" data-k="${k}" aria-pressed="${state.ueRef===k}">${v.sub.replace("Référentiel ","")}</button>`).join("")}</div></div>
    <div class="set-row"><span>Semestre en cours</span><span class="muted">S${state.sem} · modifiable dans Programme</span></div></div></div>
+  <div class="set-group"><span class="eyebrow">Rappels</span><div class="list">${ntSetRow()}</div></div>
   <div class="set-group"><span class="eyebrow">Données</span><div class="list">
    <button class="li" data-act="backup" style="grid-template-columns:minmax(0,1fr)"><span><span class="t" style="color:var(--brand)">Sauvegarder mes données</span><span class="s">Partiels, stage, carnet de suivi, progression : un fichier à garder dans Fichiers ou iCloud</span></span></button>
    <label class="li" for="restore-file" style="grid-template-columns:minmax(0,1fr)"><span><span class="t" style="color:var(--brand)">Restaurer une sauvegarde</span><span class="s">Remplace les données actuelles de cet appareil</span></span></label><input type="file" id="restore-file" class="sr-only" accept="application/json,.json">
@@ -422,8 +424,8 @@ function vReglages(){
 }
 
 /* ---------- Rendu ---------- */
-const VIEWS={outils:vOutils,outil:vOutil,med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,"stage-hist":vStageHist,perso:vPerso,a4:vA4,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages};
-const TAB={a4:"reviser",perso:"accueil","stage-hist":"stages",med:"reviser",soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil"};
+const VIEWS={outils:vOutils,outil:vOutil,med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,"stage-hist":vStageHist,perso:vPerso,a4:vA4,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages,notifs:vNotifs};
+const TAB={a4:"reviser",perso:"accueil","stage-hist":"stages",med:"reviser",soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil",notifs:"accueil"};
 let lastKey=null;
 const SCROLL={};
 function render(top){
@@ -470,6 +472,7 @@ app.addEventListener("input",ev=>{const t=ev.target;if(t.id==="q"){state.q=t.val
  else if(t.dataset.ot!=null)outilInput(t);
  else if(t.dataset.hw!=null)hwInput(t);
  else if(t.dataset.vd!=null)vdInput(t);
+ else if(t.dataset.nt!=null)ntInput(t);
  else pathoInput(t);});
 app.addEventListener("click",ev=>{
  const b=ev.target.closest("[data-act]");if(!b)return;
@@ -480,6 +483,7 @@ app.addEventListener("click",ev=>{
  if(a.startsWith("a4-")){a4Act(b,a);return;}
  if(a.startsWith("vd-")){vdAct(b,a);return;}
  if(a.startsWith("rv-")){rvAct(b,a);return;}
+ if(a.startsWith("nt-")){ntAct(b,a);return;}
  if(a.startsWith("cn-")){carnetAct(b,a);return;}
  if(a.startsWith("fs-")){feuilleAct(b,a);return;}
  if(a.startsWith("px-")){pathoAct(b,a);return;}
@@ -553,7 +557,7 @@ if(isNative){
   const r=route();if(r.v==="entrainer"&&state.quiz){state.quiz=null;render(true);return;}
   if(r.v==="accueil")A.exitApp();else if(ROOTS.includes(r.v))location.replace("#accueil");else goBack();});}catch(e){}
 }
-if(!isNative&&"serviceWorker" in navigator&&location.protocol==="https:"){
+if(!isNative&&"serviceWorker" in navigator&&(location.protocol==="https:"||/^(localhost|127\.0\.0\.1)$/.test(location.hostname))){
  const sw=navigator.serviceWorker,hadController=!!sw.controller;let reloading=false;
  sw.register("sw.js",{updateViaCache:"none"}).then(reg=>{
   const check=()=>{if(document.visibilityState==="visible")reg.update().catch(()=>{});};
@@ -574,16 +578,17 @@ function restoreData(file){
  const r=new FileReader();
  r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||d.app!=="carnet-ifsi"||!d.donnees||typeof d.donnees!=="object")throw 0;
   let n=0;Object.entries(d.donnees).forEach(([k,v])=>{if(k.startsWith("ifsi_")&&typeof v==="string"){localStorage.setItem(k,v);n++;}});
-  state.ueRef=store.get("ueRef","2026");state.sem=store.get("sem",1);applyTheme();toast(n?"Données restaurées":"Sauvegarde vide");render();}
+  state.ueRef=store.get("ueRef","2026");state.sem=store.get("sem",1);applyTheme();toast(n?"Données restaurées":"Sauvegarde vide");render();ntSoon();}
   catch(e){toast("Ce fichier n'est pas une sauvegarde Carnet IFSI");}};
  r.onerror=()=>toast("Lecture du fichier impossible");r.readAsText(file);
 }
 async function forceUpdate(){
- try{if("caches" in window){const k=await caches.keys();await Promise.all(k.map(x=>caches.delete(x)));}
+ try{if("caches" in window){const k=await caches.keys();await Promise.all(k.filter(x=>x!==NT_CACHE).map(x=>caches.delete(x)));}
   if(navigator.serviceWorker){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.update().catch(()=>{})));}}catch(e){}
  location.reload();
 }
 tbInit();
+try{ntInit();}catch(e){}
 try{shAutoArchive();}catch(e){}
 render(true);
 try{const sp=plug("SplashScreen");sp&&setTimeout(()=>sp.hide(),120);}catch(e){}

@@ -103,7 +103,7 @@ const otSeg=(act,cur,opts,label)=>`<div class="seg ot-seg" role="group" aria-lab
 /* =====================================================================
    1. PLANNING
    ===================================================================== */
-const AG_TYPES={"Cours":"#2A5D85","Révision":"#2C7451","Partiel":"#B55E3A","Stage":"#9A7A2E","TFE":"#6E5196","Perso":"#5C6B7A"};
+const AG_TYPES={"Cours":"#2A5D85","Révision":"#2C7451","À faire":"#C25B6A","Partiel":"#B55E3A","Stage":"#9A7A2E","TFE":"#6E5196","Perso":"#5C6B7A"};
 const agenda=()=>store.get("agenda",[]);
 const agSave=a=>store.set("agenda",a);
 const agPlans=()=>store.get("agendaPlans",[]);
@@ -116,11 +116,14 @@ function agAuto(from,to){
 }
 function agRow(e){
  return `<div class="ag-it${e.done?" done":""}" style="--c:${AG_TYPES[e.ty]||"#5C6B7A"}">${e.auto?`<span class="ag-dot" aria-hidden="true"></span>`:`<input type="checkbox" class="ag-chk" data-act="ot-ag-done" data-id="${esc(e.id)}" ${e.done?"checked":""} aria-label="Marquer comme fait : ${esc(e.t)}">`}
-  <span class="ag-h">${e.h?esc(e.h):"Journée"}</span><span class="ag-t">${esc(e.t)}<small>${esc(e.ty)}${e.auto?" · automatique":""}</small></span>
+  <span class="ag-h">${e.late?esc(fmtShort(at(e.d))):e.h?esc(e.h):"Journée"}</span><span class="ag-t">${esc(e.t)}<small>${esc(e.ty)}${e.auto?" · automatique":""}${e.late?" · en retard":""}${!e.auto&&e.rp!=null&&e.rp!==""?` · ${+e.rp===-1?"sans rappel":"rappel "+ntLeadTxt(e.rp)}`:""}</small></span>
   ${e.auto?"":`<button class="del" data-act="ot-ag-del" data-id="${esc(e.id)}" aria-label="Supprimer ${esc(e.t)}">${IC.x}</button>`}</div>`;
 }
+/* Tâches « À faire » non cochées des 30 derniers jours */
+const agLate=d=>agenda().filter(e=>e.ty==="À faire"&&!e.done&&e.d<d&&e.d>=addDays(d,-30)).sort((a,b)=>a.d<b.d?-1:1).map(e=>({...e,late:1}));
 function otPlanning(){
  const today=todayISO(),w0=state.agWeek||mondayOf(today),days=[...Array(7)].map((_,i)=>addDays(w0,i)),w6=days[6];
+ const late=agLate(today);
  const all=[...agenda().filter(e=>e.d>=w0&&e.d<=w6),...agAuto(w0,w6)];
  const rev=all.filter(e=>e.ty==="Révision"),revDone=rev.filter(e=>e.done).length;
  const dl=(s,o)=>parseD(s).toLocaleDateString("fr-FR",o);
@@ -131,9 +134,10 @@ function otPlanning(){
    <div class="section-title"><h2>Nouvel événement</h2><button type="button" class="link" data-act="ot-ag-cancel">Annuler</button></div>
    ${otField("ag-t","Intitulé",`<input id="ag-t" required maxlength="90" placeholder="Ex. Cours UE 2.11, réviser les anticoagulants">`)}
    <div class="cd-row">${otField("ag-d","Date",`<input id="ag-d" type="date" required value="${esc(state.agDay||today)}">`)}${otField("ag-h","Heure",`<input id="ag-h" type="time">`)}</div>
-   <div class="cd-row">${otField("ag-ty","Type",`<select id="ag-ty">${Object.keys(AG_TYPES).map(k=>`<option ${k==="Révision"?"selected":""}>${k}</option>`).join("")}</select>`)}
+   <div class="cd-row">${otField("ag-ty","Type",`<select id="ag-ty">${Object.keys(AG_TYPES).map(k=>`<option ${k===(state.agTy||"Révision")?"selected":""}>${k}</option>`).join("")}</select>`)}
     ${otField("ag-rep","Répéter",`<select id="ag-rep"><option value="0">Non</option><option value="4">Chaque semaine, 4 semaines</option><option value="8">Chaque semaine, 8 semaines</option><option value="12">Chaque semaine, 12 semaines</option></select>`)}</div>
-   <small class="ot-hint">Un événement de type Partiel est aussi ajouté au compte à rebours de l'accueil.</small>
+   ${otField("ag-rp","Rappel",`<select id="ag-rp"><option value="">Par défaut (${esc(ntLeadTxt(ntCfg().lead))}, ou le matin même s'il n'y a pas d'heure)</option>${[[0,"À l'heure de l'événement"],[15,"15 min avant"],[30,"30 min avant"],[60,"1 h avant"],[120,"2 h avant"],[1440,"La veille"],[-1,"Aucun rappel"]].map(([m,l])=>`<option value="${m}">${l}</option>`).join("")}</select>`,ntOn()?"":`Les rappels arrivent une fois les <a href="#notifs">notifications activées</a>.`)}
+   <small class="ot-hint">Un événement de type Partiel est aussi ajouté au compte à rebours de l'accueil, avec ses propres rappels. Une tâche « À faire » non cochée reste affichée en retard jusqu'à ce qu'elle soit faite.</small>
    <button class="btn block" type="submit">${IC.plus}Ajouter</button></form>`:"";
  const gen=state.agGen?`<form id="ot-ag-genf" class="cd-form sheet-body" autocomplete="off">
    <div class="section-title"><h2>Plan de révisions</h2><button type="button" class="link" data-act="ot-ag-gen">Fermer</button></div>
@@ -147,18 +151,19 @@ function otPlanning(){
    <button class="btn block" type="submit">Créer mon plan</button>
    ${plans.length?`<div class="stack-sm"><span class="ot-hint">Plans créés :</span>${plans.map(p=>`<div class="ot-line"><span>${esc(p.nom)} · ${esc(fmtShort(at(p.date)))} · ${plural(p.n,"séance")}</span><button type="button" class="link danger" data-act="ot-ag-plandel" data-id="${esc(p.id)}">Supprimer</button></div>`).join("")}</div>`:""}
   </form>`:"";
- return `<div class="ag-nav"><button class="icon-btn" data-act="ot-ag-week" data-k="-1" aria-label="Semaine précédente">${IC.back}</button>
+ return `${ntAsk("planning")}<div class="ag-nav"><button class="icon-btn" data-act="ot-ag-week" data-k="-1" aria-label="Semaine précédente">${IC.back}</button>
    <div class="ag-wk"><b>Du ${esc(dl(w0,{day:"numeric",month:"long"}))} au ${esc(dl(w6,{day:"numeric",month:"long"}))}</b><small>${rev.length?`${revDone} sur ${rev.length} révisions faites`:all.length?plural(all.length,"événement"):"Semaine libre"}</small></div>
    <button class="icon-btn" data-act="ot-ag-week" data-k="1" aria-label="Semaine suivante">${IC.chev}</button></div>
-  <div class="chips wrapchips"><button class="chip" data-act="ot-ag-week" data-k="0" ${w0===mondayOf(today)?'aria-pressed="true"':""}>Cette semaine</button><button class="chip" data-act="ot-ag-new" data-k="${today}">＋ Événement</button><button class="chip" data-act="ot-ag-gen" aria-pressed="${!!state.agGen}">Plan de révisions</button><button class="chip" data-act="ot-ag-ics">Exporter vers mon agenda</button></div>
+  <div class="chips wrapchips"><button class="chip" data-act="ot-ag-week" data-k="0" ${w0===mondayOf(today)?'aria-pressed="true"':""}>Cette semaine</button><button class="chip" data-act="ot-ag-new" data-k="${today}">＋ Événement</button><button class="chip" data-act="ot-ag-new" data-k="${today}" data-ty="À faire">＋ Tâche</button><button class="chip" data-act="ot-ag-gen" aria-pressed="${!!state.agGen}">Plan de révisions</button><button class="chip" data-act="ot-ag-ics">Exporter vers mon agenda</button><a class="chip nt-chip" href="#notifs" aria-label="Rappels ${ntOn()?"activés":"désactivés"}">${ntOn()?NT_IC.bell:NT_IC.off}Rappels${ntOn()?"":" désactivés"}</a></div>
   ${form}${gen}
+  ${late.length?`<section class="ag-day ag-late" aria-label="Tâches en retard"><div class="ag-dh"><b>En retard</b><span class="muted">${plural(late.length,"tâche")} à faire</span></div><div class="ag-items">${late.map(agRow).join("")}</div></section>`:""}
   <div class="ag-days">${days.map(d=>{const items=all.filter(e=>e.d===d).sort((a,b)=>(a.h||"00:00")<(b.h||"00:00")?-1:1);
    return `<section class="ag-day${d===today?" today":""}" aria-label="${esc(dl(d,{weekday:"long",day:"numeric",month:"long"}))}"><div class="ag-dh"><b>${esc(dl(d,{weekday:"long"}))}</b><span class="muted">${esc(dl(d,{day:"numeric",month:"short"}))}</span>${d===today?`<span class="tag">Aujourd'hui</span>`:""}
     <button class="ag-add" data-act="ot-ag-new" data-k="${d}" aria-label="Ajouter un événement le ${esc(dl(d,{weekday:"long",day:"numeric",month:"long"}))}">${IC.plus}</button></div>
     ${items.length?`<div class="ag-items">${items.map(agRow).join("")}</div>`:`<p class="ag-empty">Rien de prévu</p>`}</section>`;}).join("")}</div>
   <div class="ag-leg">${Object.entries(AG_TYPES).map(([k,c])=>`<span style="--c:${c}"><i></i>${k}</span>`).join("")}</div>
   <a class="list" href="#feuille/planif"><span class="li"><span class="ic tb-ic" style="--c:#1E5A6D">${OT_IC.chrono}</span><span><span class="t">Planifier ma journée de stage</span><span class="s">Feuille de route heure par heure pour vos patients</span></span>${chev}</span></a>
-  <p class="disclaimer">Les partiels de l'accueil et les dates de stage apparaissent automatiquement. L'export crée un fichier .ics à ouvrir dans l'agenda du téléphone.</p>`;
+  <p class="disclaimer">Les partiels de l'accueil et les dates de stage apparaissent automatiquement. L'export crée un fichier .ics à ouvrir dans l'agenda du téléphone, avec les alarmes de vos rappels.</p>`;
 }
 /* Répartit les séances : première lecture sur la première moitié de la période, révisions à J+1, J+3, J+7, dernière révision avant l'évaluation. */
 function agPlan(exam,topics,perDay,noSun,today){
@@ -189,25 +194,43 @@ function agGenerate(){
  toast(`${plural(ev.length,"séance")} ajoutée${ev.length>1?"s":""}${r.lost.length?` · ${r.lost.length} non placée${r.lost.length>1?"s":""}`:""}`);render();
  if(r.lost.length)setTimeout(()=>toast("Augmentez le nombre de séances par jour pour tout placer"),1800);
 }
+/* Export .ics : planning, partiels, stage et mémoire, avec des alarmes calquées sur les réglages des rappels
+   (l'agenda du téléphone prévient même quand l'appli est fermée). */
 function agICS(){
- const ev=[...agenda(),...exams().map(e=>({id:"ex"+e.id,d:e.date,h:e.heure||"",t:e.nom,ty:"Partiel"}))].filter(e=>e.d);
+ const C=ntCfg(),dm=ntMin(ntHM(C.digH,"07:30")),em=ntMin(ntHM(C.eveH,"19:00")),s=stageInfo(),T=tfe();
+ const ev=[...agenda().map(e=>({...e,src:"ag"})),...exams().map(e=>({id:"ex"+e.id,d:e.date,h:ntHM(e.heure,"08:00"),t:e.nom,ty:"Partiel",src:"ex"}))].filter(e=>e.d);
+ if(s.debut)ev.push({id:"stage-"+s.debut,d:s.debut,h:"",fin:s.fin&&s.fin>=s.debut?s.fin:"",t:"Stage"+(s.service?" · "+s.service:""),ty:"Stage",src:"st"});
+ if(T.rendu)ev.push({id:"tfe-rendu-"+T.rendu,d:T.rendu,h:"",t:"Rendu du mémoire",ty:"TFE",src:"tfe"});
+ if(T.sout)ev.push({id:"tfe-sout-"+T.sout,d:T.sout,h:"",t:"Soutenance du mémoire",ty:"TFE",src:"tfe"});
  if(!ev.length){toast("Aucun événement à exporter");return;}
  const p=n=>String(n).padStart(2,"0"),now=new Date(),stamp=`${now.getUTCFullYear()}${p(now.getUTCMonth()+1)}${p(now.getUTCDate())}T${p(now.getUTCHours())}${p(now.getUTCMinutes())}${p(now.getUTCSeconds())}Z`;
  const ei=s=>String(s).replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n");
+ /* Décalage en minutes par rapport au début de l'événement (minuit pour un événement à la journée) → durée iCalendar */
+ const dur=m=>{const sg=m<0?"-":"";m=Math.abs(Math.round(m));const D=Math.floor(m/1440),H=Math.floor(m%1440/60),M=m%60;return `${sg}P${D?D+"D":""}${H||M||!D?"T":""}${H?H+"H":""}${M?M+"M":""}${!D&&!H&&!M?"0S":""}`;};
+ const alarms=e=>{if(e.done)return [];const xm=e.h?ntMin(e.h):0;
+  if(e.src==="ag"){if(e.ty==="À faire"?!C.tache:!C.ag)return [];const rp=e.rp==null||e.rp===""?null:+e.rp;if(rp===-1)return [];
+   if(e.h)return [-(rp==null?+C.lead||0:rp)];return [rp!=null&&rp>=1440?em-1440:dm];}
+  if(e.src==="ex")return C.ex?[-(7*1440+xm-dm),-(1440+xm-em),-60]:[];
+  if(e.src==="st")return C.st?[dm-7*1440,em-1440]:[];
+  if(e.src==="tfe")return C.tfe?(e.id.startsWith("tfe-rendu")?[dm-30*1440,dm-7*1440,em-1440]:[dm-7*1440,em-1440]):[];
+  return [];};
  const L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Carnet IFSI//Planning//FR","CALSCALE:GREGORIAN","X-WR-CALNAME:Carnet IFSI"];
- ev.forEach(e=>{const d=e.d.replace(/-/g,"");L.push("BEGIN:VEVENT","UID:"+e.id+"@carnet-ifsi","DTSTAMP:"+stamp);
+ ev.forEach(e=>{const d=e.d.replace(/-/g,""),sum=(e.ty==="Révision"||e.ty==="Cours"||e.ty==="Perso"||e.src==="st"||e.src==="tfe"?"":e.ty+" · ")+e.t;
+  L.push("BEGIN:VEVENT","UID:"+e.id+"@carnet-ifsi","DTSTAMP:"+stamp);
   if(e.h)L.push("DTSTART:"+d+"T"+e.h.replace(":","")+"00","DURATION:"+(e.ty==="Partiel"?"PT2H":"PT1H"));
-  else L.push("DTSTART;VALUE=DATE:"+d,"DTEND;VALUE=DATE:"+addDays(e.d,1).replace(/-/g,""));
-  L.push("SUMMARY:"+ei((e.ty==="Révision"||e.ty==="Cours"||e.ty==="Perso"?"":e.ty+" · ")+e.t),"CATEGORIES:"+ei(e.ty),"END:VEVENT");});
+  else L.push("DTSTART;VALUE=DATE:"+d,"DTEND;VALUE=DATE:"+addDays(e.fin||e.d,1).replace(/-/g,""));
+  L.push("SUMMARY:"+ei(sum),"CATEGORIES:"+ei(e.ty));
+  [...new Set(alarms(e))].forEach(m=>L.push("BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+ei(sum),"TRIGGER:"+dur(m),"END:VALARM"));
+  L.push("END:VEVENT");});
  L.push("END:VCALENDAR");
  dlFile("carnet-ifsi-planning.ics","text/calendar",L.join("\r\n")+"\r\n");
 }
 function agAdd(f){
- const g=id=>document.getElementById(id),t=g("ag-t").value.trim(),d=g("ag-d").value,h=g("ag-h").value,ty=g("ag-ty").value,rep=+g("ag-rep").value||0;
+ const g=id=>document.getElementById(id),t=g("ag-t").value.trim(),d=g("ag-d").value,h=g("ag-h").value,ty=g("ag-ty").value,rep=+g("ag-rep").value||0,rp=g("ag-rp")?g("ag-rp").value:"";
  if(!t||!d){toast("Indiquez un intitulé et une date");return;}
  if(ty==="Partiel"){store.set("exams",[...exams(),{id:Date.now().toString(36),nom:t,date:d,heure:h||"08:00"}]);}
- else{const n=Math.max(1,rep),list=[];for(let i=0;i<n;i++)list.push({id:otId(),d:addDays(d,7*i),h,t,ty});agSave([...agenda(),...list]);}
- state.agForm=false;state.agWeek=mondayOf(d);haptic();toast(rep>1?`${rep} événements ajoutés`:"Événement ajouté");render();
+ else{const n=Math.max(1,rep),list=[];for(let i=0;i<n;i++)list.push({id:otId(),d:addDays(d,7*i),h,t,ty,...(rp!==""?{rp:+rp}:{})});agSave([...agenda(),...list]);}
+ state.agForm=false;state.agTy=null;state.agWeek=mondayOf(d);haptic();toast(rep>1?`${rep} événements ajoutés`:ty==="À faire"?"Tâche ajoutée":"Événement ajouté");render();
 }
 
 /* =====================================================================
@@ -546,7 +569,7 @@ function otChrono(){
   <section class="sheet-body"><h2>Minuteur</h2><div class="big-time" id="tim-show" role="timer">${mmss(tm.left)}</div>
    <div class="chips wrapchips" role="group" aria-label="Durées">${[[.5,"30 s"],[1,"1 min"],[5,"5 min"],[15,"15 min"],[30,"30 min"],[60,"1 h"]].map(([m,l])=>`<button type="button" class="chip" data-act="ot-tim-set" data-k="${m}" aria-pressed="${tm.total===m*60000}">${l}</button>`).join("")}</div>
    <div class="ot-btns"><button type="button" class="btn" data-act="ot-tim-go">${tm.run?"Pause":tm.left<tm.total&&tm.left>0?"Reprendre":"Démarrer"}</button><button type="button" class="btn ghost" data-act="ot-tim-reset">Remettre à zéro</button></div>
-   <p class="ot-hint">Exemples : 30 s de friction hydroalcoolique ; 15 min pour refroidir une brûlure ; 1 h de pose d'une crème anesthésiante. Gardez l'appli ouverte pour l'alarme.</p></section>
+   <p class="ot-hint">Exemples : 30 s de friction hydroalcoolique ; 15 min pour refroidir une brûlure ; 1 h de pose d'une crème anesthésiante. ${ntOn()&&ntCfg().tim?"Une notification vous prévient aussi si l'appli est en arrière-plan.":`Gardez l'appli ouverte pour l'alarme, ou <a href="#notifs">activez les notifications</a>.`}</p></section>
   <section class="sheet-body"><h2>Chronomètre</h2><div class="big-time" id="sw-show" role="timer">${swFmt(sw.acc+(sw.run?Date.now()-sw.start:0))}</div>
    <div class="ot-btns"><button type="button" class="btn" data-act="ot-sw-go">${sw.run?"Pause":"Démarrer"}</button><button type="button" class="btn ghost" data-act="ot-sw-reset">Remettre à zéro</button></div></section>`;
 }
@@ -621,12 +644,12 @@ function outilAct(b,a){
  if(a==="ot-af-quiz"){launchQuiz(QUIZ.map((q,i)=>q.af?i:-1).filter(i=>i>=0),"Quiz urgences AFGSU");return;}
  /* Planning */
  if(a==="ot-ag-week"){state.agWeek=k==="0"?mondayOf(todayISO()):addDays(state.agWeek||mondayOf(todayISO()),7*(+k));render();}
- else if(a==="ot-ag-new"){state.agForm=true;state.agGen=false;state.agDay=k||todayISO();render();setTimeout(()=>{const i=document.getElementById("ag-t");if(i){i.focus({preventScroll:true});i.scrollIntoView({block:"center"});}},40);}
- else if(a==="ot-ag-cancel"){state.agForm=false;render();}
+ else if(a==="ot-ag-new"){state.agForm=true;state.agGen=false;state.agDay=k||todayISO();state.agTy=b.dataset.ty||null;render();setTimeout(()=>{const i=document.getElementById("ag-t");if(i){i.focus({preventScroll:true});i.scrollIntoView({block:"center"});}},40);}
+ else if(a==="ot-ag-cancel"){state.agForm=false;state.agTy=null;render();}
  else if(a==="ot-ag-gen"){state.agGen=!state.agGen;state.agForm=false;render();if(state.agGen)setTimeout(()=>{const f=document.getElementById("ot-ag-genf");f&&f.scrollIntoView({block:"start"});},40);}
  else if(a==="ot-ag-genex"){const d=document.getElementById("gen-d"),n=document.getElementById("gen-n");if(d)d.value=k;if(n)n.value=b.dataset.n||"";}
  else if(a==="ot-ag-ue"){const t=document.getElementById("gen-t");if(t&&!t.value.split("\n").includes(k)){t.value=(t.value.replace(/\s+$/,"")?t.value.replace(/\s+$/,"")+"\n":"")+k;}haptic();}
- else if(a==="ot-ag-done"){const L=agenda(),e=L.find(x=>x.id===id);if(e){e.done=!e.done;agSave(L);haptic();if(e.done&&e.ty==="Révision")toast("Séance faite");render();}}
+ else if(a==="ot-ag-done"){const L=agenda(),e=L.find(x=>x.id===id);if(e){e.done=!e.done;agSave(L);haptic();if(e.done&&e.ty==="Révision")toast("Séance faite");else if(e.done&&e.ty==="À faire")toast("Tâche faite");render();}}
  else if(a==="ot-ag-del"){agSave(agenda().filter(x=>x.id!==id));haptic();toast("Événement supprimé");render();}
  else if(a==="ot-ag-plandel"){agSave(agenda().filter(x=>x.gen!==id));store.set("agendaPlans",agPlans().filter(p=>p.id!==id));toast("Plan supprimé");render();}
  else if(a==="ot-ag-ics")agICS();
@@ -657,9 +680,9 @@ function outilAct(b,a){
  else if(a==="ot-ch-go"){const c=CH.cnt;c.run=true;c.taps=0;c.res=null;c.end=Date.now()+c.dur*1000;haptic("MEDIUM");chStart();render();}
  else if(a==="ot-ch-tap"){const c=CH.cnt;if(!c.run)return;c.taps++;haptic();const el=document.getElementById("cnt-taps");if(el)el.textContent=c.taps;}
  else if(a==="ot-ch-stop"){CH.cnt.run=false;CH.cnt.res=null;render();}
- else if(a==="ot-tim-set"){const t=CH.tim;t.run=false;t.total=t.left=+k*60000;render();}
- else if(a==="ot-tim-go"){const t=CH.tim;if(t.run){t.run=false;t.left=t.end-Date.now();}else{if(t.left<=0)t.left=t.total;t.run=true;t.end=Date.now()+t.left;chStart();}haptic();render();}
- else if(a==="ot-tim-reset"){const t=CH.tim;t.run=false;t.left=t.total;render();}
+ else if(a==="ot-tim-set"){const t=CH.tim;t.run=false;t.total=t.left=+k*60000;ntTimer(null);render();}
+ else if(a==="ot-tim-go"){const t=CH.tim;if(t.run){t.run=false;t.left=t.end-Date.now();}else{if(t.left<=0)t.left=t.total;t.run=true;t.end=Date.now()+t.left;chStart();}ntTimer(t.run?t.end:null,t.total);haptic();render();}
+ else if(a==="ot-tim-reset"){const t=CH.tim;t.run=false;t.left=t.total;ntTimer(null);render();}
  else if(a==="ot-sw-go"){const s=CH.sw;if(s.run){s.acc+=Date.now()-s.start;s.run=false;}else{s.start=Date.now();s.run=true;chStart();}haptic();render();}
  else if(a==="ot-sw-reset"){CH.sw={run:false,start:0,acc:0};render();}
  /* Transmissions */
