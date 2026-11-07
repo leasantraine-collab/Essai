@@ -60,7 +60,7 @@ function hwStage(){
  const tot=end?Math.max(1,Math.round((day0(end)-day0(start))/DAY)+1):null,jour=Math.round((day0(now)-day0(start))/DAY)+1;
  return {k:"during",s,start,end,tot,jour:tot?Math.min(jour,tot):jour};
 }
-function hwToday(){const d=todayISO();return [...agenda().filter(e=>e.d===d),...agAuto(d,d)].sort((a,b)=>(a.h||"").localeCompare(b.h||""));}
+function hwToday(){const d=todayISO();return [...agLate(d),...[...agenda().filter(e=>e.d===d),...agAuto(d,d)].sort((a,b)=>(a.h||"").localeCompare(b.h||""))];}
 /* Questions courtes uniquement : les options très longues (questions générées des pathologies) restent pour le quiz. */
 const hwQShort=q=>q&&q.o&&q.o.length>=2&&q.o.every(o=>String(o).length<=95)&&String(q.q).length<=190&&!/image|schéma|planche|ci-dessus|ci-contre/i.test(q.q);
 function hwQPool(w){const all=QUIZ.map((q,i)=>i).filter(i=>hwQShort(QUIZ[i])),L=all.filter(i=>!w.cat||QUIZ[i].cat===w.cat);return L.length?L:all;}
@@ -216,6 +216,7 @@ function hwPage(){
  return `<div class="stack-lg">
   <header class="vh-row"><div class="hello"><span class="date">${esc(date)}</span><h1>${hr<5||hr>=18?"Bonsoir":"Bonjour"}${nm?` <span class="hello-nm">${esc(nm)}</span>`:""}</h1></div>
    <div class="hello-act"><button class="icon-btn" data-act="${edit?"hw-done":"hw-editmode"}" aria-label="${edit?"Terminer la modification":"Modifier l'accueil"}" aria-pressed="${edit}">${HW_ICS.grid}</button><button class="icon-btn" data-act="nav" data-h="reglages" aria-label="Réglages">${IC.gear}</button></div></header>
+  ${edit?"":ntAsk("home")}
   ${edit?`<div class="hw-editbar" role="toolbar" aria-label="Modifier l'accueil"><span class="hw-eb-t"><b>Modifier l'accueil</b><small>Maintenez un widget puis glissez-le où vous voulez</small></span>
    <button type="button" class="btn ghost hw-eb-add" data-act="hw-sheet">${IC.plus}<span>Ajouter</span></button><button type="button" class="btn hw-eb-ok" data-act="hw-done">Terminé</button></div>`:""}
   ${body||`<div class="empty">Votre accueil est vide. ${edit?"Touchez « Ajouter » pour choisir vos widgets.":"Ajoutez les widgets qui vous servent : partiels, stage, question du jour, raccourcis…"}</div>`}

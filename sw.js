@@ -1,7 +1,7 @@
 /* Carnet IFSI — service worker de la version web installable (PWA).
    Réseau d'abord : en ligne, l'appli charge toujours la dernière version publiée ;
    hors ligne, elle se sert de la copie gardée en cache. */
-const V="carnet-ifsi-v46";
+const V="carnet-ifsi-v47",NT_CACHE="carnet-ifsi-rappels";
 const FILES=[
  "./",
  "index.html",
@@ -17,6 +17,7 @@ const FILES=[
  "js/videos-lib.js",
  "js/videos-soins.js",
  "js/videos-ref.js",
+ "js/notifs.js",
  "js/fiche-a4.js",
  "js/accueil.js",
  "js/app.js",
@@ -146,13 +147,30 @@ const FILES=[
  "fonts/source-serif-4-latin-ext-wght-normal.woff2",
  "fonts/source-serif-4-latin-wght-normal.woff2",
  "icons/apple-touch-icon.png",
+ "icons/badge-96.png",
  "icons/icon-192.png",
  "icons/icon-512.png",
  "icons/icon-maskable-512.png",
  "icons/icon.svg"
 ];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(V).then(c=>Promise.all(FILES.map(f=>c.add(new Request(f,{cache:"reload"})).catch(()=>{})))).then(()=>self.skipWaiting()));});
-self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==V).map(x=>caches.delete(x)))).then(()=>self.clients.claim()));});
+self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==V&&x!==NT_CACHE).map(x=>caches.delete(x)))).then(()=>self.clients.claim()));});
 self.addEventListener("fetch",e=>{const r=e.request;if(r.method!=="GET"||new URL(r.url).origin!==location.origin)return;
  e.respondWith(fetch(r,{cache:"no-cache"}).then(res=>{if(res.ok){const c=res.clone();caches.open(V).then(x=>x.put(r,c));}return res;})
   .catch(()=>caches.match(r,{ignoreSearch:true}).then(m=>m||(r.mode==="navigate"?caches.match("index.html"):Response.error()))));});
+/* Rappels (voir js/notifs.js) : la page range les rappels à venir dans le cache NT_CACHE. Quand le navigateur réveille
+   le service worker (synchronisation périodique), les rappels arrivés à échéance et pas encore montrés s'affichent. */
+const ntU=n=>new URL("__rappels/"+n,self.registration.scope).href;
+async function ntCheck(){
+ const c=await caches.open(NT_CACHE),rd=async(n,d)=>{try{const r=await c.match(ntU(n));return r?await r.json():d;}catch(e){return d;}};
+ const plan=await rd("plan.json",[]),shown=await rd("shown.json",{}),now=Date.now();
+ for(const x of plan)if(x.at<=now+1e3&&now<Math.max(x.ev||0,x.at+15*6e4)&&!shown[x.k]){shown[x.k]=now;
+  await self.registration.showNotification(now-x.at>3e5&&x.lt?x.lt:x.t,{body:x.b,tag:x.k,icon:"icons/icon-192.png",badge:"icons/badge-96.png",lang:"fr",data:{r:x.r},timestamp:x.at});}
+ await c.put(ntU("shown.json"),new Response(JSON.stringify(shown),{headers:{"Content-Type":"application/json"}}));
+}
+self.addEventListener("periodicsync",e=>{if(e.tag==="carnet-rappels")e.waitUntil(ntCheck());});
+self.addEventListener("message",e=>{if(e.data&&e.data.t==="nt-check")e.waitUntil(ntCheck());});
+/* Toucher une notification : ouvre l'appli (ou la ramène au premier plan) sur la bonne page. */
+self.addEventListener("notificationclick",e=>{e.notification.close();const r=(e.notification.data&&e.notification.data.r)||"accueil";
+ e.waitUntil(self.clients.matchAll({type:"window",includeUncontrolled:true}).then(L=>{const w=L.find(x=>x.url.startsWith(self.registration.scope));
+  if(w){w.postMessage({t:"nt-open",r});return w.focus();}return self.clients.openWindow(new URL("index.html#"+r,self.registration.scope).href);}));});
