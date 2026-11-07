@@ -92,7 +92,7 @@ lzBF("polyglobulie",{t:"Trop de globules rouges rendent le sang épais",sub:"Pol
  cells:b=>lzFill(b.x,b.y,b.w,b.h,40,3,(x,y,R)=>lzRbcN(x,y,R,6.6)),
  bottomT:"Dans la moelle :",bottom:()=>lzMarrow(14,166,198,56,"plein"),
  lab:[[114,"Trop de\nglobules rouges",1,110,90],[158,"Sang épais :\nthrombose",1,160,120],[198,"Moelle trop\nactive",0,150,194]],
- pill:"Saignées si besoin ; surveiller les signes de thrombose",
+ pill:"Saignées ; surveiller les signes de thrombose",
  cap:"Signes : visage rouge, maux de tête, vertiges, prurit à l'eau chaude. Saignées pour baisser l'hématocrite, aspirine, traitement de la cause (arrêt du tabac, oxygène)."});
 /* ============ Leucémies, lymphomes, myélome ============ */
 lzBF("leucemie-aigue",{t:"Des cellules jeunes envahissent la moelle et le sang",sub:"Leucémie aiguë : des blastes se multiplient sans mûrir et prennent la place des cellules normales",

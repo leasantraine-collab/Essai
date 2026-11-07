@@ -229,7 +229,7 @@ lzSK("pemphigus",{t:"Des anticorps séparent les cellules de l'épiderme",sub:"P
  ex:g=>lzDots(60,0,56,1,9,4,(X,Y,R)=>lzY(X,g.top(X)+10+R()*3,"#7A4FB5"))+lzDots(62,0,46,1,5,7,(X,Y,R)=>lzC(X,g.top(X)+4+R()*3,2.2,"#F6D3BB","#C98E6C",.6)),
  labT:LB(10,22,"Bulle molle, qui\nse rompt vite",1,"start",84,48),
  lab:[[114,"Anticorps qui\ndécollent les\ncellules",1,88,70],[170,"Érosions, aussi\ndans la bouche",0,164,64]],
- where:[[0,6,5],[0,32,5]],whereT:"bouche, tronc",pill:"Soins des érosions : risque d'infection et de déshydratation",
+ where:[[0,6,5],[0,32,5]],whereT:"bouche, tronc",pill:"Érosions : risque d'infection et de déshydratation",
  cap:"Corticoïdes et immunosuppresseurs ; bains de bouche, alimentation adaptée si atteinte buccale ; soins cutanés comme une brûlure étendue (asepsie, pansements gras, bilan hydrique)."});
 lzSK("purpura",{t:"Le sang sort des petits vaisseaux de la peau",sub:"Purpura : taches rouges ou violacées qui ne s'effacent pas à la pression",
  ex:g=>lzDots(70,0,110,1,26,5,(X,Y,R)=>lzRbc(X,g.eb0(X)+6+R()*22,2.6,R()*180))+lzP("M118 84 l4 -2","none","#FFF",2),
