@@ -89,7 +89,7 @@ function a4Patho(p){
  if(p.m)boxes.push({t:"Le mécanisme",ic:"bulb",type:"text",items:[String(p.m).split("\n")[0]],n:1,min:1,max:300});
  if(p.a)boxes.push({t:"Pour comprendre",ic:"chat",tone:"info",type:"text",items:[p.a],n:1,min:1,max:200,drop:5});
  if(p.z&&typeof pmFig==="function"&&typeof PMAPS!=="undefined"&&PMAPS[p.z[0]]){const M=PMAPS[p.z[0]],zn=p.z.slice(1).map(k=>M.zones[k]).filter(Boolean);
-  boxes.push({t:`Où ça se passe : ${M.titre}${zn.length?" · "+zn.join(", "):""}`,ic:"eye",type:"sch",html:()=>pmFig(p.z),drop:8});}
+  boxes.push({t:typeof LZ!=="undefined"&&LZ[p.i]?`Ce qui se passe : ${LZ[p.i].t}`:`Où ça se passe : ${M.titre}${zn.length?" · "+zn.join(", "):""}`,ic:"eye",type:"sch",html:()=>typeof LZ!=="undefined"&&LZ[p.i]?lzFig(p):pmFig(p.z),drop:8});}
  if(L(p.c).length)boxes.push({t:"Causes et facteurs de risque",ic:"list",type:"list",items:L(p.c),n:4,min:2,max:105});
  if(L(p.sg).length)boxes.push({t:"Signes cliniques",ic:"eye",type:"list",items:L(p.sg),n:5,min:3,max:105});
  if(L(p.al).length)boxes.push({t:"Signes d'alerte",ic:"warn",tone:"warn",type:"list",items:L(p.al),n:3,min:1,max:120});
