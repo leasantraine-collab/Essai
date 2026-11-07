@@ -154,6 +154,7 @@ function vSoin(id){
   const box=(t,a,n)=>a.length?`<div class="px-r"><span class="cv-lab">${t}</span><ul>${a.slice(0,n).map(x=>`<li>${pmd(x)}</li>`).join("")}</ul></div>`:"";
   body=`<div class="px-recap">
    ${typeof VID!=="undefined"&&VID[id]?vdHtml(id,{steps:false}):""}
+   ${typeof rvBlock==="function"?rvBlock(id):""}
    ${a4Cta("s",id,"Ce soin en une page : étapes, surveillance, pièges")}
    <div class="px-r def"><span class="cv-lab">${SVG.info}Définition</span><p>${pmd(o.d[0]||"")}</p>${badges}</div>
    ${o.mat.length?`<div class="px-r"><span class="cv-lab">Matériel</span>${soMatGrid(o.mat)}</div>`:""}
@@ -162,7 +163,7 @@ function vSoin(id){
    <button class="btn block" data-act="so-mode" data-k="cours">Lire le cours détaillé</button></div>`;
  }else{
   toc=`<nav class="fv-toc" aria-label="Parties du cours">${secs.map((s,i)=>`<a href="#soin" data-sec="s-${i+1}"><b>${i+1}</b>${esc(s[0])}</a>`).join("")}</nav>`;
-  body=(typeof VID!=="undefined"&&VID[id]?vdHtml(id):"")+secs.map((s,i)=>`<section class="fv-sec" id="s-${i+1}"><div class="fv-sh"><span class="fv-num">${String(i+1).padStart(2,"0")}</span><h2>${s[0]}</h2></div>${s[1]}</section>`).join("")+
+  body=(typeof VID!=="undefined"&&VID[id]?vdHtml(id):"")+(typeof rvBlock==="function"?rvBlock(id):"")+secs.map((s,i)=>`<section class="fv-sec" id="s-${i+1}"><div class="fv-sh"><span class="fv-num">${String(i+1).padStart(2,"0")}</span><h2>${s[0]}</h2></div>${s[1]}</section>`).join("")+
    (o.cas?soQ(o.cas,"cas",`${SVG.bulb}Mise en situation`):"")+
    (o.q.length?`<section class="stack-sm"><h3 class="cn-g">Quiz</h3>${o.q.map((q,j)=>soQ(q,"q"+j,`Question ${j+1}`)).join("")}</section>`:"")+soOrdEx(o);
  }
@@ -175,7 +176,7 @@ function vSoin(id){
 
 /* ---------- Réviser › Soins et techniques / Examens et surveillance ---------- */
 const soSecCur=cat=>{const s=(state.soSec||{})[cat]||store.get("sosec_"+cat,"all");return soCatSecs(cat).includes(s)?s:"all";};
-const soRow=(o,isF,dn)=>`<a class="li" href="#soin/${o.i}" data-act="so-open" data-k="${isF?"recap":"cours"}"><span class="bar"></span><span><span class="t">${esc(o.n)}</span><span class="s">${esc(isF?pxCut(o.d[0]||""):`${soStLabel(o)}${o.et.length?` · ${o.et.length} étapes`:""}${o.cas?" · mise en situation":""}`)}</span></span><span class="end">${typeof VID!=="undefined"&&VID[o.i]?'<span class="tag vd-tag">Vidéo</span>':""}${dn.includes(o.i)?'<span class="tag done">Étudié</span>':""}${chev}</span></a>`;
+const soRow=(o,isF,dn)=>`<a class="li" href="#soin/${o.i}" data-act="so-open" data-k="${isF?"recap":"cours"}"><span class="bar"></span><span><span class="t">${esc(o.n)}</span><span class="s">${esc(isF?pxCut(o.d[0]||""):`${soStLabel(o)}${o.et.length?` · ${o.et.length} étapes`:""}${o.cas?" · mise en situation":""}`)}</span></span><span class="end">${typeof rvOf==="function"&&rvOf(o.i).length?'<span class="tag vd-tag">Ma vidéo</span>':typeof VID!=="undefined"&&VID[o.i]?'<span class="tag vd-tag">Vidéo</span>':""}${dn.includes(o.i)?'<span class="tag done">Étudié</span>':""}${chev}</span></a>`;
 function soRevList(cat,isF){const s=soSecCur(cat),q=soK(state.soq||""),dn=soDone();let h="";
  (s==="all"?soCatSecs(cat):[s]).forEach(sec=>{const S=SO_SEC[sec],l=soSecFiches(sec).filter(o=>!q||soK(o.n).includes(q)||o.nn.some(x=>soK(x).includes(q)));
   if(l.length)h+=pxSec(SO_COL(sec),s==="all"?esc(S.nom):(isF?"Fiches récap":"Cours détaillés"),l.length,l.map(o=>soRow(o,isF,dn)).join(""));});

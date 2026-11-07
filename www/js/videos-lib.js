@@ -269,6 +269,7 @@ function otVideos(arg){
    <p class="disclaimer">Animations pédagogiques simplifiées. Le geste s'apprend en salle de simulation et en stage, selon les protocoles de l'établissement.</p>`;}
  const ids=vdIds(),secs=typeof SO_SECS!=="undefined"?SO_SECS.map(s=>s[0]).filter(s=>ids.some(id=>SOBY[id].s===s)):[];
  return `<p class="muted">${ids.length} gestes techniques. Dans chaque vidéo, touchez une étape pour y aller directement.</p>
+  ${typeof rvList==="function"?rvList():""}
   ${secs.map(s=>`<section class="stack-sm"><div class="section-title"><h2>${esc(SO_SEC[s].nom)}</h2><span class="muted">${ids.filter(id=>SOBY[id].s===s).length}</span></div><div class="vdg">${ids.filter(id=>SOBY[id].s===s).map(vdCard).join("")}</div></section>`).join("")}
   <p class="disclaimer">Animations pédagogiques simplifiées. Le geste s'apprend en salle de simulation et en stage, selon les protocoles de l'établissement.</p>`;
 }

@@ -41,7 +41,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.43 · 7 novembre 2026";
+const APP_VERSION="1.44 · 7 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -456,6 +456,7 @@ app.addEventListener("submit",ev=>{if(ev.target.id==="calc-form"){ev.preventDefa
  else if(ev.target.id.startsWith("pl-")){ev.preventDefault();plSubmit(ev.target);}
  else if(ev.target.id.startsWith("ot-")){ev.preventDefault();outilSubmit(ev.target);}
  else if(ev.target.id==="sh-add-form"){ev.preventDefault();histSubmit(ev.target);}
+ else if(ev.target.id==="rv-form"){ev.preventDefault();rvSubmit(ev.target);}
  else if(ev.target.id==="exam-form"){ev.preventDefault();const nom=document.getElementById("ex-nom").value.trim(),date=document.getElementById("ex-date").value,heure=document.getElementById("ex-heure").value||"08:00";
   if(!nom||!date){toast("Indiquez un intitulé et une date");return;}
   store.set("exams",[...exams(),{id:Date.now().toString(36),nom,date,heure}]);haptic();toast("Partiel ajouté");render();setTimeout(()=>{const i=document.getElementById("ex-nom");i&&i.focus()},0);}});
@@ -478,6 +479,7 @@ app.addEventListener("click",ev=>{
  if(a.startsWith("hw-")){hwAct(b,a);return;}
  if(a.startsWith("a4-")){a4Act(b,a);return;}
  if(a.startsWith("vd-")){vdAct(b,a);return;}
+ if(a.startsWith("rv-")){rvAct(b,a);return;}
  if(a.startsWith("cn-")){carnetAct(b,a);return;}
  if(a.startsWith("fs-")){feuilleAct(b,a);return;}
  if(a.startsWith("px-")){pathoAct(b,a);return;}
