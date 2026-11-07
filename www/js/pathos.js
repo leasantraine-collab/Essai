@@ -130,7 +130,7 @@ function vPatho(id){
  const qs=QUIZ.filter(q=>q.pid===id),same=PATHOS.filter(x=>x.s===p.s),k=same.indexOf(p),next=same[k+1];
  const secs=[["Définition",`<p class="fv-lead">${pmd(p.d)}</p>`],
   ...(PIMG[p.i]?[["Comprendre en images",pxImages(p)]]:[]),
-  [PIMG[p.i]?"Le mécanisme expliqué":"Comprendre le mécanisme",`${(p.m||"").split("\n").map(x=>`<p class="cv-p">${pmd(x)}</p>`).join("")}${p.a&&!PIMG[p.i]?`<div class="cv-box cv-ana"><span class="cv-lab">${SVG.bulb}Pour comprendre</span><p>${pmd(p.a)}</p></div>`:""}${p.z?pmFig(p.z,"Hachurée en jaune : la zone concernée."):""}`],
+  [PIMG[p.i]?"Le mécanisme expliqué":"Comprendre le mécanisme",`${(p.m||"").split("\n").map(x=>`<p class="cv-p">${pmd(x)}</p>`).join("")}${p.a&&!PIMG[p.i]?`<div class="cv-box cv-ana"><span class="cv-lab">${SVG.bulb}Pour comprendre</span><p>${pmd(p.a)}</p></div>`:""}${LZ[p.i]?pxSchema(p):p.z?pmFig(p.z,"Hachurée en jaune : la zone concernée."):""}`],
   ["Causes et facteurs de risque",pList(p.c)],
   ["Signes cliniques",`${pList(p.sg)}${p.al&&p.al.length?`<div class="cv-box cv-trap"><span class="cv-lab">${SVG.warn}Signes de gravité : alerter</span><ul>${p.al.map(x=>`<li>${pmd(x)}</li>`).join("")}</ul></div>`:""}`],
   ["Examens",p.ex&&p.ex.length?`<div class="fv-panel"><div class="fv-tbl">${p.ex.map(x=>`<div><span>${pmd(x[0])}</span><span>${pmd(x[1])}</span></div>`).join("")}</div></div>`:""],
@@ -147,7 +147,7 @@ function vPatho(id){
    ${a4Cta("p",id,"Cette pathologie en une page : à lire ou à imprimer")}
    <div class="px-r def"><span class="cv-lab">${SVG.info}Définition</span><p>${pmd(p.d)}</p></div>
    ${PIMG[p.i]&&PIMG[p.i].hs?`<div class="px-r film"><span class="cv-lab">${pxPicSvg("film")}Le mécanisme en un coup d'œil</span>${pxFilm(PIMG[p.i].hs,true)}</div>`:""}
-   ${p.z?pmFig(p.z):""}
+   ${pxSchema(p)}
    <div class="px-grid">
     <div class="px-r"><span class="cv-lab">Causes</span><ul>${(p.c||[]).slice(0,5).map(x=>`<li>${pmd(x)}</li>`).join("")}</ul></div>
     <div class="px-r"><span class="cv-lab">Signes</span><ul>${(p.sg||[]).slice(0,6).map(x=>`<li>${pmd(x)}</li>`).join("")}</ul></div>
