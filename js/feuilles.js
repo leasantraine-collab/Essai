@@ -44,10 +44,10 @@ const fsPatLabel=(p,i)=>[p.chambre?"Ch. "+p.chambre:"",p.initiales||""].filter(B
 
 /* ---------- Champs ---------- */
 function fsField(f,path,val){
- const id="fs-"+path.replace(/\|/g,"-"),ph=f.ph?` placeholder="${esc(f.ph)}"`:"";
- if(f.t==="textarea")return `<label for="${id}">${esc(f.l)}<textarea id="${id}" data-fs="${path}" rows="${f.r||3}"${ph}>${esc(val||"")}</textarea></label>`;
+ const id="fs-"+path.replace(/\|/g,"-"),ph=f.ph?` placeholder="${esc(f.ph)}"`:"",ex=typeof fsExHint==="function"?fsExHint(path,f):"";
+ if(f.t==="textarea")return `<label for="${id}">${esc(f.l)}<textarea id="${id}" data-fs="${path}" rows="${f.r||3}"${ph}>${esc(val||"")}</textarea></label>${ex}`;
  if(f.t==="select")return `<label for="${id}">${esc(f.l)}<select id="${id}" data-fs="${path}">${f.o.map(o=>`<option ${o===(val||"")?"selected":""} value="${esc(o)}">${esc(o||"–")}</option>`).join("")}</select></label>`;
- return `<label for="${id}">${esc(f.l)}<input id="${id}" data-fs="${path}" type="${f.t}" value="${esc(val||"")}"${ph} ${f.t==="text"?'autocomplete="off"':""}></label>`;
+ return `<label for="${id}">${esc(f.l)}<input id="${id}" data-fs="${path}" type="${f.t}" value="${esc(val||"")}"${ph} ${f.t==="text"?'autocomplete="off"':""}></label>${f.half?"":ex}`;
 }
 function fsFields(fields,base,data){
  let h="",row=[];const flush=()=>{if(row.length){h+=row.length>1?`<div class="cd-row">${row.join("")}</div>`:row[0];row=[];}};
@@ -166,12 +166,12 @@ function fsEditor(type,inst){
    body=grpList(type,inst,g,base,(it,i)=>it.probleme?esc(it.probleme.length>70?it.probleme.slice(0,70)+"…":it.probleme):`${esc(g.label)} à formuler`,it=>it.type?esc(it.type):"")+
     `<button class="btn ghost block" data-act="fs-gadd" data-k="${g.k}" data-type="${type}" data-id="${inst.id}">${IC.plus}${esc(g.add)}</button>`;}
   else body=`<div class="sheet-body cd-form">${fsFields(sec.f,base,d)}</div>`;
-  return `<section class="stack-sm"><h3 class="cn-g">${esc(sec.h)}</h3>${body}</section>`;}).join("");
+  return `<section class="stack-sm"><h3 class="cn-g">${esc(sec.h)}</h3>${sec.g&&type==="projet"&&typeof fsImportBlock==="function"?fsImportBlock(inst):""}${body}</section>`;}).join("");
  return `<div class="stack-lg"><a class="back" href="#feuille/${type}">${IC.back}${esc(S.titre)}</a>
-  ${vh("Feuille de travail",esc(fsTitle(type,inst)),`<a class="link" href="#cours/${S.guide}">Mode d'emploi de cette feuille</a>`)}
+  ${vh("Feuille de travail",esc(fsTitle(type,inst)),`<a class="link" href="#cours/${S.guide}">Mode d'emploi de cette feuille</a>${typeof FS_DEMO!=="undefined"&&FS_DEMO[type]?` · <a class="link" href="#feuille/${type}/exemple">Voir un exemple rédigé</a>`:""}`)}
   <div class="section-title"><span class="muted" id="fs-saved">Enregistré sur cet appareil</span></div>
   ${secs}
-  <div class="btn-row"><button class="btn" data-act="fs-print" data-k="${type}" data-id="${inst.id}">${IC.sheet}Imprimer cette feuille</button><button class="btn ghost" data-act="fs-print" data-k="${type}">Imprimer une feuille vierge</button></div>
+  <div class="btn-row"><button class="btn" data-act="pdf-fs" data-k="${type}" data-id="${inst.id}">${IC.sheet}Exporter en PDF</button><button class="btn ghost" data-act="fs-print" data-k="${type}" data-id="${inst.id}">Imprimer cette feuille</button><button class="btn ghost" data-act="fs-print" data-k="${type}">Imprimer une feuille vierge</button></div>
   <button class="link danger" data-act="fs-del" data-k="${type}" data-id="${inst.id}">Supprimer cette feuille</button>
   <p class="disclaimer">Données de santé : initiales seulement. Une feuille imprimée reste dans le service et se détruit en fin de stage.</p></div>`;
 }
@@ -191,6 +191,7 @@ function fsList(type){
  return `<div class="stack-lg">${backBtn("Stages")}${vh("Feuille de travail",esc(S.titre),esc(S.desc))}
   <div class="btn-row"><button class="btn" data-act="fs-new" data-k="${type}">${IC.plus}Nouvelle feuille</button><button class="btn ghost" data-act="fs-print" data-k="${type}">${IC.sheet}Imprimer vierge</button></div>
   <a class="cd-card cn-entry" href="#cours/${S.guide}"><span class="cd-ic">${IC.book}</span><span><b>Mode d'emploi</b><small>Le cours pas à pas : but, étapes, exemples, astuces</small></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
+  ${typeof FS_DEMO!=="undefined"&&FS_DEMO[type]?`<a class="cd-card cn-entry" href="#feuille/${type}/exemple"><span class="cd-ic">${IC.sheet}</span><span><b>Un exemple rédigé</b><small>Une situation fictive remplie comme on l'attend en stage, à lire ou à reprendre</small></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>`:""}
   <section class="stack-sm"><div class="section-title"><h2>Mes feuilles</h2>${re?`<button class="btn" data-act="fs-ord-done" data-k="${type}">Terminé</button>`:`<span class="muted">${list.length}</span>`}</div>
   ${list.length?`<p class="muted fs-hint">${re?"Utilisez les flèches pour classer vos feuilles par ordre d'importance.":"Glissez une feuille vers la gauche pour la modifier, la hiérarchiser ou la supprimer."}</p><div class="list fs-list">${list.map(row).join("")}</div>`:`<div class="empty">Aucune feuille. Créez-en une pour la remplir ici, ou imprimez une feuille vierge à remplir à la main.</div>`}</section></div>`;
 }
@@ -213,12 +214,13 @@ document.addEventListener("pointerup",swEnd);document.addEventListener("dragstar
 document.addEventListener("click",e=>{if(swBlockClick&&e.target.closest(".sw-main")){e.preventDefault();e.stopPropagation();}swBlockClick=false;},true);
 function vFeuille(arg){
  const [type,id]=(arg||"").split("/");if(!SHEETS[type])return notFound();
+ if(id==="exemple"&&typeof fsDemoView==="function")return fsDemoView(type);
  if(id){const inst=fsInst(type,id);return inst?fsEditor(type,inst):notFound();}
  return fsList(type);
 }
 function feuillesCard(){
  const F=feuilles(),ic={planif:IC.cal,recueil:IC.sheet,projet:IC.flask,analyse:IC.book};
- return `<section class="stack-sm"><div class="section-title"><h2>Feuilles de travail</h2></div>
+ return `${typeof fsDemarche==="function"?fsDemarche():""}<section class="stack-sm"><div class="section-title"><h2>Feuilles de travail</h2></div>
   <p class="muted">À remplir dans l'appli ou à imprimer, chacune avec son mode d'emploi.</p>
   <div class="fs-grid">${SHEET_ORDER.map(t=>{const S=SHEETS[t],n=(F[t]||[]).length;return `<div class="fs-card"><a class="fs-main" href="#feuille/${t}"><span class="cd-ic">${ic[t]}</span><b>${esc(S.titre)}</b><small>${esc(S.desc)}</small>${n?`<span class="tag">${plural(n,"feuille")}</span>`:""}</a>
    <div class="fs-links"><a href="#cours/${S.guide}">Mode d'emploi</a><button data-act="fs-print" data-k="${t}">Imprimer vierge</button></div></div>`}).join("")}</div></section>`;
@@ -236,6 +238,7 @@ function feuilleInput(t){
  const m=document.getElementById("fs-saved");if(m){m.textContent="Enregistré ✓";clearTimeout(feuilleInput.t);feuilleInput.t=setTimeout(()=>{m.textContent="Enregistré sur cet appareil"},1400);}
 }
 function feuilleAct(b,a){
+ if(typeof demAct==="function"&&demAct(b,a))return;
  const F=feuilles(),type=b.dataset.type||b.dataset.k,id=b.dataset.id,inst=id?(F[type]||[]).find(x=>x.id===id):null;
  if(a==="fs-sw-edit"){nav("feuille/"+type+"/"+id);return;}
  if(inst&&a.startsWith("fs-g-")){const k=b.dataset.k,item=b.dataset.item,arr=inst.data[k]=inst.data[k]||[];

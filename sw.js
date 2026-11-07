@@ -1,7 +1,7 @@
 /* Carnet IFSI — service worker de la version web installable (PWA).
    Réseau d'abord : en ligne, l'appli charge toujours la dernière version publiée ;
    hors ligne, elle se sert de la copie gardée en cache. */
-const V="carnet-ifsi-v47",NT_CACHE="carnet-ifsi-rappels";
+const V="carnet-ifsi-v48",NT_CACHE="carnet-ifsi-rappels";
 const FILES=[
  "./",
  "index.html",
@@ -18,6 +18,12 @@ const FILES=[
  "js/videos-soins.js",
  "js/videos-ref.js",
  "js/notifs.js",
+ "js/qualite.js",
+ "js/srs.js",
+ "js/examens.js",
+ "js/pdf.js",
+ "js/demarche.js",
+ "js/contenus/maj.js",
  "js/fiche-a4.js",
  "js/accueil.js",
  "js/app.js",

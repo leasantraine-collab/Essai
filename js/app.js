@@ -41,7 +41,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.45 · 7 novembre 2026";
+const APP_VERSION="1.46 · 7 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -63,7 +63,7 @@ const vh=(eyebrow,title,lead,right="")=>`<header class="vh"><div class="vh-row">
 const backBtn=(label)=>`<button class="back" data-act="back">${IC.back}${esc(label)}</button>`;
 
 /* ---------- État et réglages ---------- */
-Object.assign(state,{rev:store.get("rev","fiches"),train:"quiz",favOnly:false,q:""});
+Object.assign(state,{rev:store.get("rev","fiches"),train:"cartes",favOnly:false,q:""});
 const settings=()=>store.get("settings",{theme:"auto",size:"m"});
 const mq=matchMedia("(prefers-color-scheme: dark)");
 function applyTheme(){
@@ -78,7 +78,7 @@ applyTheme();
 
 /* ---------- Routage ---------- */
 const ROOTS=["accueil","reviser","entrainer","stages","programme"];
-const PARENT={a4:"reviser",perso:"accueil","stage-hist":"stages",outil:"outils",outils:"accueil",med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil",notifs:"reglages"};
+const PARENT={a4:"reviser",perso:"accueil","stage-hist":"stages",outil:"outils",outils:"accueil",med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil",notifs:"reglages",legal:"reglages",progression:"entrainer"};
 function route(){const [v,...rest]=decodeURIComponent(location.hash.slice(1)).split("/");return {v:VIEWS[v]?v:"accueil",arg:rest.join("/")};}
 function nav(h){if(location.hash==="#"+h)render(true);else location.hash=h;}
 let depth=0;
@@ -267,24 +267,29 @@ function vQuizRun(){
 function vCalc(){
  if(!state.ex)state.ex={...GEN[state.calcType].make(),done:null,val:""};
  const e=state.ex,s=stats();
- return `<div class="chips" role="group" aria-label="Type d'exercice">${Object.entries(GEN).map(([k,g])=>`<button class="chip" data-act="calc-type" data-k="${k}" aria-pressed="${k===state.calcType}">${g.label}</button>`).join("")}</div>
+ return `${cxHome()}<div class="chips" role="group" aria-label="Type d'exercice">${Object.entries(GEN).map(([k,g])=>`<button class="chip" data-act="calc-type" data-k="${k}" aria-pressed="${k===state.calcType}">${g.label}</button>`).join("")}</div>
   <div class="calc-card"><div class="row"><span class="eyebrow">Énoncé · ${esc(GEN[state.calcType].label)}</span><span class="muted" style="font-size:.8rem">${s.exOk} / ${s.exTot} justes</span></div>
    <div class="presc">${e.presc}</div><h3>${e.q}</h3>
    <form class="answer" id="calc-form"><input id="calc-in" inputmode="decimal" enterkeyhint="done" autocomplete="off" placeholder="Votre réponse" value="${esc(e.val)}" ${e.done?"disabled":""} aria-label="Votre réponse"><span class="unit">${e.unit}</span>${e.done?"":`<button class="btn" type="submit">Vérifier</button>`}</form>
    ${e.done?`<div class="feedback ${e.done==="ok"?"ok":"ko"}"><b>${e.done==="ok"?"Juste !":"Réponse attendue : "+fr(e.ans)+" "+e.unit}</b><ol class="steps">${e.steps.map(s=>`<li>${s}</li>`).join("")}</ol></div>
     <button class="btn block" data-act="calc-new">Nouvel exercice</button>`:`<button class="back" data-act="calc-show">Voir la correction</button>`}
   </div>
+  ${qPedago("Exercices d'entraînement : en stage, un calcul de dose se fait sur la prescription réelle et se vérifie toujours en double contrôle.")}
   <a class="list" href="#reviser/fiches" data-act="go-cat" data-k="calcul-fiches"><span class="li"><span class="ic" style="--c:${CAT.calcul.c}">${CAT_IC.calcul}</span><span><span class="t">Revoir les formules</span><span class="s">Fiches Calculs et dosages</span></span>${chev}</span></a>
-  <p class="disclaimer">En pratique, un calcul de dose se fait toujours en double vérification.</p>`;
+`;
 }
+const TRAIN_MODES=[["cartes","Cartes"],["quiz","Quiz"],["partiels","Partiels"],["calculs","Calculs"],["schemas","Schémas"]];
 function vEntrainer(arg){
- if(arg==="quiz"||arg==="calculs"||arg==="schemas")state.train=arg;
+ if(TRAIN_MODES.some(m=>m[0]===arg))state.train=arg;
  if(state.train==="quiz"&&state.quiz)return vQuizRun();
- const T=state.train==="schemas"?"schemas":state.train==="quiz"?"quiz":"calculs";
- const H={quiz:["Quiz",`${QUIZ.length} questions, chaque réponse est expliquée.`],calculs:["Calculs de dose","Un nouvel énoncé à chaque fois, avec la correction détaillée."],schemas:["Schémas à compléter","Placez les structures sur les schémas et remettez les étapes dans l'ordre."]}[T];
- return `<div class="stack-lg">${vh("S'entraîner",H[0],H[1])}
-  <div class="seg three" role="group" aria-label="Type d'entraînement"><button data-act="train" data-k="quiz" aria-pressed="${T==="quiz"}">Quiz</button><button data-act="train" data-k="calculs" aria-pressed="${T==="calculs"}">Calculs</button><button data-act="train" data-k="schemas" aria-pressed="${T==="schemas"}">Schémas</button></div>
-  ${T==="quiz"?vQuizHome():T==="schemas"?vSchemas():vCalc()}</div>`;
+ if(state.train==="cartes"&&state.srs)return vSrsRun();
+ if(state.train==="partiels"&&state.pb)return vPbRun();
+ if(state.train==="calculs"&&state.cxs)return vCxRun();
+ const T=TRAIN_MODES.some(m=>m[0]===state.train)?state.train:"cartes";
+ const H={cartes:["Cartes de révision","Des cartes créées à partir de vos contenus, qui reviennent juste avant que vous les oubliiez."],quiz:["Quiz",`${QUIZ.length} questions, chaque réponse est expliquée.`],partiels:["Partiels blancs","Par UE ou par semestre, chronométrés et notés sur 20, avec la correction."],calculs:["Calculs de dose","Des niveaux progressifs, une épreuve blanche chronométrée et l'entraînement libre."],schemas:["Schémas à compléter","Placez les structures sur les schémas et remettez les étapes dans l'ordre."]}[T];
+ return `<div class="stack-lg">${vh("S'entraîner",H[0],H[1],`<a class="icon-btn" href="#progression" aria-label="Ma progression par UE">${EX_IC.chart}</a>`)}
+  <div class="seg five" role="group" aria-label="Type d'entraînement">${TRAIN_MODES.map(([k,l])=>`<button data-act="train" data-k="${k}" aria-pressed="${T===k}">${l}</button>`).join("")}</div>
+  ${T==="quiz"?vQuizHome():T==="schemas"?vSchemas():T==="cartes"?vSrsHome():T==="partiels"?vPbHome():vCalc()}</div>`;
 }
 
 /* ---------- Stages ---------- */
@@ -413,6 +418,7 @@ function vReglages(){
    <div class="set-row"><span>Référentiel</span><div class="seg">${Object.entries(UE).map(([k,v])=>`<button data-act="ue-ref" data-k="${k}" aria-pressed="${state.ueRef===k}">${v.sub.replace("Référentiel ","")}</button>`).join("")}</div></div>
    <div class="set-row"><span>Semestre en cours</span><span class="muted">S${state.sem} · modifiable dans Programme</span></div></div></div>
   <div class="set-group"><span class="eyebrow">Rappels</span><div class="list">${ntSetRow()}</div></div>
+  ${qSetRows()}
   <div class="set-group"><span class="eyebrow">Données</span><div class="list">
    <button class="li" data-act="backup" style="grid-template-columns:minmax(0,1fr)"><span><span class="t" style="color:var(--brand)">Sauvegarder mes données</span><span class="s">Partiels, stage, carnet de suivi, progression : un fichier à garder dans Fichiers ou iCloud</span></span></button>
    <label class="li" for="restore-file" style="grid-template-columns:minmax(0,1fr)"><span><span class="t" style="color:var(--brand)">Restaurer une sauvegarde</span><span class="s">Remplace les données actuelles de cet appareil</span></span></label><input type="file" id="restore-file" class="sr-only" accept="application/json,.json">
@@ -424,8 +430,8 @@ function vReglages(){
 }
 
 /* ---------- Rendu ---------- */
-const VIEWS={outils:vOutils,outil:vOutil,med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,"stage-hist":vStageHist,perso:vPerso,a4:vA4,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages,notifs:vNotifs};
-const TAB={a4:"reviser",perso:"accueil","stage-hist":"stages",med:"reviser",soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil",notifs:"accueil"};
+const VIEWS={outils:vOutils,outil:vOutil,med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,"stage-hist":vStageHist,perso:vPerso,a4:vA4,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages,notifs:vNotifs,legal:vLegal,progression:vProgression};
+const TAB={a4:"reviser",perso:"accueil","stage-hist":"stages",med:"reviser",soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil",notifs:"accueil",legal:"accueil",progression:"entrainer"};
 let lastKey=null;
 const SCROLL={};
 function render(top){
@@ -433,6 +439,7 @@ function render(top){
  if(moved&&lastKey)SCROLL[lastKey]=window.scrollY;
  if(moved)depth=ROOTS.includes(r.v)||lastKey===null?0:depth+1;
  app.innerHTML=VIEWS[r.v](r.arg);
+ if(CT_ROUTE[r.v]){const h=ctFoot(r);if(h)app.insertAdjacentHTML("beforeend",h);}
  const tab=TAB[r.v]||r.v;
  document.querySelectorAll("nav.tabs a").forEach(a=>a.dataset.v===tab?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current"));
  /* Retour d'une fiche, d'un cours ou d'une pathologie vers la liste Réviser : on retrouve la position dans la liste. */
@@ -449,6 +456,7 @@ function checkCalc(show){
  const raw=(inp?inp.value:"").trim().replace(",",".");e.val=inp?inp.value:"";
  if(!show&&(raw===""||isNaN(Number(raw)))){inp.focus();inp.placeholder="Entrez un nombre";return;}
  e.done=show?"ko":(Math.abs(Number(raw)-e.ans)<=e.tol+1e-9?"ok":"ko");
+ if(typeof exRecord==="function")exRecord("calc",state.calcType,e.done==="ok",EX_CALC_UE());
  haptic(e.done==="ok"?"LIGHT":"MEDIUM");
  const s=stats();s.exTot++;if(e.done==="ok")s.exOk++;store.set("stats",s);render();
 }
@@ -459,6 +467,8 @@ app.addEventListener("submit",ev=>{if(ev.target.id==="calc-form"){ev.preventDefa
  else if(ev.target.id.startsWith("ot-")){ev.preventDefault();outilSubmit(ev.target);}
  else if(ev.target.id==="sh-add-form"){ev.preventDefault();histSubmit(ev.target);}
  else if(ev.target.id==="rv-form"){ev.preventDefault();rvSubmit(ev.target);}
+ else if(ev.target.id==="q-sig-form"){ev.preventDefault();qSubmit(ev.target);}
+ else if(ev.target.id==="cx-form"){ev.preventDefault();cxFormSubmit();}
  else if(ev.target.id==="exam-form"){ev.preventDefault();const nom=document.getElementById("ex-nom").value.trim(),date=document.getElementById("ex-date").value,heure=document.getElementById("ex-heure").value||"08:00";
   if(!nom||!date){toast("Indiquez un intitulé et une date");return;}
   store.set("exams",[...exams(),{id:Date.now().toString(36),nom,date,heure}]);haptic();toast("Partiel ajouté");render();setTimeout(()=>{const i=document.getElementById("ex-nom");i&&i.focus()},0);}});
@@ -473,6 +483,9 @@ app.addEventListener("input",ev=>{const t=ev.target;if(t.id==="q"){state.q=t.val
  else if(t.dataset.hw!=null)hwInput(t);
  else if(t.dataset.vd!=null)vdInput(t);
  else if(t.dataset.nt!=null)ntInput(t);
+ else if(t.dataset.q!=null)qInput(t);
+ else if(t.dataset.srs!=null)srsInput(t);
+ else if(t.dataset.pb!=null||t.dataset.cx!=null)exInput(t);
  else pathoInput(t);});
 app.addEventListener("click",ev=>{
  const b=ev.target.closest("[data-act]");if(!b)return;
@@ -484,6 +497,10 @@ app.addEventListener("click",ev=>{
  if(a.startsWith("vd-")){vdAct(b,a);return;}
  if(a.startsWith("rv-")){rvAct(b,a);return;}
  if(a.startsWith("nt-")){ntAct(b,a);return;}
+ if(a.startsWith("q-")){qAct(b,a);return;}
+ if(a.startsWith("srs-")){srsAct(b,a);return;}
+ if(a.startsWith("pdf-")){pdfAct(b,a);return;}
+ if(/^(pb|cx|pg)-/.test(a)){exAct(b,a);return;}
  if(a.startsWith("cn-")){carnetAct(b,a);return;}
  if(a.startsWith("fs-")){feuilleAct(b,a);return;}
  if(a.startsWith("px-")){pathoAct(b,a);return;}
@@ -517,6 +534,7 @@ app.addEventListener("click",ev=>{
  else if(a==="quiz-again"){startQuiz(state.quiz.src,state.quiz.label);render(true);}
  else if(a==="quiz-reset"){state.quiz=null;render(true);}
  else if(a==="quiz-ans"){const z=state.quiz,n=+k,q=QUIZ[z.order[z.i]];if(z.answered!=null)return;z.answered=n;
+  if(typeof exRecord==="function")exRecord("q",q.q,n===q.a,q.ue);
   let w=wrongs();if(n===q.a){z.score++;w=w.filter(x=>x!==q.q);haptic("LIGHT");}else{if(!w.includes(q.q))w.push(q.q);haptic("HEAVY");}store.set("wrong",w);render();}
  else if(a==="quiz-next"){const z=state.quiz;z.i++;z.answered=null;
   if(z.i>=z.order.length){const s=stats();if(s.quizBest==null||z.score>s.quizBest){s.quizBest=z.score;store.set("stats",s);}}
@@ -569,6 +587,7 @@ async function backupData(){
  const data={app:"carnet-ifsi",version:APP_VERSION,date:new Date().toISOString(),donnees:{}};
  try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith("ifsi_"))data.donnees[k]=localStorage.getItem(k);}}catch(e){}
  const name=`carnet-ifsi-sauvegarde-${todayISO()}.json`,blob=new Blob([JSON.stringify(data)],{type:"application/json"});
+ if(isNative){await dlFile(name,"application/json",JSON.stringify(data));return;}
  try{const file=new File([blob],name,{type:"application/json"});if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"Sauvegarde Carnet IFSI"});toast("Sauvegarde enregistrée");return;}}
  catch(e){if(e&&e.name==="AbortError")return;}
  try{const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);toast("Sauvegarde téléchargée");}
