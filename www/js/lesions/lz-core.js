@@ -131,3 +131,6 @@ function lzAlv(cx,cy,r,mode="air",seed=3){const R=lzRnd(seed),cap=[...Array(6)].
  if(mode==="plein")inner=lzC(cx,cy,r-1.5,LC.fluid,"none",0,";opacity:.85");
  if(mode==="pus")inner=lzC(cx,cy,r-1.5,"#F6E7B0","none")+lzDots(cx-r*.6,cy-r*.6,r*1.2,r*1.2,4,seed,(x,y)=>lzWbc(x,y,3.2))+lzDots(cx-r*.6,cy-r*.5,r*1.2,r*1.1,6,seed+3,lzCoc);
  return cap+`<defs><clipPath id="lza-${seed}-${Math.round(cx)}-${Math.round(cy)}"><circle cx="${cx}" cy="${cy}" r="${r-1.2}"/></clipPath></defs>`+lzC(cx,cy,r,mode==="detruit"?"#FBEDEA":LC.air,"#E7A39A",mode==="detruit"?1:1.8)+`<g clip-path="url(#lza-${seed}-${Math.round(cx)}-${Math.round(cy)})">${inner}</g>`;}
+/* contour fermé lissé passant près des points (courbes de Bézier entre milieux) */
+function lzSmooth(pts){const n=pts.length,m=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];let s=m(pts[n-1],pts[0]),d=`M${lzN(s[0])} ${lzN(s[1])}`;
+ for(let i=0;i<n;i++){const p=pts[i],q=m(p,pts[(i+1)%n]);d+=` Q${lzN(p[0])} ${lzN(p[1])} ${lzN(q[0])} ${lzN(q[1])}`;}return d+" Z";}
