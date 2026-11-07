@@ -1,7 +1,7 @@
 /* Carnet IFSI — accueil personnalisable : catalogue de widgets, disposition enregistrée sur l'appareil (ordre, taille,
    réglages de chaque widget, prénom), rendu de l'accueil et page « Personnaliser l'accueil » (ajout, retrait,
    glisser-déposer ou flèches, grand ou petit format). Chargé après outils.js et stages-hist.js, avant app.js. */
-const HW_DEFAULT=["recherche","partiels","urgences","progression","reprendre","question","entrainer","raccourcis","stage","themes","semestre"];
+const HW_DEFAULT=["recherche","partiels","cartes","urgences","progression","reprendre","question","entrainer","raccourcis","stage","themes","semestre"];
 const HW_SC_DEFAULT=["o-planning","o-pansement","o-tfe","o-calculs"];
 const HW_SC_MAX=12;
 const HW_GROUPS=[["rev","Réviser"],["train","S'entraîner"],["stage","Stage"],["orga","Organisation"],["outils","Outils pratiques"]];
@@ -155,6 +155,11 @@ function hwCat(){if(hwCat.ok)return HW;hwCat.ok=1;Object.assign(HW,{
     <div class="hw-px-p"><div class="progress"><i style="width:${PATHOS.length?done/PATHOS.length*100:0}%"></i></div><small class="muted">${done} sur ${PATHOS.length} pathologies revues</small></div>`);},
   s:()=>hwTile({act:"hw-px-rand",ic:CAT_IC.patho,c:"#C25B6A",big:`${pxDone().length}<small>/${PATHOS.length}</small>`,lab:"pathologies revues · toucher pour une au hasard"}),
   cfg:(w,i)=>{const sel=w.spe||[];return `<span class="hw-cfg-h">Spécialités affichées ${sel.length?`· ${sel.length}`:"· toutes"}</span><div class="chips wrapchips">${SPES.map(([s,n])=>`<button class="chip" data-act="hw-spe" data-i="${i}" data-k="${s}" aria-pressed="${sel.includes(s)}">${esc(n)}</button>`).join("")}</div><small class="ot-hint">Sans sélection, toutes les spécialités sont affichées.</small>`;}},
+ cartes:{n:"Cartes du jour",d:"Les cartes de révision à revoir aujourd'hui, avec votre série de jours",g:"rev",ic:SRS_IC.cards,c:"#2C7451",sz:1,
+  r:()=>{const S=srsSet(),cn=srsCounts(srsSelCards()),nw=Math.min(cn.nw,Math.max(0,S.news-srsDayCount().n)),n=cn.due+nw,st=srsStreak();
+   return hwSec("Cartes du jour",`<a href="#entrainer/cartes">Mes paquets</a>`,`<div class="sheet-body hw-srs"><span class="nt-ic">${SRS_IC.cards}</span><span><b>${S.decks.length?(n?plural(n,"carte")+" à réviser":"Tout est à jour"):"Choisissez vos paquets de cartes"}</b><small class="muted">${S.decks.length?`${cn.due} à revoir · ${nw} nouvelle${nw>1?"s":""}${st?` · ${st} jour${st>1?"s":""} d'affilée`:""}`:"Créées automatiquement à partir des contenus"}</small></span>
+    ${S.decks.length&&n?`<button class="btn" data-act="srs-go">${IC.play}Réviser</button>`:`<a class="btn ghost" href="#entrainer/cartes">Ouvrir</a>`}</div>`);},
+  s:()=>{const S=srsSet(),cn=srsCounts(srsSelCards()),n=cn.due+Math.min(cn.nw,Math.max(0,S.news-srsDayCount().n));return hwTile({h:"#entrainer/cartes",ic:SRS_IC.cards,c:"#2C7451",big:S.decks.length?n:"+",lab:S.decks.length?(n?"cartes à réviser":"cartes à jour"):"Cartes de révision"});}},
  planning:{n:"Aujourd'hui",d:"Le programme du jour issu de votre planning",g:"orga",ic:IC.cal,c:"#2A5D85",sz:1,
   r:()=>{const L=hwToday(),dm=addDays(todayISO(),1),nD=agenda().filter(e=>e.d===dm).length+agAuto(dm,dm).length;
    return hwSec("Aujourd'hui",`<a href="#outil/planning">Planning</a>`,`<div class="sheet-body hw-ag">${L.length?`<div class="ag-items">${L.map(agRow).join("")}</div>`:`<p class="muted">Rien de prévu aujourd'hui.</p>`}
@@ -216,7 +221,7 @@ function hwPage(){
  return `<div class="stack-lg">
   <header class="vh-row"><div class="hello"><span class="date">${esc(date)}</span><h1>${hr<5||hr>=18?"Bonsoir":"Bonjour"}${nm?` <span class="hello-nm">${esc(nm)}</span>`:""}</h1></div>
    <div class="hello-act"><button class="icon-btn" data-act="${edit?"hw-done":"hw-editmode"}" aria-label="${edit?"Terminer la modification":"Modifier l'accueil"}" aria-pressed="${edit}">${HW_ICS.grid}</button><button class="icon-btn" data-act="nav" data-h="reglages" aria-label="Réglages">${IC.gear}</button></div></header>
-  ${edit?"":ntAsk("home")}
+  ${edit?"":qWelcome()||ntAsk("home")}
   ${edit?`<div class="hw-editbar" role="toolbar" aria-label="Modifier l'accueil"><span class="hw-eb-t"><b>Modifier l'accueil</b><small>Maintenez un widget puis glissez-le où vous voulez</small></span>
    <button type="button" class="btn ghost hw-eb-add" data-act="hw-sheet">${IC.plus}<span>Ajouter</span></button><button type="button" class="btn hw-eb-ok" data-act="hw-done">Terminé</button></div>`:""}
   ${body||`<div class="empty">Votre accueil est vide. ${edit?"Touchez « Ajouter » pour choisir vos widgets.":"Ajoutez les widgets qui vous servent : partiels, stage, question du jour, raccourcis…"}</div>`}

@@ -25,6 +25,11 @@ Elle reprend l'intégralité des contenus de l'artefact *Carnet IFSI* et les com
 - Fonctionne **hors ligne**, polices embarquées, aucune donnée envoyée
 - Retour matériel Android, retour haptique, barre d'état adaptée au thème
 - Notifications de rappel (planning, tâches, partiels, stage, mémoire, résumé du jour, minuteur), voir plus bas
+- Cartes de révision à répétition espacée (plus de 8 500 cartes créées automatiquement à partir des contenus)
+- Partiels blancs chronométrés et notés sur 20, niveaux de calculs de doses et épreuve blanche « 10 calculs en 30 min »
+- Progression par UE, par compétence (2009) ou par domaine (2026)
+- Export PDF du carnet de stage, du parcours et des feuilles de travail ; exemples rédigés (recueil, projet de soins, analyse de pratique)
+- Confiance : date de mise à jour et références officielles sur chaque contenu, signalement d'erreur, mode relecteur, mentions légales, CGU, confidentialité
 
 ## Structure
 
@@ -82,6 +87,12 @@ Les rappels sont calculés sur l'appareil par `www/js/notifs.js` (Réglages › 
 - **Android et iPhone** : notifications locales programmées avec `@capacitor/local-notifications` ; elles arrivent même appli fermée. Au plus 60 rappels sont programmés à l'avance (limite d'iOS), reprogrammés à chaque ouverture et à chaque modification. Sur Android 13 et plus, l'autorisation est demandée au premier « Activer » ; deux canaux sont créés (*Rappels*, *Minuteur*), avec la petite icône `android/app/src/main/res/drawable/ic_stat_carnet.xml`. Après une mise à jour du dépôt : `npm install` puis `npx cap sync`.
 - **Web** : le navigateur ne peut pas réveiller une page à heure fixe sans serveur d'envoi. Les rappels s'affichent quand l'appli est ouverte ou en arrière-plan, ceux manqués à la réouverture, et via la synchronisation périodique du service worker quand le navigateur la propose (Chrome Android, appli installée). Sur iPhone, il faut d'abord ajouter le site à l'écran d'accueil.
 - L'export `.ics` du planning contient les mêmes alarmes : l'agenda du téléphone prévient alors même sans l'appli.
+
+## Avant la mise en vente
+
+- Compléter l'éditeur, l'adresse, le contact et le directeur de publication dans `www/js/qualite.js` (objet `QUAL`) : les champs vides apparaissent en rouge dans les mentions légales.
+- Faire relire les contenus : voir `docs/relecture/README.md` (liste priorisée, grille de relecture, mode relecteur dans l'appli).
+- Après une modification des contenus : `node scripts/contenus-meta.js` (dates de mise à jour et liste de relecture).
 
 ## Modifier les contenus
 

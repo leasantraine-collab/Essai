@@ -90,7 +90,13 @@ async function otCopy(text){
  try{await navigator.clipboard.writeText(text);toast("Copié");return;}catch(e){}
  try{const ta=document.createElement("textarea");ta.value=text;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();toast("Copié");}catch(e){toast("Copie impossible : sélectionnez le texte");}
 }
+/* Enregistrer ou partager un fichier (texte ou octets). Appli native : fichier écrit dans le cache puis feuille de partage
+   (e-mail, Drive, Fichiers…) ; web : partage du navigateur ou téléchargement. */
+const u8B64=u=>{let s="";for(let i=0;i<u.length;i+=32768)s+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(s);};
 async function dlFile(name,type,text){
+ if(typeof isNative!=="undefined"&&isNative){const Fs=plug("Filesystem"),Sh=plug("Share");
+  if(Fs&&Sh){try{const r=await Fs.writeFile({path:name,data:u8B64(typeof text==="string"?new TextEncoder().encode(text):text),directory:"CACHE"});
+    await Sh.share({title:name,files:[r.uri],dialogTitle:"Enregistrer ou envoyer"});}catch(e){if(!/cancel/i.test(String(e&&(e.message||e))))toast("Partage impossible sur cet appareil");}return;}}
  const blob=new Blob([text],{type});
  try{const f=new File([blob],name,{type});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return;}}
  catch(e){if(e&&e.name==="AbortError")return;}
@@ -461,7 +467,7 @@ function cxRes(c){const v=(state.cx&&state.cx[c.id])||{},x={};c.f.forEach(([k,,,
  return `<div class="cx-out">${r.r}</div>${r.s.length?`<ol class="steps">${r.s.map(s=>`<li>${s}</li>`).join("")}</ol>`:""}`;}
 function otCalculs(){
  const cur=state.cxSel||"gtt",c=CX.find(x=>x.id===cur)||CX[0],v=(state.cx&&state.cx[c.id])||{};
- return `<div class="chips wrapchips" role="group" aria-label="Type de calcul">${CX.map(x=>`<button type="button" class="chip" data-act="ot-cx" data-k="${x.id}" aria-pressed="${x.id===c.id}">${x.t}</button>`).join("")}</div>
+ return `${qPedago()}<div class="chips wrapchips" role="group" aria-label="Type de calcul">${CX.map(x=>`<button type="button" class="chip" data-act="ot-cx" data-k="${x.id}" aria-pressed="${x.id===c.id}">${x.t}</button>`).join("")}</div>
   <section class="cd-form sheet-body"><h2>${c.t}</h2>
    ${c.f.map(([k,l,u,opts])=>otField(`cx-${k}`,l,opts?`<select id="cx-${k}" data-ot="cx.${c.id}.${k}">${opts.map(([ov,ol])=>`<option value="${ov}" ${String(v[k]||"")===ov?"selected":""}>${ol}</option>`).join("")}</select>`:`<span class="cx-in"><input id="cx-${k}" data-ot="cx.${c.id}.${k}" inputmode="decimal" value="${esc(v[k]||"")}" autocomplete="off">${u?`<em>${u}</em>`:""}</span>`)).join("")}
    <div class="cx-res" id="cx-res" aria-live="polite">${cxRes(c)}</div>
@@ -533,7 +539,7 @@ function otScores(){
  const cur=state.scSel||"gcs";
  return `<div class="chips wrapchips" role="group" aria-label="Score">${SC_LIST.map(([k,l])=>`<button type="button" class="chip" data-act="ot-sc" data-k="${k}" aria-pressed="${k===cur}">${l}</button>`).join("")}</div>
   <section class="cd-form sheet-body"><h2>${SC_LIST.find(x=>x[0]===cur)[1]}</h2><p class="muted">${SC_INFO[cur]}</p>${scoreBlock(cur)}<div id="sc-res" aria-live="polite">${scoreRes(cur)}</div><button type="button" class="link" data-act="ot-sc-clear">Effacer</button></section>
-  <p class="disclaimer">Les scores aident à décider mais ne remplacent pas le jugement clinique : au moindre doute, alertez.</p>`;
+  ${qPedago("Les scores servent à s'entraîner à les calculer et à les interpréter. En stage, utilisez les grilles du service ; ils ne remplacent jamais le jugement clinique : au moindre doute, alertez.")}`;
 }
 
 /* =====================================================================
