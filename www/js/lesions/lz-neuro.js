@@ -114,14 +114,14 @@ lzSkullFig("tc-n",{t:"Le choc secoue le cerveau dans le crâne",sub:"Traumatisme
  cap:"Consignes de surveillance pendant 24 à 48 h : somnolence, vomissements, céphalées qui s'aggravent, confusion ou convulsions doivent faire reconsulter **en urgence**."});
 lzSkullFig("htic",{t:"La pression monte dans le crâne",sub:"Le crâne ne peut pas s'agrandir : un œdème, un saignement ou une tumeur comprime le cerveau",z:["cerveau","ventricules"],
  sk:()=>({swell:1,vent:.55,ex:[[-1,-1],[1,-1],[-1,1],[1,1]].map(([a,b])=>lzArr(a*88,b*56,a*64,b*40,{c:LC.acc,w:3,hl:8})).join("")+lzArr(0,56,0,96,{c:LC.acc,w:3,hl:8})}),
- labels:lzLR(116,"Ventricules\nécrasés",1,128,118)+lzLL(150,"Cerveau gonflé\ncontre le crâne",1,56,96)+lzLR(212,"Risque d'engagement\nvers le bas",1,124,214),pill:"Céphalées, vomissements, troubles de la conscience",
+ labels:lzLR(116,"Ventricules\nécrasés",1,128,118)+lzLL(150,"Cerveau gonflé\ncontre le crâne",1,56,96)+lzLR(212,"Risque d'engagement\nvers le bas",1,124,214),pill:"Céphalées, vomissements, conscience",
  cap:"Tête surélevée à 30°, axe tête-cou-tronc aligné, surveillance neurologique rapprochée ; signes d'alerte : **bradycardie et HTA** (réflexe de Cushing), pupille dilatée."});
 lzSkullFig("hydrocephalie",{t:"Le liquide cérébrospinal s'accumule dans les ventricules",sub:"Il est mal évacué : les ventricules se dilatent et compriment le cerveau",z:["cerveau","ventricules"],
- sk:()=>({vent:2.2}),labels:lzLR(116,"Ventricules\ndilatés\n(liquide\nen excès)",1,150,112)+lzLL(150,"Cerveau comprimé",0,46,90),pill:"Enfant : tête qui grossit ; adulte : marche, mémoire, urines",
+ sk:()=>({vent:2.2}),labels:lzLR(116,"Ventricules\ndilatés\n(liquide\nen excès)",1,150,112)+lzLL(150,"Cerveau comprimé",0,46,90),pill:"Enfant : tête qui grossit ; adulte : marche",
  cap:"Traitement : dérivation du liquide (valve ventriculo-péritonéale). Surveiller les signes de dysfonctionnement de valve : céphalées, vomissements, somnolence."});
 lzSkullFig("tumeur-cerebrale",{t:"Une tumeur se développe dans le cerveau",sub:"Elle comprime et infiltre les tissus voisins, entourée d'un œdème qui augmente la pression",z:["cerveau","frontal","temporal"],
  sk:()=>({vent:.8,ex:`<circle cx="-40" cy="-30" r="26" style="fill:#F6D8C8;opacity:.8"/><path d="M-56 -36 C-56 -54 -30 -56 -24 -40 C-18 -26 -32 -12 -44 -16 C-54 -18 -56 -26 -56 -36 Z" style="fill:#8E6A8F;stroke:#5A3D5C;stroke-width:1.2"/>`}),
- labels:lzLL(24,"Tumeur",1,80,82)+lzLL(150,"Œdème autour\nde la tumeur",1,64,108),pill:"Céphalées, crises, déficit ou changement de comportement",
+ labels:lzLL(24,"Tumeur",1,80,82)+lzLL(150,"Œdème autour\nde la tumeur",1,64,108),pill:"Céphalées, crises, déficit, comportement",
  cap:"Traitements : chirurgie, radiothérapie, chimiothérapie ; corticoïdes contre l'œdème. Surveiller les signes d'hypertension intracrânienne et les crises."});
 /* ============ Conscience, cervelet, migraine ============ */
 lzNF("coma",{t:"Le système d'éveil ne stimule plus le cerveau",sub:"Une lésion du tronc cérébral ou une atteinte diffuse du cerveau supprime la conscience",zones:["tronc"],pt:[180,176],
@@ -134,7 +134,7 @@ lzNF("cerebelleux",{t:"Le cervelet ne coordonne plus les mouvements",sub:"Syndro
  extra:()=>lzLL(196,"Causes : alcool, AVC,\nSEP, tumeur, médicaments",0),pill:"Risque de chute",
  cap:"Marche à jambes écartées, tremblement intentionnel (en approchant le but), parole saccadée. Sécuriser les déplacements, rééducation."});
 lzNF("migraine",{t:"Une vague d'activité traverse le cerveau, les vaisseaux et nerfs s'enflamment",sub:"La crise implique le nerf trijumeau et les vaisseaux des méninges ; l'aura vient d'une onde électrique lente",zones:["meninges","vaisseaux"],pt:[232,106],
- over:lzP("M150 64 C170 70 178 86 172 100","none",LC.elec,3,";stroke-dasharray:6 4"),inner:()=>lzP("M186 96 C220 90 270 104 310 96","none",LC.bloodD,26)+lzP("M186 96 C220 90 270 104 310 96","none","#E9877A",21)+lzP("M190 140 C226 128 262 148 300 132","none",LC.nerveD,5)+lzP("M190 140 C226 128 262 148 300 132","none",LC.nerve,3.4)+lzDots(220,110,70,20,8,6,(x,y)=>lzC(x,y,1.8,LC.inflam,"none")),zt:["Vaisseau dilaté, nerf qui","libère des substances inflammatoires"],
+ over:lzP("M150 64 C170 70 178 86 172 100","none",LC.elec,3,";stroke-dasharray:6 4"),inner:()=>lzP("M186 96 C220 90 270 104 310 96","none",LC.bloodD,26)+lzP("M186 96 C220 90 270 104 310 96","none","#E9877A",21)+lzP("M190 140 C226 128 262 148 300 132","none",LC.nerveD,5)+lzP("M190 140 C226 128 262 148 300 132","none",LC.nerve,3.4)+lzDots(220,110,70,20,8,6,(x,y)=>lzC(x,y,1.8,LC.inflam,"none")),zt:["Vaisseau dilaté, nerf qui","libère des substances"],
  extra:()=>lzLL(196,"Douleur pulsatile d'un côté,\nnausées, gêne à la lumière",0),
  cap:"Traitement de crise précoce, au calme et dans le noir. Repérer les facteurs déclenchants (sommeil, stress, alimentation, règles) ; traitement de fond si crises fréquentes."});
 lzNF("cephalees",{t:"Les muscles du crâne et de la nuque se contractent",sub:"Céphalée de tension : douleur en casque ou en bandeau, souvent liée au stress, à la posture et à la fatigue",zones:["meninges"],pt:[150,30],

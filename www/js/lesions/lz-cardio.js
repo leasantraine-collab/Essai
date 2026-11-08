@@ -169,7 +169,7 @@ lz("myocardite",{t:"Le muscle du cœur est enflammé",sub:"Le plus souvent aprè
   +lzZoom("myo",134,150,260,96,54,`<rect x="206" y="42" width="108" height="108" style="fill:#F3D8D2"/>`
    +[50,68,86,104,122,140].map((y,i)=>lzR(206,y,108,12,6,i%2?"#C9675A":"#D27869","rgba(90,30,25,.35)",.6)+[...Array(9)].map((_,k)=>lzP(`M${212+k*12} ${y+2} v8`,"none","rgba(255,230,225,.45)",1)).join("")).join("")
    +lzDots(214,52,92,92,10,6,(x,y)=>lzWbc(x,y,4.2)))
-  +lzS(260,164,"Cellules de l'inflammation","middle","st-acc")+lzS(260,175,"entre les fibres musculaires","middle","st-acc")
+  +lzS(248,164,"Cellules de l'inflammation","middle","st-acc")+lzS(248,175,"entre les fibres du muscle","middle","st-acc")
   +lzLL(226,"Douleur, essoufflement,\npalpitations après un virus",0),
  cap:"Repos et surveillance (ECG, troponine, échographie) ; risque de troubles du rythme et d'insuffisance cardiaque. Pas de sport intense pendant plusieurs mois."});
 lz("pericardite",{t:"L'enveloppe du cœur est enflammée",sub:"Le péricarde s'épaissit et du liquide peut s'accumuler entre ses deux feuillets",h:246,ins:false,
@@ -212,11 +212,11 @@ lzRhythm("tsv",{t:"Un court-circuit près du nœud auriculo-ventriculaire",sub:"
  cap:"Souvent chez le sujet jeune au cœur sain. Manœuvres vagales (souffler dans une seringue), puis médicament sur prescription médicale (adénosine) sous scope."});
 lzRhythm("tv",{t:"Un foyer électrique s'emballe dans un ventricule",sub:"Les ventricules battent très vite, sans l'aide des oreillettes : le cœur se remplit mal",ecg:"tv",ecgL:"ECG : QRS larges, rapides et réguliers",
  h:{sinus:"#F7E2A0",ex:lzC(38,30,5,LC.acc,"#fff",1.2)+[10,16,22].map(r=>`<circle cx="38" cy="30" r="${r}" style="fill:none;stroke:${LC.acc};stroke-width:1.4;opacity:${1.2-r/22}"/>`).join("")},
- labels:[[110,"Foyer anormal dans\nle ventricule",1,132,138]],pill:"Peut évoluer en arrêt cardiaque",
+ labels:[[110,"Foyer anormal dans\nle ventricule",1,132,138]],pill:"Risque d'arrêt cardiaque",
  cap:"Urgence : vérifier la **conscience et le pouls**. Sans pouls, c'est un arrêt cardiaque : massage et **défibrillation**. Avec pouls : scope, médecin, chariot d'urgence."});
 lzRhythm("fv",{t:"Les ventricules ne font plus que trembler",sub:"Activité électrique totalement anarchique : le cœur ne pompe plus, c'est l'arrêt cardiaque",ecg:"fv",ecgL:"ECG : tracé anarchique, aucun QRS",
  h:{pale:"vg",ex:(()=>{const R=lzRnd(8);let s="";for(let i=0;i<18;i++){const x=-54+R()*104,y=-2+R()*56;s+=lzP(`M${lzN(x)} ${lzN(y)} q3 -4 6 0 t6 0`,"none",LC.acc,1.8);}return s;})()},
- labels:[[110,"Ventricules : trémulation\nsans contraction",1,140,140]],pill:"Arrêt cardiaque : choc électrique",
+ labels:[[110,"Ventricules : trémulation\nsans contraction",1,140,140]],pill:"Arrêt : choc électrique",
  cap:"Pas de pouls, pas de respiration normale : **appeler, masser, défibriller**. Chaque minute sans massage fait baisser fortement les chances de survie."});
 lzRhythm("bradycardie",{t:"Le cœur bat trop lentement",sub:"Le nœud sinusal envoie peu d'influx, ou ils passent mal : moins de 50 à 60 battements par minute",ecg:"brady",ecgL:"ECG : complexes normaux mais très espacés",
  h:{sinus:"#E8DDBF",condC:"#E8D28A"},labels:[[58,"Nœud sinusal :\ninflux trop lents",1,62,76],[150,"Fatigue, vertiges,\nmalaise si très lent",0,140,140]],
