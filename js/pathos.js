@@ -144,7 +144,7 @@ function vPatho(id){
  let body,toc="";
  if(mode==="recap"){
   body=`<div class="px-recap">
-   ${a4Cta("p",id,"Cette pathologie en une page : à lire ou à imprimer")}
+   ${a4Cta("p",id,"Cette pathologie en une page : à lire ou à imprimer")}${typeof psCta==="function"?psCta(id):""}
    <div class="px-r def"><span class="cv-lab">${SVG.info}Définition</span><p>${pmd(p.d)}</p></div>
    ${PIMG[p.i]&&PIMG[p.i].hs?`<div class="px-r film"><span class="cv-lab">${pxPicSvg("film")}Le mécanisme en un coup d'œil</span>${pxFilm(PIMG[p.i].hs,true)}</div>`:""}
    ${pxSchema(p)}

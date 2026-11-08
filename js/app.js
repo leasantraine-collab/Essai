@@ -41,7 +41,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.48 · 8 novembre 2026";
+const APP_VERSION="1.49 · 8 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
@@ -480,6 +480,7 @@ app.addEventListener("input",ev=>{const t=ev.target;if(t.id==="q"){state.q=t.val
  else if(t.dataset.cn)carnetInput(t);
  else if(t.dataset.fs)feuilleInput(t);
  else if(t.dataset.ot!=null)outilInput(t);
+ else if(t.dataset.ps!=null)psInput(t);
  else if(t.dataset.hw!=null)hwInput(t);
  else if(t.dataset.vd!=null)vdInput(t);
  else if(t.dataset.nt!=null)ntInput(t);
@@ -491,6 +492,7 @@ app.addEventListener("click",ev=>{
  const b=ev.target.closest("[data-act]");if(!b)return;
  const a=b.dataset.act,k=b.dataset.k,id=b.dataset.id;
  if(a.startsWith("ot-")){outilAct(b,a);return;}
+ if(a.startsWith("ps-")){psAct(b,a);return;}
  if(a.startsWith("sh-")){histAct(b,a);return;}
  if(a.startsWith("hw-")){hwAct(b,a);return;}
  if(a.startsWith("a4-")){a4Act(b,a);return;}
