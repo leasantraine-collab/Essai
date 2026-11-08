@@ -1,7 +1,7 @@
 /* Carnet IFSI — service worker de la version web installable (PWA).
    Réseau d'abord : en ligne, l'appli charge toujours la dernière version publiée ;
    hors ligne, elle se sert de la copie gardée en cache. */
-const V="carnet-ifsi-v51",NT_CACHE="carnet-ifsi-rappels";
+const V="carnet-ifsi-v52",NT_CACHE="carnet-ifsi-rappels";
 const FILES=[
  "./",
  "index.html",
@@ -13,6 +13,27 @@ const FILES=[
  "css/content.css",
  "js/afgsu.js",
  "js/pansement-img.js",
+ "img/pansement/noir.webp",
+ "img/pansement/jaune.webp",
+ "img/pansement/rouge.webp",
+ "img/pansement/rose.webp",
+ "img/pansement/sec.webp",
+ "img/pansement/faible.webp",
+ "img/pansement/modere.webp",
+ "img/pansement/abondant.webp",
+ "img/pansement/inf.webp",
+ "img/pansement/sang.webp",
+ "img/pansement/cav.webp",
+ "img/pansement/odeur.webp",
+ "img/pansement/peau.webp",
+ "img/pansement/chir.webp",
+ "img/pansement/trauma.webp",
+ "img/pansement/escarre.webp",
+ "img/pansement/veineux.webp",
+ "img/pansement/arteriel.webp",
+ "img/pansement/diab.webp",
+ "img/pansement/brulure.webp",
+ "img/pansement/tumorale.webp",
  "js/outils.js",
  "js/projet-soins.js",
  "js/videos-lib.js",
