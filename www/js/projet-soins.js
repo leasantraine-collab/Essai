@@ -417,7 +417,7 @@ function psStep4(d){if(!d.sel.length)return `<p class="muted">Choisissez d'abord
   <div class="btn-row"><button class="btn" data-act="ps-create">${IC.plus}Créer la feuille « Projet de soins »</button><button class="btn ghost" data-act="ps-copy">${OT_IC.copy}Copier le texte</button></div>
   <p class="ot-hint">La feuille créée se modifie, s'imprime et s'exporte en PDF comme les autres feuilles de travail.</p></section>`;}
 /* lien depuis une fiche pathologie */
-const psCta=id=>`<a class="a4-cta" href="#outil/projet/${encodeURIComponent(id)}"><span class="a4-cta-ic">${OT_IC.projet}</span><span><b>Construire un projet de soins</b><small>Problèmes proposés pour cette pathologie, à adapter à votre patient</small></span></a>`;
+const psCta=id=>`<a class="a4-cta" href="#outil/projet/${encodeURIComponent(id)}"><span class="a4-cta-ic">${OT_IC.projet}</span><span><b>Projet de soins</b><small>Problèmes proposés, à adapter</small></span></a>`;
 
 /* ---------- Saisie et actions ---------- */
 function psRefreshBlock(id,d){const el=document.getElementById("ps-b-"+id);if(!el)return;const open=el.open;el.outerHTML=psBlock(id,d);const n=document.getElementById("ps-b-"+id);if(n)n.open=open;}

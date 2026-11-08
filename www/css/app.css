@@ -688,3 +688,21 @@ a.back{text-decoration:none}
 .pdoc .pv-priol i{font-style:normal;display:inline-grid;place-items:center;width:3.8mm;height:3.8mm;border-radius:50%;background:var(--pv-acc);color:#fff;font-size:6.2pt;font-weight:700}
 .pdoc .pv-ech{grid-template-columns:repeat(6,1fr)}
 .pdoc .pv-ech div{height:11mm}
+/* ---------- Réviser : six entrées et progression globale ---------- */
+.rev-prog{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.rev-prog-t{display:flex;align-items:baseline;gap:6px;font-size:.92rem;color:var(--ink-2)}
+.rev-prog-t b{color:var(--ink);font-size:1rem}
+.rev-prog-t span{margin-left:auto;font-weight:700;color:var(--ok)}
+.rev-prog>i,.rev-bar{display:block;height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.rev-prog>i>i,.rev-bar>i{display:block;height:100%;border-radius:99px;background:var(--ok)}
+.rev-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.rev-card{display:flex;flex-direction:column;gap:5px;padding:14px;border-radius:16px;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);text-decoration:none;color:var(--ink);min-width:0;transition:transform .12s ease}
+.rev-card:active{transform:scale(.985)}
+.rev-card b{font-size:.98rem;line-height:1.25}
+.rev-card small{font-size:.78rem;color:var(--muted);line-height:1.35}
+.rev-card .rev-n{margin-top:auto;padding-top:4px;font-size:.78rem;font-weight:700;color:var(--ink-2)}
+.rev-ic{width:36px;height:36px;border-radius:11px;background:var(--c);display:grid;place-items:center;margin-bottom:2px}
+.rev-ic svg{width:19px;height:19px;stroke:#1A252A;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.rev-grid-sm .rev-card{padding:12px}
+@media (min-width:760px){.rev-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.chips.wrapchips .chip{white-space:normal;max-width:100%;text-align:left;line-height:1.3}

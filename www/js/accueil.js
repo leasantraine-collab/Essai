@@ -1,7 +1,7 @@
 /* Carnet IFSI — accueil personnalisable : catalogue de widgets, disposition enregistrée sur l'appareil (ordre, taille,
    réglages de chaque widget, prénom), rendu de l'accueil et page « Personnaliser l'accueil » (ajout, retrait,
    glisser-déposer ou flèches, grand ou petit format). Chargé après outils.js et stages-hist.js, avant app.js. */
-const HW_DEFAULT=["recherche","partiels","cartes","urgences","progression","reprendre","question","entrainer","raccourcis","stage","themes","semestre"];
+const HW_DEFAULT=["recherche","partiels","reprendre","cartes","themes","stage","urgences"];
 const HW_SC_DEFAULT=["o-planning","o-pansement","o-tfe","o-calculs"];
 const HW_SC_MAX=12;
 const HW_GROUPS=[["rev","Réviser"],["train","S'entraîner"],["stage","Stage"],["orga","Organisation"],["outils","Outils pratiques"]];
@@ -140,10 +140,9 @@ function hwCat(){if(hwCat.ok)return HW;hwCat.ok=1;Object.assign(HW,{
    return `<label class="hw-cfg-l" for="hw-t-${i}">Titre du widget<input id="hw-t-${i}" data-hw="title" data-i="${i}" maxlength="30" placeholder="Raccourcis" value="${esc(w.t||"")}"></label>
     <span class="hw-cfg-h">Choisissez jusqu'à ${HW_SC_MAX} raccourcis · ${ids.length}/${HW_SC_MAX}</span>
     ${groups.map(g=>`<span class="hw-cfg-g">${esc(g)}</span><div class="chips wrapchips">${A.filter(s=>s.g===g).map(s=>`<button class="chip" data-act="hw-sc" data-i="${i}" data-k="${s.id}" aria-pressed="${ids.includes(s.id)}">${esc(s.n)}</button>`).join("")}</div>`).join("")}`;}},
- themes:{n:"Réviser par thème",d:"Toutes les catégories de fiches et de cours",g:"rev",ic:IC.book,c:"#2A5D85",
-  r:()=>hwSec("Réviser par thème",`<a href="#reviser">Tout voir</a>`,`<div class="cats">${CATS.map(c=>{const n=FICHES.filter(f=>f.cat===c.id).length+FULL_COURS.filter(x=>x.cat===c.id).length;
-    const sub=c.id==="stage"?"Préparation":c.id==="calcul"?"Exercices illimités":c.id==="quiz"?QUIZ.length+" questions":c.id==="patho"?PATHOS.length+" pathologies par spécialité":(c.id==="soins"||c.id==="exam")&&soCatN(c.id)?`${soCatN(c.id)} fiches ${c.id==="exam"?"de surveillance":"de soins"} + ${plural(n,"contenu")}`:c.id==="thera"&&mdN()?`${mdN()} classes thérapeutiques + ${plural(n,"contenu")}`:plural(n,"contenu");
-    return `<button class="cat-row" style="--c:${c.c}" data-act="go-cat" data-k="${c.id}"><span class="sw">${CAT_IC[c.id].replace('<svg','<svg style="width:18px;height:18px;stroke:#1A252A;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round"')}</span><span><b>${esc(c.nom)}</b><small>${sub}</small></span></button>`}).join("")}</div>`)},
+ themes:{n:"Réviser",d:"Les six types de contenus et votre progression",g:"rev",ic:IC.book,c:"#2A5D85",
+  r:()=>hwSec("Réviser",`<a href="#reviser">Tout voir</a>`,`<div class="rev-grid rev-grid-sm">${REV_SECS.map(S=>{const [a,n]=revStat(S),p=n?Math.round(a/n*100):0;
+    return `<a class="rev-card" href="#reviser/${S.k}" style="--c:${S.c}"><span class="rev-ic">${CAT_IC[S.ic]}</span><b>${esc(S.n)}</b><span class="rev-n">${n}${a?` · ${a} étudié${a>1?"s":""}`:""}</span><i class="rev-bar"><i style="width:${p}%"></i></i></a>`;}).join("")}</div>`)},
  semestre:{n:"Mon semestre",d:"Les UE de votre semestre, en un geste",g:"rev",ic:IC.cap,c:"#2A5D85",
   r:()=>{const R=UE[state.ueRef]||UE["2026"],L=R.list.filter(u=>u[3].includes(state.sem));
    return hwSec(`Mon semestre`,`<a href="#programme">Programme</a>`,`<div class="chips hw-sem" role="group" aria-label="Semestre">${[1,2,3,4,5,6].map(s=>`<button class="chip" data-act="sem" data-k="${s}" aria-pressed="${state.sem===s}">S${s}</button>`).join("")}</div>
@@ -166,8 +165,8 @@ function hwCat(){if(hwCat.ok)return HW;hwCat.ok=1;Object.assign(HW,{
     <div class="hw-ag-f"><small class="muted">Demain : ${nD?plural(nD,"événement"):"rien de prévu"}</small><button class="link" data-act="hw-ag-add">${IC.plus.replace("<svg",'<svg class="hw-inl"')} Ajouter</button></div></div>`);},
   s:()=>{const L=hwToday().filter(e=>!e.done);return hwTile({h:"#outil/planning",ic:IC.cal,c:"#2A5D85",big:L.length,lab:L.length?"à faire aujourd'hui":"rien de prévu aujourd'hui"});}},
  favoris:{n:"Mes favoris",d:"Vos fiches et cours marqués d'une étoile",g:"rev",ic:IC.star,c:"#9A7A2E",sz:1,
-  r:()=>{const L=favs().slice().reverse().map(k=>{const [t,id]=k.split(":");const it=t==="f"?FICHES.find(x=>x.id===id):t==="c"?COURS.find(x=>x.id===id):null;return it?[it,t]:null;}).filter(Boolean);
-   return hwSec("Mes favoris",L.length?`<button data-act="favs">Tout voir</button>`:"",L.length?`<div class="list">${L.slice(0,5).map(([it,t])=>itemRow(it,t)).join("")}</div>`:`<p class="muted">Touchez l'étoile d'une fiche ou d'un cours pour le retrouver ici.</p>`);},
+  r:()=>{const L=favs().slice().reverse().map(favItem).filter(Boolean);
+   return hwSec("Mes favoris",L.length?`<button data-act="favs">Tout voir</button>`:"",L.length?`<div class="list">${L.slice(0,5).map(favRow).join("")}</div>`:`<p class="muted">Touchez l’étoile d’un contenu pour le retrouver ici.</p>`);},
   s:()=>hwTile({act:"favs",ic:IC.star,c:"#9A7A2E",big:favs().length,lab:favs().length>1?"favoris":"favori"})},
  notes:{n:"Bloc-notes",d:"Vos dernières notes et une note rapide",g:"orga",ic:OT_IC.notes,c:"#5C6B7A",sz:1,
   r:()=>{const L=notesL().sort((a,b)=>b.u-a.u).slice(0,3);

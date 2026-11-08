@@ -705,3 +705,9 @@ body.hw-dragging{-webkit-user-select:none;user-select:none;cursor:grabbing}
 .pa-real{position:relative;display:block;width:100%;height:100%}
 .pa-real>.pa-svg,.pa-real>img{position:absolute;inset:0;width:100%;height:100%}
 .pa-real>img{object-fit:cover;display:block}
+/* pathologie : actions compactes côte à côte */
+.px-acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.px-acts .a4-cta{margin:0;padding:10px 12px;gap:10px;min-width:0}
+.px-acts .a4-cta small{font-size:.74rem}
+.px-acts .a4-cta-ic{width:30px;height:30px;flex:none}
+.px-acts .a4-cta{grid-template-columns:auto minmax(0,1fr)}.px-acts .a4-cta>svg{display:none}

@@ -18,9 +18,8 @@ function pxCard(){
 }
 /* Les anciennes adresses #pathos et #pathos/<spécialité> mènent à Réviser › Pathologies. */
 function vPathos(arg){
- state.filter="patho";state.favOnly=false;
  if(arg&&SPE[arg]){state.pxSpe=arg;store.set("pxspe",arg);}
- location.replace("#reviser");return "";
+ location.replace("#reviser/pathos");return "";
 }
 /* ---------- Réviser › Pathologies : toutes les fiches récap et tous les cours, menu défilant des spécialités ---------- */
 const pxSpeCur=()=>{const s=state.pxSpe||store.get("pxspe","all");return SPE[s]?s:"all";};
@@ -126,7 +125,7 @@ function pxFilmEx(p){const I=PIMG[p.i];if(!I||!I.hs||I.hs.length<3)return "";con
 function vPatho(id){
  const p=PBY[id];if(!p)return notFound();
  const S=SPE[p.s],mode=state.pxMode||"recap",done=pxDone().includes(id);
- const links=(p.f||[]).map(x=>{const f=FICHES.find(y=>y.id===x),c=f?null:COURS.find(y=>y.id===x&&!y.pro),it=f||c;return it?`<a class="chip" href="#${f?"fiche":"cours"}/${x}">${esc(it.titre)}</a>`:"";}).join("");
+ const links=ctChips(p.f);
  const qs=QUIZ.filter(q=>q.pid===id),same=PATHOS.filter(x=>x.s===p.s),k=same.indexOf(p),next=same[k+1];
  const secs=[["Définition",`<p class="fv-lead">${pmd(p.d)}</p>`],
   ...(PIMG[p.i]?[["Comprendre en images",pxImages(p)]]:[]),
@@ -144,10 +143,9 @@ function vPatho(id){
  let body,toc="";
  if(mode==="recap"){
   body=`<div class="px-recap">
-   ${a4Cta("p",id,"Cette pathologie en une page : à lire ou à imprimer")}${typeof psCta==="function"?psCta(id):""}
+   <div class="px-acts">${a4Cta("p",id,"À lire ou à imprimer")}${typeof psCta==="function"?psCta(id):""}</div>
    <div class="px-r def"><span class="cv-lab">${SVG.info}Définition</span><p>${pmd(p.d)}</p></div>
-   ${PIMG[p.i]&&PIMG[p.i].hs?`<div class="px-r film"><span class="cv-lab">${pxPicSvg("film")}Le mécanisme en un coup d'œil</span>${pxFilm(PIMG[p.i].hs,true)}</div>`:""}
-   ${pxSchema(p)}
+   ${LZ[p.i]?pxSchema(p):PIMG[p.i]&&PIMG[p.i].hs?`<div class="px-r film"><span class="cv-lab">${pxPicSvg("film")}Le mécanisme en un coup d'œil</span>${pxFilm(PIMG[p.i].hs,true)}</div>`:pxSchema(p)}
    <div class="px-grid">
     <div class="px-r"><span class="cv-lab">Causes</span><ul>${(p.c||[]).slice(0,5).map(x=>`<li>${pmd(x)}</li>`).join("")}</ul></div>
     <div class="px-r"><span class="cv-lab">Signes</span><ul>${(p.sg||[]).slice(0,6).map(x=>`<li>${pmd(x)}</li>`).join("")}</ul></div>
@@ -284,7 +282,7 @@ function pxQuizBlock(){
 function pathoAct(b,a){const k=b.dataset.k;
  if(a==="px-open"){state.pxMode=k;return;}
  if(a==="px-spe"){state.pxSpe=k;store.set("pxspe",k);render();pxBind(true);return;}
- if(a==="px-go"){state.filter="patho";state.favOnly=false;render();window.scrollTo(0,0);pxBind();return;}
+ if(a==="px-go"){nav("reviser/pathos");return;}
  if(a==="px-mode"){state.pxMode=k;render();const t=document.querySelector(".px-head");if(t)t.scrollIntoView();return;}
  if(a==="px-quiz"){launchQuiz(pxSpeQ(k).sort(()=>Math.random()-.5).slice(0,20),"Quiz "+SPE[k].nom);return;}
  if(a==="px-qp"){launchQuiz(QUIZ.map((q,i)=>i).filter(i=>QUIZ[i].pid===k),"Quiz · "+PBY[k].n);return;}

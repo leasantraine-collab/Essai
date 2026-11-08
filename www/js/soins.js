@@ -139,7 +139,7 @@ function vSoin(id){
  const S=SO_SEC[o.s],C=CAT[S.cat],mode=state.soMode||"recap",done=soDone().includes(id),qs=QUIZ.filter(q=>q.sid===id);
  const list=soSecFiches(o.s),k=list.indexOf(o),next=list[k+1],col=SO_COL(o.s);
  const badges=`<div class="so-badges">${o.st.map(s=>`<span class="so-st so-${s}">${SO_ST[s]||esc(s)}</span>`).join("")}</div>`;
- const links=o.f.map(x=>{const f=FICHES.find(y=>y.id===x),c=f?null:COURS.find(y=>y.id===x&&!y.pro),it=f||c;return it?`<a class="chip" href="#${f?"fiche":"cours"}/${x}">${esc(it.titre)}</a>`:"";}).join("");
+ const links=ctChips(o.f);
  const secs=[["Définition",o.d.map(x=>`<p class="fv-lead">${pmd(x)}</p>`).join("")],["Indications",soList(o.ind)],["Contre-indications et précautions",soList(o.ci)],
   ["Rôle IDE et cadre réglementaire",`${badges}${o.r.map(x=>`<p class="cv-p">${pmd(x)}</p>`).join("")}`],["Matériel",soMatGrid(o.mat)],["Préparation",soTbl(o.prep)],
   ["Réalisation pas à pas",o.et.length?`<p class="muted so-hint">Touchez chaque étape pour la cocher au fur et à mesure.</p>${soSteps(o)}`:""],["Surveillance",soSurv(o.surv)],["Risques et complications",soList(o.ri)],
@@ -185,15 +185,14 @@ function soRev(cat,isF){
  const s=soSecCur(cat),S=s==="all"?null:SO_SEC[s],n=S?soSecFiches(s).length:soCatN(cat),dn=soDone();
  const tools=S?(()=>{const ids=new Set(soSecFiches(s).map(o=>o.i)),nq=QUIZ.filter(q=>ids.has(q.sid)).length,d=[...ids].filter(i=>dn.includes(i)).length;
    return nq||d?`<div class="px-spebtns">${nq?`<button class="btn sm" data-act="so-sec-quiz" data-k="${s}">${IC.bolt}Quiz · ${nq}</button>`:""}${d?`<span class="muted px-spedone">${d} étudié${d>1?"s":""}</span>`:""}</div>`:"";})():"";
- const old=(isF?FICHES:COURS).filter(i=>i.cat===cat&&!i.pro);
+
  return `<span class="eyebrow px-revlab" id="px-top">Catégorie</span>
   <div class="px-revbar"><label class="px-sel" style="--c:${S?SO_COL(s):"var(--brand)"}"><span class="dot"></span><b>${esc(S?S.nom:"Toutes les catégories")}</b><small>${n}</small><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
    <select id="sosec" aria-label="Choisir une catégorie de soins"><option value="all"${s==="all"?" selected":""}>Toutes les catégories (${soCatN(cat)})</option>${soCatSecs(cat).map(id=>`<option value="${id}"${s===id?" selected":""}>${esc(SO_SEC[id].nom)} (${soSecFiches(id).length})</option>`).join("")}</select></label></div>
   ${tools}
   ${cat==="soins"&&typeof vdEntry==="function"?vdEntry():""}
   <label class="search-field">${IC.search}<input id="soq" type="search" placeholder="Filtrer les soins" value="${esc(state.soq||"")}" autocomplete="off" aria-label="Filtrer les soins"></label>
-  <div class="stack-lg" id="so-list">${soRevList(cat,isF)}</div>
-  ${old.length?`<details class="ue-pg so-old"><summary><span><b>${isF?"Fiches complètes":"Cours complets"} déjà présents</b><small>${plural(old.length,"contenu")}</small></span></summary><div class="list">${old.map(i=>itemRow(i,isF?"f":"c")).join("")}</div></details>`:""}`;
+  <div class="stack-lg" id="so-list">${soRevList(cat,isF)}</div>`;
 }
 const soEntry=(c,isF)=>`<a class="li px-entry" role="button" tabindex="0" data-act="so-go" data-k="${c.id}" style="--c:${c.c}"><span class="bar"></span><span><span class="t">Toutes les fiches de ${c.id==="exam"?"surveillance et d'examens":"soins"} par catégorie</span><span class="s">${soCatN(c.id)} ${isF?"fiches récap":"cours détaillés"} · réalisation pas à pas, checklist, mise en situation</span></span><span class="end">${chev}</span></a>`;
 
@@ -210,7 +209,7 @@ soMakeQuiz();
 /* ---------- Actions ---------- */
 function soAct(b,a){const k=b.dataset.k;
  if(a==="so-open"){state.soMode=k;return;}
- if(a==="so-go"){state.filter=k;state.favOnly=false;render();window.scrollTo(0,0);pxBind();return;}
+ if(a==="so-go"){nav("reviser/"+(k==="exam"?"surveillance":"soins"));return;}
  if(a==="so-mode"){state.soMode=k;render();const t=document.querySelector(".px-head");if(t)t.scrollIntoView();return;}
  if(a==="so-chk"){const id=route().arg,c=soChk(id),i=+k;if(c.has(i))c.delete(i);else c.add(i);b.classList.toggle("on",c.has(i));b.setAttribute("aria-pressed",c.has(i));soChkBar(id);haptic();return;}
  if(a==="so-chk-reset"){soChk(route().arg).clear();document.querySelectorAll(".so-step.on").forEach(x=>{x.classList.remove("on");x.setAttribute("aria-pressed","false");});soChkBar(route().arg);return;}

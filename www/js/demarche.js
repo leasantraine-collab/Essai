@@ -81,7 +81,7 @@ function fsDemarche(){
  return `<section class="stack-sm"><div class="section-title"><h2>La démarche de soins en 4 étapes</h2></div>
   <ol class="dm-steps sheet-body">
    ${step(1,"Recueillir les données","Les 14 besoins de V. Henderson, les antécédents, les traitements, ce que dit le patient.",`<a class="chip" href="#feuille/recueil">Recueil${n("recueil")?` · ${n("recueil")}`:""}</a><a class="chip" href="#feuille/recueil/exemple">Exemple</a>`)}
-   ${step(2,"Analyser et identifier les problèmes","Besoins perturbés, risques, ressources : la synthèse en fin de recueil.",`<a class="chip" href="#cours/guide-recueil">Comment faire</a>`)}
+   ${step(2,"Analyser et identifier les problèmes","Besoins perturbés, risques, ressources : la synthèse en fin de recueil. L'assistant propose les problèmes selon la situation.",`<a class="chip" href="#outil/projet">Assistant guidé</a><a class="chip" href="#cours/guide-recueil">Comment faire</a>`)}
    ${step(3,"Planifier : objectifs et actions","Un problème formulé, un objectif mesurable et daté, des actions concrètes. Les problèmes du recueil s'importent en un geste.",`<a class="chip" href="#feuille/projet">Projet de soins${n("projet")?` · ${n("projet")}`:""}</a><a class="chip" href="#feuille/projet/exemple">Exemple</a>`)}
    ${step(4,"Évaluer et réajuster","Objectif atteint ? Ce qui a marché, ce qui change. Puis prendre du recul sur une situation vécue.",`<a class="chip" href="#feuille/analyse">Analyse de pratique${n("analyse")?` · ${n("analyse")}`:""}</a><a class="chip" href="#feuille/analyse/exemple">Exemple</a>`)}
   </ol></section>`;}
