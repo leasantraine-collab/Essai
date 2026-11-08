@@ -141,4 +141,7 @@ const PA_IMG={
    <g filter="url(#pa-gran)">${paSpecks(80,60,26,18,9,6,"#C9564D",6)}</g>
    <path d="${paBlob(92,66,9,6,2,.3)}" fill="#E1CF8A" filter="url(#pa-slough)"/>`,"Plaie tumorale bourgeonnante")
 };
-const paImg=k=>PA_IMG[k]?PA_IMG[k]():"";
+/* Images de synthèse réalistes (rendu 3D : relief, humidité, lumière) dans img/pansement ; le dessin vectoriel reste en secours si l'image ne charge pas */
+const PA_PHOTO=new Set("noir jaune rouge rose sec faible modere abondant inf sang cav odeur peau chir trauma escarre veineux arteriel diab brulure tumorale".split(" "));
+const paImg=k=>{const v=PA_IMG[k]?PA_IMG[k]():"";if(!PA_PHOTO.has(k))return v;
+ return `<span class="pa-real">${v}<img src="img/pansement/${k}.webp" alt="" loading="lazy" decoding="async" width="600" height="450" onerror="this.remove()"></span>`;};
