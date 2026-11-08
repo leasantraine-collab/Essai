@@ -166,7 +166,7 @@ function fsEditor(type,inst){
    body=grpList(type,inst,g,base,(it,i)=>it.probleme?esc(it.probleme.length>70?it.probleme.slice(0,70)+"…":it.probleme):`${esc(g.label)} à formuler`,it=>it.type?esc(it.type):"")+
     `<button class="btn ghost block" data-act="fs-gadd" data-k="${g.k}" data-type="${type}" data-id="${inst.id}">${IC.plus}${esc(g.add)}</button>`;}
   else body=`<div class="sheet-body cd-form">${fsFields(sec.f,base,d)}</div>`;
-  return `<section class="stack-sm"><h3 class="cn-g">${esc(sec.h)}</h3>${sec.g&&type==="projet"&&typeof fsImportBlock==="function"?fsImportBlock(inst):""}${body}</section>`;}).join("");
+  return `<section class="stack-sm"><h3 class="cn-g">${esc(sec.h)}</h3>${sec.g&&type==="projet"?`<p class="muted fs-hint">Besoin d'aide pour formuler ? <a class="link" href="#outil/projet">Ouvrir le projet de soins guidé</a></p>`:""}${sec.g&&type==="projet"&&typeof fsImportBlock==="function"?fsImportBlock(inst):""}${body}</section>`;}).join("");
  return `<div class="stack-lg"><a class="back" href="#feuille/${type}">${IC.back}${esc(S.titre)}</a>
   ${vh("Feuille de travail",esc(fsTitle(type,inst)),`<a class="link" href="#cours/${S.guide}">Mode d'emploi de cette feuille</a>${typeof FS_DEMO!=="undefined"&&FS_DEMO[type]?` · <a class="link" href="#feuille/${type}/exemple">Voir un exemple rédigé</a>`:""}`)}
   <div class="section-title"><span class="muted" id="fs-saved">Enregistré sur cet appareil</span></div>
@@ -188,7 +188,7 @@ function fsList(type){
     <button class="sw-b sw-ord" data-act="fs-sw-ord" data-k="${type}" data-id="${x.id}" tabindex="-1"><b>↑↓</b><span>Hiérarchiser</span></button>
     <button class="sw-b sw-del" data-act="fs-sw-del" data-k="${type}" data-id="${x.id}" tabindex="-1">${IC.x}<span>Supprimer</span></button></div>
    <a class="li sw-main" href="#feuille/${type}/${x.id}" draggable="false"><span class="bar" style="--c:${CAT.stage.c}"></span><span><span class="t">${t}</span><span class="s">${sub}</span></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a></div>`;};
- return `<div class="stack-lg">${backBtn("Stages")}${vh("Feuille de travail",esc(S.titre),esc(S.desc))}
+ return `<div class="stack-lg">${backBtn("Stages")}${vh("Feuille de travail",esc(S.titre),esc(S.desc))}${type==="projet"?`<a class="a4-cta" href="#outil/projet"><span class="a4-cta-ic">${OT_IC.projet}</span><span><b>Projet de soins guidé</b><small>Problèmes proposés selon la situation, aide à la formulation, vérification, puis feuille remplie</small></span></a>`:""}
   <div class="btn-row"><button class="btn" data-act="fs-new" data-k="${type}">${IC.plus}Nouvelle feuille</button><button class="btn ghost" data-act="fs-print" data-k="${type}">${IC.sheet}Imprimer vierge</button></div>
   <a class="cd-card cn-entry" href="#cours/${S.guide}"><span class="cd-ic">${IC.book}</span><span><b>Mode d'emploi</b><small>Le cours pas à pas : but, étapes, exemples, astuces</small></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>
   ${typeof FS_DEMO!=="undefined"&&FS_DEMO[type]?`<a class="cd-card cn-entry" href="#feuille/${type}/exemple"><span class="cd-ic">${IC.sheet}</span><span><b>Un exemple rédigé</b><small>Une situation fictive remplie comme on l'attend en stage, à lire ou à reprendre</small></span><svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></a>`:""}
@@ -223,7 +223,7 @@ function feuillesCard(){
  return `${typeof fsDemarche==="function"?fsDemarche():""}<section class="stack-sm"><div class="section-title"><h2>Feuilles de travail</h2></div>
   <p class="muted">À remplir dans l'appli ou à imprimer, chacune avec son mode d'emploi.</p>
   <div class="fs-grid">${SHEET_ORDER.map(t=>{const S=SHEETS[t],n=(F[t]||[]).length;return `<div class="fs-card"><a class="fs-main" href="#feuille/${t}"><span class="cd-ic">${ic[t]}</span><b>${esc(S.titre)}</b><small>${esc(S.desc)}</small>${n?`<span class="tag">${plural(n,"feuille")}</span>`:""}</a>
-   <div class="fs-links"><a href="#cours/${S.guide}">Mode d'emploi</a><button data-act="fs-print" data-k="${t}">Imprimer vierge</button></div></div>`}).join("")}</div></section>`;
+   <div class="fs-links">${t==="projet"?`<a href="#outil/projet">Assistant guidé</a>`:""}<a href="#cours/${S.guide}">Mode d'emploi</a><button data-act="fs-print" data-k="${t}">Imprimer vierge</button></div></div>`}).join("")}</div></section>`;
 }
 
 /* ---------- Saisie et actions ---------- */

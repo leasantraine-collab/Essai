@@ -657,3 +657,48 @@ body.hw-dragging{-webkit-user-select:none;user-select:none;cursor:grabbing}
 .lz-fig .sch{overflow:visible}
 .lz-leg{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--fx-sub)}
 .lz-leg li{display:inline-flex;align-items:center;gap:6px}.lz-leg i{width:12px;height:12px;border-radius:3px;display:inline-block}
+/* ---------- Projet de soins guidé ---------- */
+.ps-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ps-st{display:flex;flex-direction:column;align-items:center;gap:4px;font:inherit;font-size:.74rem;font-weight:650;color:var(--muted);background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:8px 4px;cursor:pointer}
+.ps-st span{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--surface-2);color:var(--ink-2);font-weight:800}
+.ps-st[aria-current="step"]{border-color:var(--brand);color:var(--ink)}
+.ps-st[aria-current="step"] span{background:var(--brand);color:#fff}
+.ps-st:disabled{opacity:.45;cursor:default}
+.ps-foot{justify-content:space-between}
+.ps-card{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;font:inherit;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px;cursor:pointer}
+.ps-card[aria-pressed="true"]{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 8%,var(--surface))}
+.ps-ck{flex:none;display:grid;place-items:center;width:22px;height:22px;border-radius:7px;border:1.5px solid var(--line-2);font-size:.8rem;font-weight:800;color:#fff;margin-top:1px}
+[aria-pressed="true"]>.ps-ck{background:var(--ok);border-color:var(--ok)}
+.ps-cbody{display:flex;flex-direction:column;gap:5px;min-width:0}
+.ps-cbody small{color:var(--muted);font-size:.78rem;line-height:1.4}
+.ps-tags{display:flex;flex-wrap:wrap;gap:6px}
+.ps-tags i,.ps-t{font-style:normal;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--surface-2);color:var(--ink-2)}
+.ps-t-r{background:color-mix(in srgb,#C8372D 14%,var(--surface));color:#A12C23}
+.ps-t-x{background:color-mix(in srgb,#B98B14 18%,var(--surface));color:#7A5A08}
+.ps-t-c{background:color-mix(in srgb,#2A5D85 16%,var(--surface));color:#234E70}
+:root[data-theme="dark"] .ps-t-r{color:#F4A39A}:root[data-theme="dark"] .ps-t-x{color:#F2CE6B}:root[data-theme="dark"] .ps-t-c{color:#9CC0E4}
+.ps-h4{font-size:.86rem;margin:6px 0 0}
+.ps-h4 small{font-weight:500;color:var(--muted);font-size:.76rem;margin-left:4px}
+.ps-blk{background:var(--surface);border:1.5px solid var(--line);border-radius:16px;overflow:hidden}
+.ps-blk>summary{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;list-style:none}
+.ps-blk>summary::-webkit-details-marker{display:none}
+.ps-blk>summary b{flex:1;min-width:140px}
+.ps-badge{font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:99px}
+.ps-badge.ok{background:color-mix(in srgb,var(--ok) 15%,var(--surface));color:var(--ok)}
+.ps-badge.warn{background:var(--bad-soft);color:var(--bad)}
+.ps-in{padding:0 14px 16px}
+.ps-form{background:var(--brand-soft);border-radius:12px;padding:10px 12px}
+.ps-form p{margin:4px 0 0;font-weight:600;line-height:1.45}
+.ps-ob{text-align:left;font:inherit;font-size:.86rem;color:var(--ink);background:var(--bg);border:1.5px dashed var(--line-2);border-radius:10px;padding:8px 10px;cursor:pointer}
+.ps-ech .chip{font-size:.74rem;padding:4px 9px}
+.ps-acts{display:flex;flex-direction:column;gap:6px}
+.ps-ac{display:flex;gap:10px;align-items:flex-start;text-align:left;font:inherit;font-size:.86rem;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:8px 10px;cursor:pointer}
+.ps-ac[aria-pressed="true"]{border-color:var(--ok)}
+.ps-role{display:inline-block;font-style:normal;font-size:.68rem;font-weight:700;margin-left:6px;padding:1px 7px;border-radius:99px;background:var(--surface-2);color:var(--muted)}
+.ps-role-s{background:color-mix(in srgb,#2A5D85 14%,var(--surface));color:#2A5D85}
+.ps-role-c{background:color-mix(in srgb,#6E5196 14%,var(--surface));color:#6E5196}
+:root[data-theme="dark"] .ps-role-s{color:#9CC0E4}:root[data-theme="dark"] .ps-role-c{color:#C9B3E6}
+.ps-row .t{white-space:normal}
+.ps-w{color:var(--bad)}
+.ps-pre{white-space:pre-wrap;font:inherit;font-size:.84rem;line-height:1.5;background:var(--bg);border-radius:10px;padding:10px;margin:0}
+.ps .chips .chip{white-space:normal;text-align:left;line-height:1.3;max-width:100%}

@@ -14,11 +14,13 @@ const OT_IC={
  reperes:OI('<path d="M4 4v16h16"/><path d="M8 16v-5M12 16V7M16 16v-8"/>'),
  notes:OI('<path d="M4 20h4L19.5 8.5l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>'),
  urgences:OI('<path d="M12 20.5s-8-4.9-8-10.6A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 8 2.7c0 5.7-8 10.6-8 10.6z"/><path d="M6.5 12.5h3l1.3-2.6 1.9 5 1.3-2.4h3.5"/>'),
+ projet:OI('<path d="M7 4h10a2 2 0 0 1 2 2v14H5V6a2 2 0 0 1 2-2z"/><path d="M9 4.5V3h6v1.5"/><path d="M8.5 10.5l1.5 1.5 2.5-3M8.5 16l1.5 1.5 2.5-3M14.5 11h2M14.5 16.5h2"/>'),
  copy:OI('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/>')
 };
 const TOOLS=[
  {id:"urgences",n:"Urgences (AFGSU)",s:"Urgences",c:"#C8372D",d:"Fiches réflexes : arrêt cardiaque, étouffement, hémorragie, malaises, traumatismes, situations exceptionnelles",lead:"Les fiches réflexes du programme de l'AFGSU niveau 2, pour réagir vite : urgences vitales, urgences potentielles, risques collectifs."},
  {id:"planning",n:"Planning",s:"Planning",c:"#2A5D85",d:"Agenda de la semaine, plan de révisions automatique, export vers l'agenda du téléphone",lead:"Organisez vos cours, révisions, partiels et stages. Le plan de révisions répartit les séances jusqu'à l'évaluation."},
+ {id:"projet",n:"Projet de soins guidé",s:"Projet",c:"#2A6F5E",d:"Problèmes proposés selon la situation, formulation, objectifs, actions, évaluation, puis feuille prête à imprimer",lead:"Décrivez la situation du patient : l'outil propose des problèmes justifiés, vous aide à les formuler, vérifie votre projet et remplit la feuille « Projet de soins »."},
  {id:"pansement",n:"Choix du pansement",s:"Pansement",c:"#B55E3A",d:"Quelques questions sur la plaie pour orienter vers la bonne classe de pansement",lead:"Décrivez la plaie : l'outil propose une classe de pansement, la fréquence de réfection et les points de vigilance."},
  {id:"tfe",n:"Aide au TFE",s:"TFE",c:"#6E5196",d:"Étapes du mémoire, question de départ, équation de recherche, références APA, rétroplanning",lead:"Avancez pas à pas dans votre travail de fin d'études. Tout est enregistré sur cet appareil."},
  {id:"calculs",n:"Calculs de soins",s:"Calculs",c:"#2C7451",d:"Débits, doses au poids, volumes à prélever, concentrations, conversions",lead:"Résultat et étapes de calcul détaillées. En pratique, tout calcul se fait en double vérification."},
@@ -641,7 +643,7 @@ function otNotes(){
   <p class="disclaimer">Les notes restent sur cet appareil et sont incluses dans la sauvegarde (Réglages). Aucune donnée permettant d'identifier un patient.</p>`;
 }
 
-const OT_VIEWS={urgences:otUrgences,planning:otPlanning,pansement:otPansement,tfe:otTfe,calculs:otCalculs,scores:otScores,chrono:otChrono,transmissions:otTransmissions,reperes:otReperes,notes:otNotes};
+const OT_VIEWS={projet:a=>otProjet(a),urgences:otUrgences,planning:otPlanning,pansement:otPansement,tfe:otTfe,calculs:otCalculs,scores:otScores,chrono:otChrono,transmissions:otTransmissions,reperes:otReperes,notes:otNotes};
 
 /* ---------- Événements ---------- */
 function outilAct(b,a){
