@@ -88,7 +88,7 @@ function cnService(c){
  if(!sv)return `<div class="empty">Choisissez votre lieu de stage en haut du carnet : vous retrouverez ici les pathologies et traitements du service à cocher au fil du stage.</div>${cnMemo(c)}`;
  const chk=(lab,items)=>`<section class="stack-sm"><h3 class="cn-g">${lab}</h3><div class="list">${items.map(x=>{const k=cnHash(plainMd(x)),v=c.svc[k]||{};
    return `<div class="cn-svc-row"><span class="t">${md(x)}</span><span class="cn-tog">${[["vu","Rencontré"],["revu","Révisé"]].map(([f,l])=>`<button class="chip" data-act="cn-svc" data-k="${k}" data-f="${f}" aria-pressed="${!!v[f]}">${l}</button>`).join("")}</span></div>`}).join("")}</div></section>`;
- const links=(sv.fiches||[]).map(id=>{const f=FICHES.find(x=>x.id===id),co=f?null:COURS.find(x=>x.id===id&&!x.pro),it=f||co;return it?`<a class="chip" href="#${f?"fiche":"cours"}/${id}">${esc(it.titre)}</a>`:"";}).join("");
+ const links=ctChips(sv.fiches);
  const all=[...sv.patho,...sv.thera].map(x=>c.svc[cnHash(plainMd(x))]||{}),vu=all.filter(v=>v.vu).length,revu=all.filter(v=>v.revu).length;
  return `<div class="cn-help"><p>Touchez <b>Rencontré</b> quand vous voyez la pathologie ou le traitement en stage, puis <b>Révisé</b> une fois la fiche relue. Le soir, révisez en priorité ce que vous avez rencontré dans la journée.</p></div>
  <div class="cn-kpi"><span><b data-kpi="svcVu">${vu}/${all.length}</b>rencontrés</span><span><b data-kpi="svcRevu">${revu}/${all.length}</b>révisés</span></div>
@@ -249,7 +249,7 @@ function cnPrintInfos(blank){
 }
 function cnSvcPage(sv,c,blank){
  const L=(t,a,ck)=>a&&a.length?`<div><h3>${t}</h3><ul>${a.map(x=>{let m="";if(ck){const v=blank?{}:(c.svc[cnHash(plainMd(x))]||{});m=` <span class="pck">${v.vu?"☑":"☐"} rencontré ${v.revu?"☑":"☐"} révisé</span>`;}return `<li>${md(x)}${m}</li>`;}).join("")}</ul></div>`:"";
- const fiches=(sv.fiches||[]).map(id=>{const it=FICHES.find(x=>x.id===id)||COURS.find(x=>x.id===id&&!x.pro);return it?esc(it.titre):"";}).filter(Boolean);
+ const fiches=[...new Set((sv.fiches||[]).map(id=>{const it=ctLink(id);return it?esc(it.t):"";}).filter(Boolean))];
  return `<section class="pp"><h1>Mon service · ${esc(sv.nom)}</h1><p class="psub">${md(sv.intro||"")}</p>
   <div class="psvc">${L("Pathologies à connaître",sv.patho,1)}${L("Thérapeutiques à connaître",sv.thera,1)}${L("Soins rencontrés",sv.soins)}${fiches.length?`<div><h3>À réviser dans Carnet IFSI</h3><ul>${fiches.map(f=>`<li>${f}</li>`).join("")}</ul></div>`:""}
   ${sv.pieges&&sv.pieges.length?`<div class="pwarn"><h3>Erreurs fréquentes dans ce service</h3><ul>${sv.pieges.map(x=>`<li>${md(x)}</li>`).join("")}</ul></div>`:""}</div></section>`;

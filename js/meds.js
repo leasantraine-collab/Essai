@@ -23,7 +23,7 @@ function mdLinks(o){return o.f.map(x=>{
  if(x.startsWith("s:")){const s=SOBY[x.slice(2)];return s?`<a class="chip" href="#soin/${s.i}">${esc(s.n)}</a>`:"";}
  if(x.startsWith("p:")){const p=typeof PBY!=="undefined"&&PBY[x.slice(2)];return p?`<a class="chip" href="#patho/${x.slice(2)}">${esc(p.n||p.titre||x.slice(2))}</a>`:"";}
  if(x.startsWith("m:")){const m=MDBY[x.slice(2)];return m?`<a class="chip" href="#med/${m.i}">${esc(m.n)}</a>`:"";}
- const f=FICHES.find(y=>y.id===x),c=f?null:COURS.find(y=>y.id===x&&!y.pro),it=f||c;return it?`<a class="chip" href="#${f?"fiche":"cours"}/${x}">${esc(it.titre)}</a>`:"";}).join("");}
+ const it=ctLink(x);return it?`<a class="chip" href="#${it.h}">${esc(it.t)}</a>`:"";}).filter((v,i,a)=>v&&a.indexOf(v)===i).join("");}
 
 function vMed(id){
  const o=MDBY[id];if(!o)return notFound();
@@ -84,14 +84,13 @@ function mdRev(isF){
  const s=mdSecCur(),S=s==="all"?null:MD_SEC[s],n=S?mdSecMeds(s).length:mdN(),dn=mdDone();
  const tools=S?(()=>{const ids=new Set(mdSecMeds(s).map(o=>o.i)),nq=QUIZ.filter(q=>ids.has(q.mid)).length,d=[...ids].filter(i=>dn.includes(i)).length;
    return nq||d?`<div class="px-spebtns">${nq?`<button class="btn sm" data-act="md-sec-quiz" data-k="${s}">${IC.bolt}Quiz · ${nq}</button>`:""}${d?`<span class="muted px-spedone">${d} étudiée${d>1?"s":""}</span>`:""}</div>`:"";})():"";
- const old=(isF?FICHES:COURS).filter(i=>i.cat==="thera"&&!i.pro);
+
  return `<span class="eyebrow px-revlab" id="px-top">Spécialité</span>
   <div class="px-revbar"><label class="px-sel" style="--c:${S?MD_COL(s):"var(--brand)"}"><span class="dot"></span><b>${esc(S?S.nom:"Toutes les spécialités")}</b><small>${n}</small><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
    <select id="mdsec" aria-label="Choisir une spécialité"><option value="all"${s==="all"?" selected":""}>Toutes les spécialités (${mdN()})</option>${mdSecs().map(id=>`<option value="${id}"${s===id?" selected":""}>${esc(MD_SEC[id].nom)} (${mdSecMeds(id).length})</option>`).join("")}</select></label></div>
   ${tools}
   <label class="search-field">${IC.search}<input id="mdq" type="search" placeholder="Classe ou médicament (DCI, nom commercial)" value="${esc(state.mdq||"")}" autocomplete="off" aria-label="Filtrer les classes thérapeutiques"></label>
-  <div class="stack-lg" id="md-list">${mdRevList(isF)}</div>
-  ${old.length?`<details class="ue-pg so-old"><summary><span><b>${isF?"Fiches":"Cours"} déjà présents</b><small>${plural(old.length,"contenu")}</small></span></summary><div class="list">${old.map(i=>itemRow(i,isF?"f":"c")).join("")}</div></details>`:""}`;
+  <div class="stack-lg" id="md-list">${mdRevList(isF)}</div>`;
 }
 const mdEntry=isF=>`<a class="li px-entry" role="button" tabindex="0" data-act="md-go" style="--c:${CAT.thera.c}"><span class="bar"></span><span><span class="t">Toutes les classes thérapeutiques par spécialité</span><span class="s">${mdN()} ${isF?"fiches récap":"cours détaillés"} · mécanisme, médicaments, effets indésirables, surveillance, quiz</span></span><span class="end">${chev}</span></a>`;
 
@@ -104,7 +103,7 @@ mdMakeQuiz();
 /* ---------- Actions ---------- */
 function mdAct(b,a){const k=b.dataset.k;
  if(a==="md-open"){state.mdMode=k;return;}
- if(a==="md-go"){state.filter="thera";state.favOnly=false;render();window.scrollTo(0,0);pxBind();return;}
+ if(a==="md-go"){nav("reviser/meds");return;}
  if(a==="md-mode"){state.mdMode=k;render();const t=document.querySelector(".px-head");if(t)t.scrollIntoView();return;}
  if(a==="md-done"){let d=mdDone();const on=!d.includes(k);d=on?[...d,k]:d.filter(x=>x!==k);store.set("mddone",d);haptic();if(on)toast("Fiche marquée comme étudiée");render();return;}
  if(a==="md-quiz"){launchQuiz(QUIZ.map((q,i)=>i).filter(i=>QUIZ[i].mid===k),"Quiz · "+MDBY[k].n);return;}
