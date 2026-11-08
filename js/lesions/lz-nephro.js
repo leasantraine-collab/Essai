@@ -38,13 +38,13 @@ lzRF("ira",{t:"Les reins s'arrêtent brutalement de filtrer",sub:"Insuffisance r
  extra:()=>lzLL(196,"Urines rares, potassium\net créatinine qui montent",1),pill:"Hyperkaliémie : risque cardiaque",
  cap:"Surveiller la **diurèse**, le poids, la kaliémie, la créatinine ; corriger la cause (réhydratation, arrêt des médicaments toxiques, lever l'obstacle). Souvent réversible."});
 lzRF("irc",{t:"Les reins perdent peu à peu leurs unités de filtration",sub:"Insuffisance rénale chronique : diabète et HTA détruisent les néphrons au fil des années",zones:["reins"],pt:[80,92],
- inner:()=>lzNephron({scar:1}),zt:["Néphrons détruits et","remplacés par du tissu cicatriciel"],
+ inner:()=>lzNephron({scar:1}),zt:["Néphrons détruits,","remplacés par une cicatrice"],
  extra:()=>lzLL(196,"Fatigue, anémie, HTA,\nœdèmes ; souvent silencieuse",0),pill:"Préserver les veines du bras (future fistule)",
  cap:"Protéger les reins : contrôle de la tension et du diabète, éviter les AINS et les produits néphrotoxiques, adapter les doses. Préparer si besoin la dialyse ou la greffe."});
 LZ["mrc"]=Object.assign({},LZ["irc"],{t:"La maladie rénale chronique détruit lentement les néphrons",sub:"Elle évolue en stades, du rein abîmé à l'insuffisance rénale terminale"});
 lzRF("irt",{t:"Les reins ne filtrent presque plus : il faut les remplacer",sub:"Insuffisance rénale terminale : moins de 15 % de fonction, la dialyse ou la greffe deviennent nécessaires",zones:["reins"],pt:[80,92],
  inner:()=>lzKidney(250,100,1,{small:1})+lzS(250,58,"rein petit, cicatriciel","middle"),zt:["Rein rétréci,","qui ne filtre plus"],
- extra:()=>lzLL(196,"Hémodialyse, dialyse\npéritonéale ou greffe",0),pill:"Fistule : pas de tension ni de prise de sang sur ce bras",
+ extra:()=>lzLL(196,"Hémodialyse, dialyse\npéritonéale ou greffe",0),pill:"Bras de la fistule : ni tension ni prise de sang",
  cap:"Restriction hydrique et potassique selon la prescription, surveillance du poids entre deux séances, soins de la fistule (thrill), accompagnement au quotidien."});
 lzRF("glomerulonephrite",{t:"Les filtres des reins sont enflammés",sub:"Les glomérules, abîmés par une réaction immunitaire, laissent passer du sang et des protéines",zones:["reins"],pt:[80,92],
  inner:()=>lzNephron({red:1,leak:12}),zt:["Glomérule enflammé :","sang et protéines dans l'urine"],

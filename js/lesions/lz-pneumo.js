@@ -25,24 +25,24 @@ const lzPF=(id,o)=>lz(id,{t:o.t,sub:o.sub,h:o.h||262,ins:false,cap:o.cap,
   +(o.zt?lzS(248,176,o.zt[0],"middle","st-acc")+lzS(248,187,o.zt[1]||"","middle","st-acc"):"")+(o.extra?o.extra():"")+(o.pill?lzPill(160,(o.h||262)-12,o.pill,LC.acc):"");}});
 /* ============ Bronches ============ */
 lzPF("asthme",{t:"Les bronches se resserrent, gonflent et s'encombrent",sub:"Le muscle de la bronche se contracte, la paroi enflamme et le mucus bouche la lumière",zones:["bronches"],pt:[188,96],bg:"#F6E3DE",
- inner:()=>lzBr(248,96,54,{lum:.42,mus:.16,red:1,wavy:1,mucus:4,seed:7}),zt:["Spasme, inflammation et mucus :","l'air passe mal (sifflements)"],
- extra:()=>lzBr(164,206,15,{seed:2})+lzS(164,234,"bronche\nnormale","middle")+lzLL(188,"Déclenché par : allergènes,\nvirus, effort, froid, tabac",0),pill:"Crise grave : parole difficile, urgence",
+ inner:()=>lzBr(248,96,54,{lum:.42,mus:.16,red:1,wavy:1,mucus:4,seed:7}),zt:["Spasme, mucus :","l'air passe mal (sifflements)"],
+ extra:()=>lzBr(164,206,15,{seed:2})+lzS(164,232,"bronche normale","middle")+lzLL(188,"Déclenché par : allergènes,\nvirus, effort, froid, tabac",0),pill:"Crise grave : parole difficile, urgence",
  cap:"Le traitement de fond calme l'**inflammation** (corticoïde inhalé) ; le traitement de crise **ouvre la bronche** (bronchodilatateur). Vérifier la technique d'inhalation."});
 lzPF("bpco",{t:"Les bronches s'abîment et les alvéoles se détruisent",sub:"Le tabac enflamme les bronches (bronchite chronique) et détruit les alvéoles (emphysème) : l'air reste piégé",zones:["bronches","alveoles"],pt:[188,96],bg:"#F6E3DE",
  inner:()=>lzBr(222,86,30,{lum:.4,thick:1,mus:.12,mucus:3,seed:4})+lzAlvC(270,112,"detruit"),zt:["Bronche épaissie + alvéoles","détruites : l'air ne sort plus"],
- extra:()=>lzLL(196,"Cause principale :\nle tabac (90 %)",1)+lzLL(232,"Essoufflement, toux,\ncrachats le matin",0),pill:"Arrêt du tabac : le seul traitement qui freine",
+ extra:()=>lzLL(196,"Cause principale :\nle tabac (90 %)",1)+lzLL(228,"Essoufflement, toux, crachats",0),pill:"Arrêt du tabac : le seul traitement qui freine",
  cap:"Maladie chronique et progressive. Surveiller les **exacerbations** (crachats plus abondants ou purulents, essoufflement accru) ; vaccinations grippe et pneumocoque, réhabilitation respiratoire."});
 lzPF("emphyseme",{t:"Les cloisons entre les alvéoles se détruisent",sub:"Les petites alvéoles fusionnent en grandes poches : moins de surface d'échange, l'air reste piégé",zones:["alveoles"],pt:[268,176],bg:"#FBF1EF",
  inner:()=>lzAlvC(222,100,"air",{r:11})+lzAlvC(274,96,"detruit"),zt:["Alvéoles normales / alvéoles","détruites en grosses poches"],
  extra:()=>lzLL(206,"Thorax distendu,\nessoufflement, souvent\nfumeur",0),
  cap:"Les échanges d'oxygène diminuent ; le patient expire lèvres pincées pour mieux vider ses poumons. Oxygène sur prescription seulement : risque d'hypercapnie."});
 lzPF("bronchite-aigue",{t:"La paroi des bronches s'enflamme",sub:"Le plus souvent un virus : la muqueuse gonfle et produit du mucus, d'où la toux",zones:["bronches","trachee"],pt:[188,96],bg:"#F6E3DE",
- inner:()=>lzBr(248,96,54,{lum:.52,red:1,mucus:3,seed:3})+lzVirus(226,70,5)+lzVirus(270,118,5),zt:["Muqueuse enflammée et mucus :","toux, parfois fièvre"],
- extra:()=>lzBr(164,206,15,{seed:2})+lzS(164,234,"bronche\nnormale","middle")+lzLL(186,"Guérit seule en\n2 à 3 semaines",0),
+ inner:()=>lzBr(248,96,54,{lum:.52,red:1,mucus:3,seed:3})+lzVirus(226,70,5)+lzVirus(270,118,5),zt:["Muqueuse enflammée, mucus :","toux, parfois fièvre"],
+ extra:()=>lzBr(164,206,15,{seed:2})+lzS(164,232,"bronche normale","middle")+lzLL(186,"Guérit seule en\n2 à 3 semaines",0),
  cap:"Virale dans la grande majorité des cas : **pas d'antibiotique**. Hydratation, repos, antipyrétique si fièvre ; consulter si essoufflement ou fièvre prolongée."});
 lzPF("bronchite-chronique",{t:"Les bronches produisent trop de mucus en permanence",sub:"Toux et crachats au moins 3 mois par an, 2 années de suite : la paroi s'épaissit",zones:["bronches"],pt:[188,96],bg:"#F6E3DE",
  inner:()=>lzBr(248,96,54,{lum:.44,thick:1,mus:.12,mucus:6,seed:9})+lzDots(204,58,90,10,5,3,(x,y)=>lzE(x,y,5,3,"#F3EBC8","#C9BE8E",.6)),zt:["Paroi épaissie, glandes à mucus","plus nombreuses"],
- extra:()=>lzBr(164,206,15,{seed:2})+lzS(164,234,"bronche\nnormale","middle")+lzLL(186,"Le plus souvent\nle tabac",1),
+ extra:()=>lzBr(164,206,15,{seed:2})+lzS(164,232,"bronche normale","middle")+lzLL(186,"Le plus souvent\nle tabac",1),
  cap:"Première étape de la BPCO. L'**arrêt du tabac** stoppe l'évolution ; kinésithérapie respiratoire pour drainer les crachats."});
 lzPF("bronchiolite",{t:"Les petites bronches du nourrisson se bouchent",sub:"Un virus (souvent le VRS) enflamme les bronchioles : mucus et débris les obstruent",zones:["bronches"],pt:[188,96],bg:"#F6E3DE",
  inner:()=>lzBr(232,92,34,{lum:.34,red:1,mucus:4,seed:6})+lzVirus(270,62,5)+lzAlvC(274,128,["air","aplati","air","aplati"],{r:9}),zt:["Bronchiole bouchée :","l'air passe mal"],
@@ -54,7 +54,7 @@ lzPF("mucoviscidose",{t:"Un mucus trop épais bouche les bronches",sub:"Maladie 
  cap:"**Kinésithérapie respiratoire** quotidienne, aérosols, antibiotiques, enzymes pancréatiques et alimentation enrichie. Hygiène stricte pour éviter les germes (Pseudomonas)."});
 lzPF("ddb",{t:"Les bronches se dilatent et ne se vident plus",sub:"Dilatation des bronches : leur paroi abîmée laisse stagner des sécrétions qui s'infectent",zones:["bronches"],pt:[188,96],bg:"#F6E3DE",
  inner:()=>lzBr(248,96,54,{lum:.8,mus:.04,seed:3})+lzP("M210 116 Q248 128 286 116 Q280 136 248 138 Q216 136 210 116 Z","#D9D27A","#9A9330",1)+lzDots(222,118,50,14,6,5,lzBact),zt:["Bronche dilatée,","pleine de sécrétions infectées"],
- extra:()=>lzBr(164,206,15,{seed:2})+lzS(164,234,"bronche\nnormale","middle")+lzLL(186,"Toux et crachats\nabondants chaque jour",0),
+ extra:()=>lzBr(164,206,15,{seed:2})+lzS(164,232,"bronche normale","middle")+lzLL(186,"Toux et crachats\nabondants chaque jour",0),
  cap:"Drainage bronchique quotidien (kinésithérapie, positions), traitement rapide des surinfections, vaccinations."});
 /* ============ Alvéoles ============ */
 lzPF("pneumonie-com",{t:"Les alvéoles d'un lobe se remplissent de pus",sub:"Une bactérie (souvent le pneumocoque) infecte le poumon : le lobe devient « plein »",zones:[],pt:[104,152],over:`<ellipse cx="54" cy="122" rx="20" ry="22" style="fill:#D9B45A;opacity:.55"/>`,bg:"#FBF1EF",
@@ -84,7 +84,7 @@ lzPF("fibrose-pulm",{t:"Le tissu du poumon se transforme en cicatrice",sub:"Les 
  cap:"Évolution lente vers l'insuffisance respiratoire. Oxygénothérapie, réhabilitation, traitements antifibrosants ; éviter les infections (vaccins)."});
 lzPF("sdra",{t:"Les alvéoles des deux poumons se remplissent de liquide",sub:"Une agression grave (infection, choc, inhalation) rend les capillaires perméables : œdème lésionnel",zones:["alveoles","vaisseaux"],pt:[268,176],over:lzDots(36,86,104,60,12,6,(x,y)=>lzC(x,y,5,LC.fluid,"none",0,";opacity:.55")),bg:"#FBF1EF",
  inner:()=>lzAlvC(248,96,["plein","eau","plein","plein","eau","plein"])+lzDots(212,60,72,72,6,4,(x,y)=>lzWbc(x,y,3.6)),zt:["Alvéoles inondées et","inflammation intense"],
- extra:()=>lzLL(196,"Hypoxie sévère malgré\nl'oxygène",1),pill:"Réanimation : ventilation protectrice, décubitus ventral",
+ extra:()=>lzLL(196,"Hypoxie sévère malgré\nl'oxygène",1),pill:"Ventilation protectrice, décubitus ventral",
  cap:"Le cœur n'est pas en cause (contrairement à l'OAP cardiogénique). Prise en charge en réanimation ; surveillance de la SpO₂ et des gaz du sang."});
 lzPF("atelectasie",{t:"Une partie du poumon s'affaisse",sub:"La bronche est bouchée (mucus, corps étranger, tumeur) : l'air en aval est résorbé et les alvéoles s'aplatissent",zones:["alveoles","bronches"],pt:[188,96],over:`<ellipse cx="128" cy="132" rx="16" ry="12" style="fill:#B9A6A2;opacity:.6"/>`,bg:"#FBF1EF",
  inner:()=>lzP("M200 96 L240 96","none","#E7A39A",14)+lzP("M200 96 L240 96","none",LC.air,9)+lzE(232,96,7,5,"#F3EBC8","#C9BE8E",1)+lzAlvC(270,96,"aplati",{r:13}),zt:["Bronche bouchée : alvéoles","affaissées, sans air"],
