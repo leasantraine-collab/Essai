@@ -43,13 +43,13 @@ function tbInit(){
   <nav class="list tb-list" aria-label="Outils">${TOOLS.map(t=>`<a class="li" href="#outil/${t.id}" data-tool="${t.id}"><span class="ic tb-ic" style="--c:${t.c}">${OT_IC[t.id]}</span><span><span class="t">${esc(t.n)}</span><span class="s">${esc(t.d)}</span></span>${chev}</a>`).join("")}</nav>
   <a class="btn ghost block" href="#outils">Voir la page des outils</a>`;
  document.body.append(rail,tab,back,dr);
+ if(store.get("tbSeen",0))document.body.classList.add("tb-known");
  tab.addEventListener("click",()=>tbToggle(true));
  back.addEventListener("click",()=>tbToggle(false));
  dr.addEventListener("click",e=>{if(e.target.closest("[data-tb=close]"))tbToggle(false);else if(e.target.closest("a"))tbToggle(false,true);});
  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&tbOpen)tbToggle(false);});
  let lastY=window.scrollY;
- window.addEventListener("scroll",()=>{const y=window.scrollY,d=y-lastY;if(Math.abs(d)<6)return;document.body.classList.toggle("tb-scroll",d>0&&y>80);lastY=y;
-  clearTimeout(tbInit.t);tbInit.t=setTimeout(()=>document.body.classList.remove("tb-scroll"),1600);},{passive:true});
+ window.addEventListener("scroll",()=>{const y=window.scrollY,d=y-lastY;if(Math.abs(d)<6&&y>80)return;document.body.classList.toggle("tb-scroll",d>0&&y>80);lastY=y;},{passive:true});
  document.addEventListener("focusin",e=>{const t=e.target;document.body.classList.toggle("tb-typing",!!(t&&t.matches&&t.matches("input:not([type=checkbox]):not([type=radio]),textarea,select")&&!t.closest(".tb-drawer")));});
  document.addEventListener("focusout",()=>setTimeout(()=>{const a=document.activeElement;if(!a||!a.matches||!a.matches("input:not([type=checkbox]):not([type=radio]),textarea,select"))document.body.classList.remove("tb-typing");},0));
 }
@@ -57,14 +57,16 @@ function tbToggle(on,nav){
  tbOpen=on;document.body.classList.toggle("tb-on",on);
  const tab=document.querySelector(".tb-tab"),dr=document.querySelector(".tb-drawer");if(!tab||!dr)return;
  tab.setAttribute("aria-expanded",String(on));dr.setAttribute("aria-hidden",String(!on));
- if(on){tbLast=document.activeElement;haptic();setTimeout(()=>{const f=dr.querySelector(".tb-list a");f&&f.focus({preventScroll:true});},80);}
+ if(on){tbLast=document.activeElement;haptic();if(!store.get("tbSeen",0)){store.set("tbSeen",1);setTimeout(()=>document.body.classList.add("tb-known"),400);}setTimeout(()=>{const f=dr.querySelector(".tb-list a");f&&f.focus({preventScroll:true});},80);}
  else if(!nav&&tbLast&&tbLast.focus)tbLast.focus({preventScroll:true});
 }
 function tbSync(r){
  const cur=r.v==="outil"?(r.arg||"").split("/")[0]:"";
  document.querySelectorAll(".tb-rail a[data-tool],.tb-drawer a[data-tool]").forEach(a=>a.dataset.tool===cur?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current"));
  const h=document.querySelector(".tb-rail .tb-head");if(h){r.v==="outils"?h.setAttribute("aria-current","page"):h.removeAttribute("aria-current");}
- document.body.classList.toggle("tb-off",r.v==="perso"||(r.v==="accueil"&&!!state.hwEdit));
+ /* Caché sur la page des outils, la personnalisation de l'accueil et pendant une séance (cartes, partiel, épreuve de calculs) */
+ document.body.classList.toggle("tb-off",r.v==="perso"||r.v==="outils"||(r.v==="accueil"&&!!state.hwEdit)||(r.v==="entrainer"&&!!(state.srs||(state.pb&&!state.pb.res)||(state.cxs&&!state.cxs.res))));
+ document.body.classList.remove("tb-scroll");
 }
 
 /* ---------- Vues ---------- */

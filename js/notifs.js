@@ -219,7 +219,7 @@ function vNotifs(){
    <div class="sheet-body nt-up" id="nt-up">${ntUpList()}</div>
    ${on?"":`<p class="ot-hint">Ces rappels seront envoyés une fois les notifications activées.</p>`}</section>
   <div class="callout"><b>${isNative?"Rappels programmés sur le téléphone":"Sur le web"}</b><p>${isNative?"Les rappels arrivent même quand l'appli est fermée. Ils sont programmés jusqu'à 60 à l'avance : ouvrez l'appli de temps en temps pour programmer les suivants.":"Le navigateur ne peut pas réveiller une page web à heure fixe : les rappels arrivent quand Carnet IFSI est ouvert ou en arrière-plan, et ceux que vous avez manqués s'affichent à la réouverture. Pour être prévenu·e appli fermée, utilisez l'appli Android ou iPhone, ou exportez votre planning vers l'agenda du téléphone : les alarmes sont incluses."}</p></div>
-  <button class="btn ghost block" data-act="ot-ag-ics">${OT_IC.planning}Exporter mon planning vers l'agenda (avec alarmes)</button>
+  <button class="btn ghost block" data-act="ot-ag-ics">${OT_IC.planning}Exporter vers mon agenda</button>
   <p class="disclaimer">Les rappels sont calculés sur cet appareil à partir de vos données ; rien n'est envoyé en ligne.</p></div>`;
 }
 /* Invitation discrète à activer les rappels, là où ils servent (accueil, planning, stage). */
