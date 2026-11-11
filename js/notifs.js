@@ -82,7 +82,7 @@ function ntPlan(now){
   if(nx){const j=Math.round((parseD(nx.date)-parseD(d))/DAY);parts.push(`${nx.nom} dans ${plural(j,"jour")}`);}
   const n=ev.length+ex.length+(stg?1:0);
   if(parts.length)add(`dig:${d}`,ts,n?`Au programme : ${plural(n,"événement")}`:"Votre journée",parts.join(" · "),n||late?"outil/planning":"accueil",ts+5*36e5);
-  else if(C.daily)add(`dly:${d}`,ts,"Un petit moment de révision ?","Rien de prévu aujourd'hui : quelques questions de quiz pour garder le rythme.","entrainer",ts+12*36e5);}
+  else if(C.daily)add(`dly:${d}`,ts,"Un petit moment de révision ?","Rien de prévu aujourd'hui : quelques cartes pour garder le rythme.","entrainer/cartes",ts+12*36e5);}
  out.sort((a,b)=>a.at-b.at);
  const seen=new Set(),U=out.filter(x=>!seen.has(x.k)&&seen.add(x.k));
  if(U.length<=NT_MAX)return U;

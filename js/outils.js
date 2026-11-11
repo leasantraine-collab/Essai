@@ -428,7 +428,7 @@ function otTfe(){
    <div class="cd-form sheet-body"><div class="cd-row">${otField("tfe-rendu","Date de rendu du mémoire",`<input id="tfe-rendu" type="date" data-ot="tfe.rendu" value="${esc(T.rendu)}">`)}${otField("tfe-sout","Date de soutenance",`<input id="tfe-sout" type="date" data-ot="tfe.sout" value="${esc(T.sout)}">`)}</div>
     <div id="tfe-plan">${plan||`<p class="muted">Indiquez la date de rendu pour obtenir des échéances intermédiaires.</p>`}</div></div></section>
   <div class="list"><a class="li" href="#cours/tfe-0"><span class="ic tb-ic" style="--c:#6E5196">${OT_IC.tfe}</span><span><span class="t">Cours : le mémoire de A à Z</span><span class="s">Attendus, calendrier, évaluation, les 12 étapes</span></span>${chev}</a>
-   <button type="button" class="li" data-act="go-cat" data-k="tfe"><span class="ic tb-ic" style="--c:#6E5196">${OT_IC.tfe}</span><span><span class="t">Tous les cours du mémoire</span><span class="s">Un cours détaillé par étape, quiz du mémoire</span></span>${chev}</button></div>`;
+   <button type="button" class="li" data-act="go-cat" data-k="tfe"><span class="ic tb-ic" style="--c:#6E5196">${OT_IC.tfe}</span><span><span class="t">Tous les cours du mémoire</span><span class="s">Un cours détaillé par étape, avec ses cartes de révision</span></span>${chev}</button></div>`;
 }
 function eqOut(fr,en){
  if(!fr&&!en)return `<p class="muted">L'équation apparaît ici quand vous remplissez au moins un concept.</p>`;
@@ -649,7 +649,6 @@ const OT_VIEWS={projet:a=>otProjet(a),urgences:otUrgences,planning:otPlanning,pa
 function outilAct(b,a){
  const k=b.dataset.k,id=b.dataset.id;
  if(a==="ot-copy"){otCopy(k||"");return;}
- if(a==="ot-af-quiz"){launchQuiz(QUIZ.map((q,i)=>q.af?i:-1).filter(i=>i>=0),"Quiz urgences AFGSU");return;}
  /* Planning */
  if(a==="ot-ag-week"){state.agWeek=k==="0"?mondayOf(todayISO()):addDays(state.agWeek||mondayOf(todayISO()),7*(+k));render();}
  else if(a==="ot-ag-new"){state.agForm=true;state.agGen=false;state.agDay=k||todayISO();state.agTy=b.dataset.ty||null;render();setTimeout(()=>{const i=document.getElementById("ag-t");if(i){i.focus({preventScroll:true});i.scrollIntoView({block:"center"});}},40);}

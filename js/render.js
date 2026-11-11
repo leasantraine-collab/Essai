@@ -456,9 +456,9 @@ function fvRender(f){
   <div class="fv-body">${body}
    <div class="fv-end">
     <h3>${done?"Fiche révisée":"Vous avez terminé la fiche"}</h3>
-    <p class="muted">Marquez-la comme révisée pour suivre votre progression, puis testez-vous.</p>
+    <p class="muted">Marquez-la comme révisée pour suivre votre progression, puis testez-vous avec les cartes, juste en dessous.</p>
     <div class="row2"><button class="btn ${done?"ghost":"ok"}" data-act="fv-done" data-id="${f.id}">${done?"Retirer des révisées":"J'ai révisé cette fiche"}</button>
-    ${QUIZ.some(q=>q.cat===f.cat)?`<button class="btn ghost" data-act="fv-quiz" data-k="${f.cat}">Quiz ${esc(cat.nom)}</button>`:""}</div>
+    </div>
     ${next?`<button class="card cat fv-next" style="--c:${cat.c}" data-act="fiche" data-id="${next.id}"><span class="eyebrow">Fiche suivante</span><h3>${esc(next.titre)}</h3></button>`:""}
    </div>
   </div></article>`;
@@ -542,9 +542,9 @@ function cvRender(c){
    <div class="fv-key"><h3>${SVG.bulb}L'essentiel du cours</h3><ul>${c.ess.map(e=>`<li>${md(e)}</li>`).join("")}</ul></div>
    <div class="fv-end">
     <h3>${done?"Cours étudié":"Vous avez terminé le cours"}</h3>
-    <p class="muted">Relisez l'essentiel, répondez aux questions de chaque chapitre sans regarder, puis passez au quiz.</p>
+    <p class="muted">Relisez l'essentiel, répondez aux questions de chaque chapitre sans regarder, puis testez-vous avec les cartes, juste en dessous.</p>
     <div class="row2"><button class="btn ${done?"ghost":"ok"}" data-act="cv-done" data-id="${c.id}">${done?"Retirer des cours étudiés":"J'ai étudié ce cours"}</button>
-    ${QUIZ.some(q=>q.cat===c.cat)?`<button class="btn ghost" data-act="fv-quiz" data-k="${c.cat}">Quiz ${esc(cat.nom)}</button>`:""}</div>
+    </div>
     ${next?`<button class="card cat fv-next" style="--c:${CAT[next.cat].c}" data-act="cours" data-id="${next.id}"><span class="eyebrow">${c.cat==="tfe"?"Étape suivante":"Cours suivant"}</span><h3>${esc(next.titre)}</h3></button>`:""}
    </div>
   </div></article>`;

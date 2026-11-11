@@ -137,7 +137,7 @@ function afList(){
    <div class="cd-row">${otField("af-date","Date d'obtention",`<input id="af-date" type="date" data-ot="af.date" value="${esc(s.date||"")}">`)}${otField("af-tel","Numéro d'urgence interne",`<input id="af-tel" type="tel" data-ot="af.tel" value="${esc(s.tel||"")}" placeholder="Ex. 2222" maxlength="20">`)}</div>
    <div id="af-valid">${validity}</div>
    <small class="ot-hint">Le numéro interne change selon l'établissement : notez celui de votre lieu de stage.</small></section>
-  <button type="button" class="btn block" data-act="ot-af-quiz">${IC.bolt}S'entraîner : quiz urgences</button>
+  <button type="button" class="btn block" data-act="srs-deckgo" data-k="fam:a:afgsu" data-l="Urgences AFGSU">${SRS_IC.cards}S'entraîner en cartes : urgences</button>
   <a class="list" href="#cours/urgence-c"><span class="li"><span class="ic tb-ic" style="--c:#C8372D">${OT_IC.urgences}</span><span><span class="t">Cours : les soins d'urgence</span><span class="s">Chaîne de survie, ABCDE, choc, chariot d'urgence</span></span>${chev}</span></a>
   <p class="disclaimer">Ces fiches rappellent les gestes appris en formation AFGSU. Elles ne remplacent ni la formation pratique, obligatoire, ni les protocoles de votre établissement.</p>`.replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");
 }

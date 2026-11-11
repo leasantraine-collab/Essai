@@ -27,7 +27,7 @@ function mdLinks(o){return o.f.map(x=>{
 
 function vMed(id){
  const o=MDBY[id];if(!o)return notFound();
- const S=MD_SEC[o.s],C=CAT.thera,mode=state.mdMode||"recap",done=mdDone().includes(id),qs=QUIZ.filter(q=>q.mid===id);
+ const S=MD_SEC[o.s],C=CAT.thera,mode=state.mdMode||"recap",done=mdDone().includes(id);
  const list=mdSecMeds(o.s),k=list.indexOf(o),next=list[k+1],col=MD_COL(o.s),links=mdLinks(o);
  const secs=[
   ["Présentation de la classe",o.d.map((x,i)=>`<p class="${i?"cv-p":"fv-lead"}">${pmd(x)}</p>`).join("")],
@@ -67,8 +67,8 @@ function vMed(id){
  }
  return `<article class="fv px so md" style="--c:${col}">${hero}${toc}<div class="fv-body"><div class="px-head">${seg}</div>${body}
   ${links?`<section class="stack-sm"><h3 class="cn-g">Pour aller plus loin dans l'appli</h3><div class="chips wrapchips">${links}</div></section>`:""}
-  <div class="fv-end"><h3>${done?"Fiche étudiée":"Vous avez terminé"}</h3><p class="muted">Marquez-la comme étudiée, puis testez-vous.</p>
-   <div class="row2"><button class="btn ${done?"ghost":"ok"}" data-act="md-done" data-k="${id}">${done?"Retirer des étudiées":"J'ai étudié cette fiche"}</button>${qs.length?`<button class="btn ghost" data-act="md-quiz" data-k="${id}">${IC.bolt}Me tester · ${qs.length}</button>`:""}</div>
+  <div class="fv-end"><h3>${done?"Fiche étudiée":"Vous avez terminé"}</h3><p class="muted">Marquez-la comme étudiée, puis testez-vous avec les cartes, juste en dessous.</p>
+   <div class="row2"><button class="btn ${done?"ghost":"ok"}" data-act="md-done" data-k="${id}">${done?"Retirer des étudiées":"J'ai étudié cette fiche"}</button></div>
    ${next?`<a class="card cat fv-next" style="--c:${col}" href="#med/${next.i}" data-act="md-open" data-k="${mode}"><span class="eyebrow">Fiche suivante</span><h3>${esc(next.n)}</h3></a>`:""}</div></div></article>`;
 }
 
@@ -82,8 +82,8 @@ function mdRevList(isF){const s=mdSecCur(),q=mdK(state.mdq||""),dn=mdDone();let 
  return h||`<div class="empty">Aucune classe ni aucun médicament ne correspond à « ${esc(state.mdq)} ».</div>`;}
 function mdRev(isF){
  const s=mdSecCur(),S=s==="all"?null:MD_SEC[s],n=S?mdSecMeds(s).length:mdN(),dn=mdDone();
- const tools=S?(()=>{const ids=new Set(mdSecMeds(s).map(o=>o.i)),nq=QUIZ.filter(q=>ids.has(q.mid)).length,d=[...ids].filter(i=>dn.includes(i)).length;
-   return nq||d?`<div class="px-spebtns">${nq?`<button class="btn sm" data-act="md-sec-quiz" data-k="${s}">${IC.bolt}Quiz · ${nq}</button>`:""}${d?`<span class="muted px-spedone">${d} étudiée${d>1?"s":""}</span>`:""}</div>`:"";})():"";
+ const tools=S?(()=>{const ids=new Set(mdSecMeds(s).map(o=>o.i)),nq=srsKeysCards([...ids].map(i=>"m:"+i)).length,d=[...ids].filter(i=>dn.includes(i)).length;
+   return nq||d?`<div class="px-spebtns">${nq?`<button class="btn sm" data-act="md-sec-cards" data-k="${s}">${SRS_IC.cards}Cartes · ${nq}</button>`:""}${d?`<span class="muted px-spedone">${d} étudiée${d>1?"s":""}</span>`:""}</div>`:"";})():"";
 
  return `<span class="eyebrow px-revlab" id="px-top">Spécialité</span>
   <div class="px-revbar"><label class="px-sel" style="--c:${S?MD_COL(s):"var(--brand)"}"><span class="dot"></span><b>${esc(S?S.nom:"Toutes les spécialités")}</b><small>${n}</small><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
@@ -106,8 +106,7 @@ function mdAct(b,a){const k=b.dataset.k;
  if(a==="md-go"){nav("reviser/meds");return;}
  if(a==="md-mode"){state.mdMode=k;render();const t=document.querySelector(".px-head");if(t)t.scrollIntoView();return;}
  if(a==="md-done"){let d=mdDone();const on=!d.includes(k);d=on?[...d,k]:d.filter(x=>x!==k);store.set("mddone",d);haptic();if(on)toast("Fiche marquée comme étudiée");render();return;}
- if(a==="md-quiz"){launchQuiz(QUIZ.map((q,i)=>i).filter(i=>QUIZ[i].mid===k),"Quiz · "+MDBY[k].n);return;}
- if(a==="md-sec-quiz"){const ids=new Set(mdSecMeds(k).map(o=>o.i));launchQuiz(QUIZ.map((q,i)=>i).filter(i=>ids.has(QUIZ[i].mid)).sort(()=>Math.random()-.5).slice(0,20),"Quiz · "+MD_SEC[k].nom);return;}
+ if(a==="md-sec-cards"){srsKeysGo(mdSecMeds(k).map(o=>"m:"+o.i),MD_SEC[k].nom);return;}
 }
 function mdInput(t){
  if(t.id==="mdsec"){if(mdSecCur()!==t.value){state.mdSec=t.value;store.set("mdsec",t.value);render();pxBind(true);}return true;}

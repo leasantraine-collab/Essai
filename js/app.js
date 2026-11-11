@@ -41,12 +41,12 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.51 · 8 novembre 2026";
+const APP_VERSION="1.52 · 11 novembre 2026";
 
 /* ---------- État ---------- */
-let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,quiz:null,quizCat:"all",
+let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,
   ueRef:store.get("ueRef","2026"),sem:store.get("sem",1),ue:null};
-const stats=()=>store.get("stats",{exOk:0,exTot:0,quizBest:null});
+const stats=()=>store.get("stats",{exOk:0,exTot:0});
 
 /* ---------- Données dérivées ---------- */
 const FULL_COURS=COURS.filter(c=>c.chap);
@@ -88,7 +88,7 @@ applyTheme();
 
 /* ---------- Routage ---------- */
 const ROOTS=["accueil","reviser","entrainer","stages","programme"];
-const PARENT={a4:"reviser",perso:"accueil","stage-hist":"stages",outil:"outils",outils:"accueil",med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil",notifs:"reglages",legal:"reglages",progression:"entrainer"};
+const PARENT={mescartes:"entrainer",a4:"reviser",perso:"accueil","stage-hist":"stages",outil:"outils",outils:"accueil",med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil",notifs:"reglages",legal:"reglages",progression:"entrainer"};
 function route(){const [v,...rest]=decodeURIComponent(location.hash.slice(1)).split("/");return {v:VIEWS[v]?v:"accueil",arg:rest.join("/")};}
 function nav(h){if(location.hash==="#"+h)render(true);else location.hash=h;}
 let depth=0;
@@ -226,9 +226,9 @@ function vFiche(id){
    <span class="fv-kicker">${esc(cat.nom)} · ${esc(f.theme)}</span><h1>${esc(f.titre)}</h1>
    <div class="fv-meta">${(f.ue&&f.ue[state.ueRef]||[]).map(u=>`<span class="m">UE ${esc(u)}</span>`).join("")}</div></header>
   <div class="sheet-body">${f.body}</div>
-  <div class="fv-end"><h3>${done?"Fiche révisée":"Vous avez terminé la fiche"}</h3><p class="muted">Marquez-la comme révisée pour suivre votre progression, puis testez-vous.</p>
+  <div class="fv-end"><h3>${done?"Fiche révisée":"Vous avez terminé la fiche"}</h3><p class="muted">Marquez-la comme révisée pour suivre votre progression, puis testez-vous avec les cartes, juste en dessous.</p>
    <div class="row2"><button class="btn ${done?"ghost":"ok"}" data-act="fv-done" data-id="${id}">${done?"Retirer des révisées":"J'ai révisé cette fiche"}</button>
-   ${QUIZ.some(q=>q.cat===f.cat)?`<button class="btn ghost" data-act="fv-quiz" data-k="${f.cat}">Quiz ${esc(cat.nom)}</button>`:""}</div></div></article>`;
+   </div></div></article>`;
 }
 function vCoursView(id){
  const c=COURS.find(x=>x.id===id);if(!c||c.pro)return notFound();
@@ -240,43 +240,9 @@ function vCoursView(id){
    <span class="fv-kicker">Cours · ${esc(cat.nom)}</span><h1>${esc(c.titre)}</h1>
    <div class="fv-meta"><span>≈ ${esc(c.duree)}</span>${(c.ue&&c.ue[state.ueRef]||[]).map(u=>`<span class="m">UE ${esc(u)}</span>`).join("")}</div></header>
   ${c.sections.map((s,i)=>`<section class="sheet-body"><div class="fv-sh"><span class="fv-num">${String(i+1).padStart(2,"0")}</span><h2>${esc(s[0])}</h2></div><p>${esc(s[1])}</p>${s[2]?schFig(s[2].k,s[2].cap):""}</section>`).join("")}
-  ${QUIZ.some(q=>q.cat===c.cat)?`<button class="btn block" data-act="fv-quiz" data-k="${c.cat}">Vérifier mes connaissances</button>`:""}</article>`;
+  </article>`;
 }
 const notFound=()=>`<div class="stack-lg">${backBtn("Retour")}<div class="empty">Ce contenu est introuvable.</div></div>`;
-
-/* ---------- S'entraîner : quiz ---------- */
-function startQuiz(list,label){state.quiz={order:list.slice().sort(()=>Math.random()-.5),src:list.slice(),i:0,score:0,answered:null,label};}
-const quizIdx=f=>QUIZ.map((q,i)=>i).filter(i=>f(QUIZ[i]));
-function vQuizHome(){
- const present=CATS.filter(c=>QUIZ.some(q=>q.cat===c.id)),nW=wrongs().length;
- const n=state.quizCat==="all"?QUIZ.length:QUIZ.filter(q=>q.cat===state.quizCat).length;
- return `<div class="q-modes">
-   <button class="qa" data-act="quiz-quick" style="flex-direction:row;align-items:center"><span class="ic">${IC.bolt}</span><span style="flex:1"><b>Quiz express</b><br><small>10 questions tirées au hasard</small></span>${chev}</button>
-   <button class="qa" data-act="quiz-wrong" style="flex-direction:row;align-items:center${nW?"":";opacity:.55"}" ${nW?"":"disabled"}><span class="ic acc">${IC.redo}</span><span style="flex:1"><b>Revoir mes erreurs</b><br><small>${nW?plural(nW,"question")+" ratée"+(nW>1?"s":""):"Les questions ratées apparaîtront ici"}</small></span>${chev}</button>
-  </div>
-  <section class="stack-sm"><div class="section-title"><h2>Par catégorie</h2></div>
-   <div class="chips wrapchips" role="group" aria-label="Catégorie du quiz">
-    <button class="chip" data-act="quiz-cat" data-k="all" aria-pressed="${state.quizCat==="all"}">Tout mélanger</button>
-    ${present.map(c=>`<button class="chip" style="--c:${c.c}" data-act="quiz-cat" data-k="${c.id}" aria-pressed="${state.quizCat===c.id}"><i></i>${esc(c.nom)}</button>`).join("")}</div>
-   <button class="btn block" data-act="quiz-start">${IC.play}Commencer · ${plural(n,"question")}</button></section>
-  ${pxQuizBlock()}`;
-}
-function vQuizRun(){
- const z=state.quiz;
- if(z.i>=z.order.length){const pct=Math.round(z.score/z.order.length*100);
-  return `<div class="stack-lg"><div class="q-top"><span class="eyebrow">${esc(z.label||"Quiz")}</span><button class="q-close" data-act="quiz-reset">Fermer</button></div>
-   <div class="score-hero">${ring(pct,140)}<h1>${z.score} / ${z.order.length}</h1>
-   <p class="lead">${pct>=85?"Excellent, vous maîtrisez cette partie.":pct>=60?"Bien. Relisez les fiches sur vos erreurs.":"Reprenez les fiches récap, puis retentez."}</p></div>
-   <div class="btn-row"><button class="btn" data-act="quiz-again">Recommencer</button><button class="btn ghost" data-act="quiz-reset">Autre quiz</button></div></div>`;}
- const q=QUIZ[z.order[z.i]],L="ABCDEF";
- return `<div class="stack-lg"><div class="stack-sm"><div class="q-top"><span class="eyebrow">Question ${z.i+1} sur ${z.order.length}</span><button class="q-close" data-act="quiz-reset">Quitter</button></div>
-  <div class="progress"><i style="width:${(z.i+(z.answered!=null?1:0))/z.order.length*100}%"></i></div></div>
-  <div class="q-card"><div>${sticker(q.cat)}</div><h2>${esc(q.q)}</h2>
-  <div class="stack-sm">${q.o.map((o,k)=>{let c="";if(z.answered!=null){if(k===q.a)c="good";else if(k===z.answered)c="wrong";}
-   return `<button class="opt ${c}" data-act="quiz-ans" data-k="${k}" ${z.answered!=null?"disabled":""}><span class="l">${L[k]}</span><span>${esc(o)}</span></button>`}).join("")}</div>
-  ${z.answered!=null?`<div class="feedback ${z.answered===q.a?"ok":"ko"}"><b>${z.answered===q.a?"Bonne réponse":"Pas tout à fait"}</b><span>${esc(q.e)}</span></div>`:""}</div>
-  ${z.answered!=null?`<button class="btn block" data-act="quiz-next">${z.i+1<z.order.length?"Question suivante":"Voir mon score"}</button>`:""}</div>`;
-}
 
 /* ---------- S'entraîner : calculs ---------- */
 function vCalc(){
@@ -293,18 +259,19 @@ function vCalc(){
   <a class="list" href="#reviser/fiches" data-act="go-cat" data-k="calcul-fiches"><span class="li"><span class="ic" style="--c:${CAT.calcul.c}">${CAT_IC.calcul}</span><span><span class="t">Revoir les formules</span><span class="s">Fiches Calculs et dosages</span></span>${chev}</span></a>
 `;
 }
-const TRAIN_MODES=[["cartes","Cartes"],["quiz","Quiz"],["partiels","Partiels"],["calculs","Calculs"],["schemas","Schémas"]];
+const TRAIN_MODES=[["cartes","Cartes"],["partiels","Partiels"],["calculs","Calculs"],["schemas","Schémas"]];
 function vEntrainer(arg){
+ /* L'ancien quiz est remplacé par les cartes */
+ if(arg==="quiz"){location.replace("#entrainer/cartes");return "";}
  if(TRAIN_MODES.some(m=>m[0]===arg))state.train=arg;
- if(state.train==="quiz"&&state.quiz)return vQuizRun();
  if(state.train==="cartes"&&state.srs)return vSrsRun();
  if(state.train==="partiels"&&state.pb)return vPbRun();
  if(state.train==="calculs"&&state.cxs)return vCxRun();
  const T=TRAIN_MODES.some(m=>m[0]===state.train)?state.train:"cartes";
- const H={cartes:["Cartes de révision","Des cartes créées à partir de vos contenus, qui reviennent juste avant que vous les oubliiez."],quiz:["Quiz",`${QUIZ.length} questions, chaque réponse est expliquée.`],partiels:["Partiels blancs","Par UE ou par semestre, chronométrés et notés sur 20, avec la correction."],calculs:["Calculs de dose","Des niveaux progressifs, une épreuve blanche chronométrée et l'entraînement libre."],schemas:["Schémas à compléter","Placez les structures sur les schémas et remettez les étapes dans l'ordre."]}[T];
+ const H={cartes:["Cartes de révision","Des cartes prêtes pour chaque contenu et celles que vous écrivez, qui reviennent juste avant que vous les oubliiez."],partiels:["Partiels blancs","Par UE ou par semestre, chronométrés et notés sur 20, avec la correction."],calculs:["Calculs de dose","Des niveaux progressifs, une épreuve blanche chronométrée et l'entraînement libre."],schemas:["Schémas à compléter","Placez les structures sur les schémas et remettez les étapes dans l'ordre."]}[T];
  return `<div class="stack-lg">${vh("S'entraîner",H[0],H[1],`<a class="icon-btn" href="#progression" aria-label="Ma progression par UE">${EX_IC.chart}</a>`)}
-  <div class="seg five" role="group" aria-label="Type d'entraînement">${TRAIN_MODES.map(([k,l])=>`<button data-act="train" data-k="${k}" aria-pressed="${T===k}">${l}</button>`).join("")}</div>
-  ${T==="quiz"?vQuizHome():T==="schemas"?vSchemas():T==="cartes"?vSrsHome():T==="partiels"?vPbHome():vCalc()}</div>`;
+  <div class="seg four" role="group" aria-label="Type d'entraînement">${TRAIN_MODES.map(([k,l])=>`<button data-act="train" data-k="${k}" aria-pressed="${T===k}">${l}</button>`).join("")}</div>
+  ${T==="schemas"?vSchemas():T==="cartes"?vSrsHome():T==="partiels"?vPbHome():vCalc()}</div>`;
 }
 
 /* ---------- Stages ---------- */
@@ -394,7 +361,7 @@ function vUE(code){
  const L=ueContent(u[0],state.ueRef),sm=ueSummary(L);
  return `<div class="stack-lg">${backBtn("Programme")}
   <header class="vh"><span class="eyebrow">UE ${u[0]} · ${esc(R.groups[u[2]])}</span><h1>${esc(u[1])}</h1><p class="muted">Enseignée en ${u[3].map(s=>"S"+s).join(", ")} · ${esc(R.sub)}</p>${sm?`<p class="ue-sum">${esc(sm)}</p>`:""}</header>
-  ${L.q.length?`<button class="btn block" data-act="ue-quiz" data-k="${esc(u[0])}">${IC.play}Quiz de cette UE · ${plural(L.q.length,"question")}</button>`:""}
+  ${(n=>n?`<button class="btn block" data-act="srs-deckgo" data-k="ue:${esc(u[0])}" data-l="UE ${esc(u[0])}">${SRS_IC.cards}Réviser cette UE en cartes · ${plural(n,"carte")}</button>`:"")(srsDeckCards("ue:"+u[0]).length)}
   ${ueBody(u[0],state.ueRef)}
   ${!sm?`<div class="empty">Les contenus de cette UE arrivent bientôt.</div>`:""}</div>`;
 }
@@ -444,13 +411,13 @@ function vReglages(){
    <p class="muted" style="padding:0 4px">Votre progression reste sur cet appareil, rien n'est envoyé en ligne.</p></div>
   <div class="set-group"><span class="eyebrow">À propos</span><div class="list"><div class="set-row"><span>Carnet IFSI</span><span class="muted">Version ${APP_VERSION}</span></div>
    ${!isNative?`<button class="li" data-act="force-update" style="grid-template-columns:minmax(0,1fr)"><span class="t" style="color:var(--brand)">Rechercher une mise à jour</span></button>`:""}
-   <div class="set-row" style="display:block"><span class="muted">${FICHES.length} fiches, ${FULL_COURS.length} cours complets, ${QUIZ.length} questions, ${Object.keys(GEN).length} types de calculs et ${Object.keys(SCH).length} schémas. Contenus pédagogiques : vérifiez toujours avec vos cours et les protocoles de votre établissement.</span></div></div></div></div>`;
+   <div class="set-row" style="display:block"><span class="muted">${FICHES.length} fiches, ${FULL_COURS.length} cours complets, ${(typeof srsAuto==="function"?srsAuto().length:0).toLocaleString("fr-FR")} cartes de révision, ${Object.keys(GEN).length} types de calculs et ${Object.keys(SCH).length} schémas. Contenus pédagogiques : vérifiez toujours avec vos cours et les protocoles de votre établissement.</span></div></div></div></div>`;
 }
 
 /* ---------- Rendu ---------- */
-const VIEWS={outils:vOutils,outil:vOutil,med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,"stage-hist":vStageHist,perso:vPerso,a4:vA4,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages,notifs:vNotifs,legal:vLegal,progression:vProgression};
+const VIEWS={mescartes:vMesCartes,outils:vOutils,outil:vOutil,med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,"stage-hist":vStageHist,perso:vPerso,a4:vA4,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages,notifs:vNotifs,legal:vLegal,progression:vProgression};
 ["patho","soin","med"].forEach(v=>{const f=VIEWS[v],k={patho:"p",soin:"s",med:"m"}[v];VIEWS[v]=id=>withFav(f(id),k+":"+id);});
-const TAB={a4:"reviser",perso:"accueil","stage-hist":"stages",med:"reviser",soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil",notifs:"accueil",legal:"accueil",progression:"entrainer"};
+const TAB={mescartes:"entrainer",a4:"reviser",perso:"accueil","stage-hist":"stages",med:"reviser",soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil",notifs:"accueil",legal:"accueil",progression:"entrainer"};
 let lastKey=null;
 const SCROLL={};
 function render(top){
@@ -480,8 +447,10 @@ function checkCalc(show){
  haptic(e.done==="ok"?"LIGHT":"MEDIUM");
  const s=stats();s.exTot++;if(e.done==="ok")s.exOk++;store.set("stats",s);render();
 }
-function launchQuiz(list,label){if(!list.length){toast("Aucune question disponible");return;}startQuiz(list,label);state.train="quiz";nav("entrainer/quiz");}
 app.addEventListener("submit",ev=>{if(ev.target.id==="calc-form"){ev.preventDefault();checkCalc(false);}
+ else if(ev.target.id==="mc-form"){ev.preventDefault();mcSave(false);}
+ else if(ev.target.id==="mc-imp-form"){ev.preventDefault();mcImpSubmit();}
+ else if(ev.target.id==="mc-ren-form"){ev.preventDefault();mcRenSubmit(ev.target);}
  else if(ev.target.id.startsWith("cn-")){ev.preventDefault();carnetSubmit(ev.target);}
  else if(ev.target.id.startsWith("pl-")){ev.preventDefault();plSubmit(ev.target);}
  else if(ev.target.id.startsWith("ot-")){ev.preventDefault();outilSubmit(ev.target);}
@@ -506,6 +475,7 @@ app.addEventListener("input",ev=>{const t=ev.target;if(t.id==="q"){state.q=t.val
  else if(t.dataset.nt!=null)ntInput(t);
  else if(t.dataset.q!=null)qInput(t);
  else if(t.dataset.srs!=null)srsInput(t);
+ else if(t.dataset.mc!=null){if(t.dataset.mc!=="file"&&t.type!=="checkbox")mcInput(t);}
  else if(t.dataset.pb!=null||t.dataset.cx!=null)exInput(t);
  else pathoInput(t);});
 app.addEventListener("click",ev=>{
@@ -521,6 +491,7 @@ app.addEventListener("click",ev=>{
  if(a.startsWith("nt-")){ntAct(b,a);return;}
  if(a.startsWith("q-")){qAct(b,a);return;}
  if(a.startsWith("srs-")){srsAct(b,a);return;}
+ if(a.startsWith("mc-")){mcAct(b,a);return;}
  if(a.startsWith("pdf-")){pdfAct(b,a);return;}
  if(/^(pb|cx|pg)-/.test(a)){exAct(b,a);return;}
  if(a.startsWith("cn-")){carnetAct(b,a);return;}
@@ -532,7 +503,7 @@ app.addEventListener("click",ev=>{
  else if(a==="back"||a==="fiche-back"||a==="cours-back"){goBack();}
  else if(a==="go-cat"){ev.preventDefault();
   const sec={patho:"pathos",soins:"soins",exam:"surveillance",thera:"meds"}[k];
-  if(k==="stage")nav("stages");else if(sec)nav("reviser/"+sec);else if(k==="calcul")nav("entrainer/calculs");else if(k==="quiz")nav("entrainer/quiz");
+  if(k==="stage")nav("stages");else if(sec)nav("reviser/"+sec);else if(k==="calcul")nav("entrainer/calculs");else if(k==="quiz")nav("entrainer/cartes");
   else if(k==="calcul-fiches"){state.fichesFilter="calcul";nav("reviser/fiches");}
   else{const f=FICHES.some(x=>x.cat===k);state[(f?"fiches":"cours")+"Filter"]=k;nav("reviser/"+(f?"fiches":"cours"));}}
  else if(a==="rev"){state.rev=k;store.set("rev",k);render();}
@@ -546,27 +517,13 @@ app.addEventListener("click",ev=>{
  else if(a==="cours"){nav("cours/"+id);}
  else if(a==="fv-done"){let r=reviewed();const on=!r.includes(id);r=on?[...r,id]:r.filter(x=>x!==id);store.set("reviewed",r);haptic();if(on)toast("Fiche marquée comme révisée");render();}
  else if(a==="cv-done"){let r=studied();const on=!r.includes(id);r=on?[...r,id]:r.filter(x=>x!==id);store.set("studied",r);haptic();if(on)toast("Cours marqué comme étudié");render();}
- else if(a==="fv-quiz"){launchQuiz(quizIdx(q=>q.cat===k),"Quiz "+CAT[k].nom);}
  else if(a==="train"){state.train=k;location.replace("#entrainer/"+k);}
  else if(a==="calc-type"){state.calcType=k;state.ex=null;render();}
  else if(a==="calc-new"){state.ex=null;render();setTimeout(()=>{const i=document.getElementById("calc-in");i&&i.focus()},0);}
  else if(a==="calc-show")checkCalc(true);
- else if(a==="quiz-cat"){state.quizCat=k;render();}
- else if(a==="quiz-start"){launchQuiz(quizIdx(q=>state.quizCat==="all"||q.cat===state.quizCat),state.quizCat==="all"?"Toutes catégories":"Quiz "+CAT[state.quizCat].nom);}
- else if(a==="quiz-quick"){launchQuiz(QUIZ.map((q,i)=>i).sort(()=>Math.random()-.5).slice(0,10),"Quiz express");}
- else if(a==="quiz-wrong"){const w=wrongs();launchQuiz(quizIdx(q=>w.includes(q.q)),"Mes erreurs");}
- else if(a==="quiz-again"){startQuiz(state.quiz.src,state.quiz.label);render(true);}
- else if(a==="quiz-reset"){state.quiz=null;render(true);}
- else if(a==="quiz-ans"){const z=state.quiz,n=+k,q=QUIZ[z.order[z.i]];if(z.answered!=null)return;z.answered=n;
-  if(typeof exRecord==="function")exRecord("q",q.q,n===q.a,q.ue);
-  let w=wrongs();if(n===q.a){z.score++;w=w.filter(x=>x!==q.q);haptic("LIGHT");}else{if(!w.includes(q.q))w.push(q.q);haptic("HEAVY");}store.set("wrong",w);render();}
- else if(a==="quiz-next"){const z=state.quiz;z.i++;z.answered=null;
-  if(z.i>=z.order.length){const s=stats();if(s.quizBest==null||z.score>s.quizBest){s.quizBest=z.score;store.set("stats",s);}}
-  render();window.scrollTo(0,0);}
  else if(a==="ue-pg"){const o=state.uePg||(state.uePg={});o[k]=!b.parentElement.open;if(o[k]&&b.parentElement.classList.contains("ue-grp")){ev.preventDefault();const y=window.scrollY;render();window.scrollTo(0,y);}}
  else if(a==="ue-ref"){state.ueRef=k;store.set("ueRef",k);render();}
  else if(a==="sem"){state.sem=+k;store.set("sem",+k);render();}
- else if(a==="ue-quiz"){const r=state.ueRef;launchQuiz(quizIdx(q=>(q.ue[r]||[]).includes(k)),"Quiz UE "+k);}
  else if(a==="suggest"){state.q=k;render();}
  else if(a==="set"){const s=settings();s[b.dataset.n]=k;store.set("settings",s);applyTheme();render();}
  else if(a==="obj-add"){const sv=STAGES[+b.dataset.s],o=sv&&sv.obj[+b.dataset.i];if(!o)return;const st=stageInfo(),line=objText(o[1]);
@@ -586,7 +543,7 @@ app.addEventListener("click",ev=>{
   ["reviewed","studied","stats","wrong","favs","check","last","pxdone"].forEach(x=>{try{localStorage.removeItem("ifsi_"+x)}catch(e){}});haptic("MEDIUM");toast("Progression réinitialisée");render();}
 });
 app.addEventListener("change",ev=>{
- const t=ev.target;if(t.id==="restore-file"){if(t.files&&t.files[0])restoreData(t.files[0]);t.value="";return;}if(t.dataset.sf){saveStageField(t);return;}if(t.dataset.cn){carnetInput(t);return;}if(t.dataset.fs){feuilleInput(t);return;}if(t.dataset.px!=null||t.id==="pxspe"||t.id==="sosec"||t.id==="mdsec"){pathoInput(t);return;}if(t.dataset.act!=="check")return;
+ const t=ev.target;if(t.id==="restore-file"){if(t.files&&t.files[0])restoreData(t.files[0]);t.value="";return;}if(t.dataset.sf){saveStageField(t);return;}if(t.dataset.cn){carnetInput(t);return;}if(t.dataset.fs){feuilleInput(t);return;}if(t.dataset.mc!=null){if(t.dataset.mc==="file"||t.type==="checkbox")mcInput(t);return;}if(t.dataset.px!=null||t.id==="pxspe"||t.id==="sosec"||t.id==="mdsec"){pathoInput(t);return;}if(t.dataset.act!=="check")return;
  let d=store.get("check",[]);const i=+t.dataset.i;
  d=t.checked?[...new Set([...d,i])]:d.filter(x=>x!==i);store.set("check",d);haptic();render();
 });
@@ -596,7 +553,7 @@ if(isNative){
  try{const A=plug("App");A&&A.addListener("backButton",()=>{
   if(tbOpen){tbToggle(false);return;}
   if(document.querySelector(".zoom")){document.querySelector(".zoom").remove();return;}
-  const r=route();if(r.v==="entrainer"&&state.quiz){state.quiz=null;render(true);return;}
+  const r=route();if(r.v==="entrainer"&&state.srs){srsAct({dataset:{}},"srs-quit");return;}
   if(r.v==="accueil")A.exitApp();else if(ROOTS.includes(r.v))location.replace("#accueil");else goBack();});}catch(e){}
 }
 if(!isNative&&"serviceWorker" in navigator&&(location.protocol==="https:"||/^(localhost|127\.0\.0\.1)$/.test(location.hostname))){

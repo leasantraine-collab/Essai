@@ -37,8 +37,8 @@ function hwShortcuts(){
  const cat=(id,n)=>({id:"c-"+id,g:"Réviser",n,ic:CAT_IC[id],c:"#4C6B7D",act:"go-cat",k:id});
  L.push({id:"p-fiches",g:"Réviser",n:"Fiches",ic:IC.sheet,c:"#2A5D85",h:"#reviser/fiches"},{id:"p-cours",g:"Réviser",n:"Cours",ic:IC.book,c:"#2A5D85",h:"#reviser/cours"},
   cat("patho","Pathologies"),cat("soins","Soins"),cat("thera","Médicaments"),cat("anat","Anatomie"),cat("exam","Examens"),cat("voca","Vocabulaire"),cat("role","Rôle infirmier"),cat("tfe","Mémoire"),
-  {id:"p-quiz",g:"S'entraîner",n:"Quiz",ic:IC.bolt,c:"#B55E3A",h:"#entrainer/quiz"},{id:"p-express",g:"S'entraîner",n:"Quiz express",ic:IC.bolt,c:"#B55E3A",act:"quiz-quick"},
-  {id:"p-erreurs",g:"S'entraîner",n:"Mes erreurs",ic:IC.redo,c:"#B03E30",act:"quiz-wrong"},{id:"p-calc",g:"S'entraîner",n:"Exercices de calcul",ic:IC.flask,c:"#2C7451",h:"#entrainer/calculs"},
+  {id:"p-cartes",g:"S'entraîner",n:"Cartes du jour",ic:SRS_IC.cards,c:"#2C7451",h:"#entrainer/cartes"},{id:"p-macarte",g:"S'entraîner",n:"Créer une carte",ic:MC_IC.pen,c:"#B55E3A",h:"#mescartes/new"},
+  {id:"p-mescartes",g:"S'entraîner",n:"Mes cartes",ic:SRS_IC.cards,c:"#B55E3A",h:"#mescartes"},{id:"p-calc",g:"S'entraîner",n:"Exercices de calcul",ic:IC.flask,c:"#2C7451",h:"#entrainer/calculs"},
   {id:"p-schemas",g:"S'entraîner",n:"Schémas",ic:CAT_IC.anat,c:"#6E5196",h:"#entrainer/schemas"},
   {id:"p-stages",g:"Stage",n:"Stages",ic:CAT_IC.stage,c:"#9A7A2E",h:"#stages"},{id:"p-carnet",g:"Stage",n:"Carnet de suivi",ic:IC.sheet,c:"#9A7A2E",h:"#carnet"},
   {id:"p-journal",g:"Stage",n:"Noter ma journée",ic:IC.cal,c:"#9A7A2E",h:"#carnet/journal"},{id:"p-soinsfaits",g:"Stage",n:"Soins réalisés",ic:IC.check,c:"#9A7A2E",h:"#carnet/soins"},
@@ -61,13 +61,16 @@ function hwStage(){
  return {k:"during",s,start,end,tot,jour:tot?Math.min(jour,tot):jour};
 }
 function hwToday(){const d=todayISO();return [...agLate(d),...[...agenda().filter(e=>e.d===d),...agAuto(d,d)].sort((a,b)=>(a.h||"").localeCompare(b.h||""))];}
-/* Questions courtes uniquement : les options très longues (questions générées des pathologies) restent pour le quiz. */
-const hwQShort=q=>q&&q.o&&q.o.length>=2&&q.o.every(o=>String(o).length<=95)&&String(q.q).length<=190&&!/image|schéma|planche|ci-dessus|ci-contre/i.test(q.q);
-function hwQPool(w){const all=QUIZ.map((q,i)=>i).filter(i=>hwQShort(QUIZ[i])),L=all.filter(i=>!w.cat||QUIZ[i].cat===w.cat);return L.length?L:all;}
-function hwQIndex(w){
- const d=todayISO(),key=w.cat||"",st=store.get("hwq",{}),pool=hwQPool(w);
- if(st.d===d&&st.k===key&&QUIZ[st.i])return st;
- const ns={d,k:key,i:pool[hwSeed(d+key)%pool.length],pick:null};store.set("hwq",ns);return ns;
+/* Carte du jour : une carte courte, tirée de mes cartes, de ce que j'ai étudié ou de tout le contenu. */
+const HW_CSRC=[["","Mes cartes, sinon tout le contenu"],["mes","Mes cartes"],["etudies","Ce que j'ai étudié"],["tout","Tout le contenu"]];
+const hwCShort=c=>c&&String(c.q).length<=180&&(c.type==="cloze"||(Array.isArray(c.a)?c.a.length<=6&&c.a.join(" ").length<=420:String(c.a).length<=420));
+function hwCPool(w){const src=w.src||"",mine=srsDeckCards("mes");
+ let L=src==="mes"||(!src&&mine.length)?mine:src==="etudies"?srsDeckCards("etudies"):srsAuto();
+ L=L.filter(hwCShort);return L.length?L:srsAuto().filter(hwCShort);}
+function hwCPick(w){
+ const d=todayISO(),key=w.src||"",st=store.get("hwc",{}),C=srsCards();
+ if(st.d===d&&st.k===key&&C.some(c=>c.id===st.id))return C.find(c=>c.id===st.id);
+ const P=hwCPool(w);if(!P.length)return null;const c=P[hwSeed(d+key)%P.length];store.set("hwc",{d,k:key,id:c.id});state.hwFlip=null;return c;
 }
 const HW_NSRC=[["f","Fiches"],["c","Cours"],["p","Pathologies"],["s","Soins"],["m","Médicaments"]];
 function hwNotionPool(w){
@@ -104,35 +107,33 @@ function hwCat(){if(hwCat.ok)return HW;hwCat.ok=1;Object.assign(HW,{
    return hwTile({h:"#carnet/journal",ic:CAT_IC.stage,c:"#9A7A2E",big:`J${S.jour}${S.tot?`<small>/${S.tot}</small>`:""}`,lab:`de stage${sv?" · "+sv:""}`});}},
  urgences:{n:"Urgences AFGSU",d:"Fiches réflexes : arrêt cardiaque, étouffement, hémorragie…",g:"outils",ic:OT_IC.urgences,c:"#C8372D",sz:1,
   r:()=>afHome(),s:()=>hwTile({h:"#outil/urgences",ic:OT_IC.urgences,c:"#C8372D",big:"AFGSU",lab:`${AF.length} fiches réflexes d'urgence`})},
- progression:{n:"Ma progression",d:"Contenus révisés, calculs justes, meilleur quiz",g:"rev",ic:IC.check,c:"#2C7451",sz:1,
+ progression:{n:"Ma progression",d:"Contenus révisés, calculs justes, cartes apprises",g:"rev",ic:IC.check,c:"#2C7451",sz:1,
   r:()=>{const s=stats();return `<section class="dash">${ring(hwPct())}
    <div class="dash-txt"><span class="k">Ma progression</span><h2>${doneItems()} sur ${totalItems} contenus révisés</h2>
-    <div class="dash-stats"><span><b>${s.exTot?Math.round(s.exOk/s.exTot*100)+"%":"–"}</b>calculs justes</span><span><b>${s.quizBest==null?"–":s.quizBest}</b>meilleur quiz</span></div></div></section>`;},
+    <div class="dash-stats"><span><b>${s.exTot?Math.round(s.exOk/s.exTot*100)+"%":"–"}</b>calculs justes</span><span><b>${Object.keys(srsSt()).length}</b>cartes apprises</span></div></div></section>`;},
   s:()=>`<a class="hw-tile hw-prog" href="#reviser" style="--c:#2C7451">${ring(hwPct(),58)}<span class="hw-lab">${doneItems()} sur ${totalItems} contenus révisés</span></a>`},
  reprendre:{n:"Reprendre",d:"Le dernier cours ou la dernière fiche ouverte",g:"rev",ic:IC.play,c:"#2A5D85",sz:1,
   it:()=>{const last=store.get("last",null);if(!last)return null;const it=last.t==="f"?FICHES.find(x=>x.id===last.id):COURS.find(x=>x.id===last.id);return it?{it,t:last.t}:null;},
   r:()=>{const L=HW.reprendre.it();if(!L)return "";const {it,t}=L;
    return hwSec("Reprendre","",`<a class="card resume" href="#${t==="f"?"fiche":"cours"}/${it.id}" style="--c:${CAT[it.cat].c}"><span class="ic">${CAT_IC[it.cat]}</span><span><span class="eyebrow">${t==="f"?"Fiche":"Cours"} · ${esc(CAT[it.cat].nom)}</span><h3>${esc(it.titre)}</h3></span>${chev}</a>`);},
   s:()=>{const L=HW.reprendre.it();if(!L)return "";const {it,t}=L;return hwTile({h:`#${t==="f"?"fiche":"cours"}/${it.id}`,ic:CAT_IC[it.cat],c:"#2A5D85",lab:`<span class="hw-k">Reprendre</span><b class="hw-tt">${esc(it.titre)}</b>`});}},
- question:{n:"Question du jour",d:"Une question de quiz chaque jour, avec la correction",g:"train",ic:HW_ICS.help,c:"#B55E3A",cfg:1,
-  r:(w,i)=>{const st=hwQIndex(w),q=QUIZ[st.i];if(!q)return "";const done=st.pick!=null,ok=done&&st.pick===q.a,L="ABCDE";
-   return hwSec("Question du jour",`<button data-act="hw-q-next" data-i="${i}">Une autre</button>`,`<div class="sheet-body hw-q"><span class="eyebrow" style="color:var(--accent)">${esc((CAT[q.cat]||{nom:"Quiz"}).nom)}</span><p class="hw-q-t">${esc(q.q)}</p>
-    <div class="stack-sm">${q.o.map((o,k)=>`<button class="opt ${done?(k===q.a?"good":k===st.pick?"wrong":""):""}" data-act="hw-q" data-i="${i}" data-k="${k}" ${done?"disabled":""}><span class="l">${L[k]}</span><span>${esc(o)}</span></button>`).join("")}</div>
-    ${done?`<div class="callout hw-q-e ${ok?"ok":"ko"}"><b>${ok?"Bonne réponse !":"Pas tout à fait."}</b> ${esc(q.e||"")}${ok?"":` <span class="muted">La question est ajoutée à « Mes erreurs ».</span>`}</div>`:""}</div>`);},
-  cfg:(w,i)=>{const cats=CATS.filter(c=>QUIZ.some(q=>q.cat===c.id));
-   return `<label class="hw-cfg-l" for="hw-qcat-${i}">Thème des questions<select id="hw-qcat-${i}" data-hw="qcat" data-i="${i}"><option value="">Tous les thèmes</option>${cats.map(c=>`<option value="${c.id}" ${w.cat===c.id?"selected":""}>${esc(c.nom)}</option>`).join("")}</select></label>`;}},
+ question:{n:"Carte du jour",d:"Une carte à retourner chaque jour, tirée de vos cartes ou des contenus",g:"train",ic:SRS_IC.cards,c:"#B55E3A",cfg:1,
+  r:(w,i)=>{const c=hwCPick(w);if(!c)return "";const fl=state.hwFlip===c.id,mine=!!c.user;
+   return hwSec("Carte du jour",`<button data-act="hw-q-next" data-i="${i}">Une autre</button>`,`<div class="sheet-body hw-q hw-card"><span class="eyebrow" style="color:var(--accent)">${mine?"Ma carte":"Carte"} · ${esc(c.ctx||"")}</span>${srsFace(c,false)}
+    ${fl?`<div class="srs-ans">${srsFace(c,true)}</div><div class="hw-c-acts"><a class="link" href="#entrainer/cartes">Toutes mes révisions</a>${mine?"":`<a class="link" href="#mescartes/new">Créer une carte</a>`}</div>`:`<button class="btn ghost block" data-act="hw-flip" data-k="${esc(c.id)}">Retourner la carte</button>`}</div>`);},
+  cfg:(w,i)=>`<label class="hw-cfg-l" for="hw-csrc-${i}">Piocher dans<select id="hw-csrc-${i}" data-hw="csrc" data-i="${i}">${HW_CSRC.map(([k,l])=>`<option value="${k}" ${(w.src||"")===k?"selected":""}>${esc(l)}</option>`).join("")}</select></label>`},
  notion:{n:"À découvrir aujourd'hui",d:"Une fiche, un cours, une pathologie, un soin ou un médicament au hasard chaque jour",g:"rev",ic:HW_ICS.bulb,c:"#9A7A2E",cfg:1,
   r:(w,i)=>{const P=hwNotionPool(w);if(!P.length)return "";const o=P[(hwSeed(todayISO()+(w.src||[]).join(""))+(state.hwN||0)*7919)%P.length];
    return hwSec("À découvrir aujourd'hui",`<button data-act="hw-n-next">Une autre</button>`,`<a class="card hw-notion" href="${o.h}" style="--c:${o.c}"><span class="hw-n-top"><span class="ic">${o.ic}</span><span class="eyebrow">${esc(o.t)}</span></span><h3>${esc(o.n)}</h3>${o.s?`<p class="muted">${esc(o.s.length>170?o.s.slice(0,167).replace(/\s+\S*$/,"")+"…":o.s)}</p>`:""}<span class="hw-more">Lire${chev}</span></a>`);},
   cfg:(w,i)=>{const src=w.src&&w.src.length?w.src:HW_NSRC.map(x=>x[0]);
    return `<span class="hw-cfg-h">Piocher dans</span><div class="chips wrapchips">${HW_NSRC.map(([k,l])=>`<button class="chip" data-act="hw-nsrc" data-i="${i}" data-k="${k}" aria-pressed="${src.includes(k)}">${l}</button>`).join("")}</div>`;}},
- entrainer:{n:"S'entraîner",d:"Quiz express, calcul de dose, erreurs et favoris",g:"train",ic:IC.bolt,c:"#B55E3A",sz:1,
-  r:()=>{const nW=wrongs().length;return hwSec("S'entraîner","",`<div class="quick">
-    <button class="qa" data-act="quiz-quick"><span class="ic">${IC.bolt}</span><b>Quiz express</b><small>10 questions au hasard</small></button>
+ entrainer:{n:"S'entraîner",d:"Cartes du jour, création de cartes, calcul de dose et favoris",g:"train",ic:IC.bolt,c:"#B55E3A",sz:1,
+  r:()=>{const S=srsSet(),cn=srsCounts(srsSelCards()),n=cn.due+Math.min(cn.nw,Math.max(0,S.news-srsDayCount().n)),nm=mcAll().length;return hwSec("S'entraîner","",`<div class="quick">
+    <button class="qa" data-act="nav" data-h="entrainer/cartes"><span class="ic">${SRS_IC.cards}</span><b>Cartes du jour</b><small>${S.decks.length?(n?plural(n,"carte")+" à réviser":"Tout est à jour"):"Choisir mes paquets"}</small></button>
     <button class="qa" data-act="nav" data-h="entrainer/calculs"><span class="ic acc">${IC.flask}</span><b>Calcul de dose</b><small>Énoncés illimités</small></button>
-    <button class="qa" data-act="quiz-wrong" ${nW?"":"disabled style='opacity:.55'"}><span class="ic acc">${IC.redo}</span><b>Mes erreurs</b><small>${nW?plural(nW,"question")+" à revoir":"Aucune pour l'instant"}</small></button>
+    <button class="qa" data-act="nav" data-h="mescartes/new"><span class="ic acc">${MC_IC.pen}</span><b>Créer une carte</b><small>${nm?plural(nm,"carte")+" à moi":"Vos propres cartes"}</small></button>
     <button class="qa" data-act="favs"><span class="ic">${IC.star}</span><b>Favoris</b><small>${plural(favs().length,"élément")}</small></button></div>`);},
-  s:()=>hwTile({act:"quiz-quick",ic:IC.bolt,c:"#B55E3A",big:"Quiz",lab:"10 questions express au hasard"})},
+  s:()=>hwTile({h:"#mescartes/new",ic:MC_IC.pen,c:"#B55E3A",big:"+",lab:"Créer une carte de révision"})},
  raccourcis:{n:"Raccourcis",d:"Vos outils et pages préférés, à choisir",g:"outils",ic:HW_ICS.grid,c:"#2A5D85",cfg:1,multi:1,
   r:(w,i)=>{const ids=w.sc||HW_SC_DEFAULT,L=ids.map(id=>hwSC().find(s=>s.id===id)).filter(Boolean);
    return hwSec(esc(w.t||"Raccourcis"),`<button data-act="hw-edit" data-i="${i}">Modifier</button>`,L.length?`<div class="ot-mini hw-sc">${L.map(hwScItem).join("")}</div>`:`<p class="muted">Aucun raccourci : touchez « Modifier » pour en choisir.</p>`);},
@@ -281,10 +282,10 @@ function hwAct(b,a){
  else if(a==="hw-nsrc"){hwMut(h=>{const w=h.w[i],L=(w.src&&w.src.length?w.src:HW_NSRC.map(x=>x[0])).slice(),p=L.indexOf(k);if(p>=0){if(L.length>1)L.splice(p,1);}else L.push(k);w.src=L.length===HW_NSRC.length?undefined:L;});haptic();render();}
  else if(a==="hw-reset"){if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Toucher à nouveau pour rétablir l'accueil d'origine";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent="Revenir à l'accueil d'origine";}},4000);return;}
   const name=hwGet().name;store.set("home",name?{name}:null);try{if(!name)localStorage.removeItem("ifsi_home");}catch(e){}state.hwCfg=null;haptic("MEDIUM");toast("Accueil d'origine rétabli");render();}
- else if(a==="hw-q"){const st=store.get("hwq",{});if(st.pick!=null)return;const q=QUIZ[st.i];if(!q)return;st.pick=+k;store.set("hwq",st);
-  if(+k===q.a)haptic();else{haptic("MEDIUM");store.set("wrong",[...new Set([...wrongs(),q.q])]);}render();}
- else if(a==="hw-q-next"){const w=hwGet().w[i]||{},pool=hwQPool(w),st=store.get("hwq",{});let n=st.i;if(pool.length>1)while(n===st.i)n=pool[Math.floor(Math.random()*pool.length)];
-  store.set("hwq",{d:todayISO(),k:w.cat||"",i:n,pick:null});render();}
+ else if(a==="hw-flip"){state.hwFlip=k;haptic();render();}
+ else if(a==="hw-q-next"){const w=hwGet().w[i]||{},P=hwCPool(w),st=store.get("hwc",{});let c=P[Math.floor(Math.random()*P.length)];
+  for(let n=0;P.length>1&&c&&c.id===st.id&&n<8;n++)c=P[Math.floor(Math.random()*P.length)];
+  if(c)store.set("hwc",{d:todayISO(),k:w.src||"",id:c.id});state.hwFlip=null;render();}
  else if(a==="hw-n-next"){state.hwN=(state.hwN||0)+1;render();}
  else if(a==="hw-px-rand"){const p=PATHOS[Math.floor(Math.random()*PATHOS.length)];if(p)nav("patho/"+p.i);}
  else if(a==="hw-note"){state.noteId=b.dataset.id;nav("outil/notes");}
@@ -297,7 +298,7 @@ function hwInput(t){
  if(k==="name"){hwMut(h=>{h.name=t.value.trim().slice(0,30);});}
  else if(k==="title"){hwMut(h=>{if(h.w[i])h.w[i].t=t.value.trim().slice(0,30)||undefined;});const b=document.querySelector(`.hw-row[data-i="${i}"] .hw-tx b`);if(b)b.textContent=t.value.trim()||HW.raccourcis.n;}
  else if(k==="rp"){hwMut(h=>{if(h.w[i])h.w[i].b=+t.value;});}
- else if(k==="qcat"){hwMut(h=>{if(h.w[i])h.w[i].cat=t.value||undefined;});}
+ else if(k==="csrc"){hwMut(h=>{if(h.w[i])h.w[i].src=t.value||undefined;});state.hwFlip=null;}
  else if(k==="deb"){state.hwDeb=Object.assign({},state.hwDeb,{[t.dataset.k]:t.value});const o=document.getElementById("hw-deb-out");if(o)o.innerHTML=hwDebOut();}
 }
 
