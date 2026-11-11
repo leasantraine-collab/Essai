@@ -2,7 +2,7 @@
   "name": "carnet-ifsi",
   "version": "1.1.0",
   "private": true,
-  "description": "Carnet IFSI : fiches, cours, quiz et calculs de doses pour réviser en IFSI (Android, iOS et web).",
+  "description": "Carnet IFSI : fiches, cours, cartes de révision et calculs de doses pour réviser en IFSI (Android, iOS et web).",
   "scripts": {
     "serve": "npx --yes http-server www -p 8080 -c-1",
     "sync": "npx cap sync",

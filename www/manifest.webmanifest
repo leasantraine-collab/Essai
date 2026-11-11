@@ -1,7 +1,7 @@
 {
   "name": "Carnet IFSI",
   "short_name": "Carnet IFSI",
-  "description": "Fiches, cours, quiz et calculs de doses pour réviser en IFSI.",
+  "description": "Fiches, cours, cartes de révision et calculs de doses pour réviser en IFSI.",
   "lang": "fr",
   "start_url": "./index.html",
   "scope": "./",
