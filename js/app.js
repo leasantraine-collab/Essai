@@ -41,7 +41,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.52 · 11 novembre 2026";
+const APP_VERSION="1.53 · 11 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,
@@ -130,7 +130,7 @@ function examCard(){
 const STAGE_TYPES=["Soins de courte durée","Santé mentale et psychiatrie","Soins de longue durée et SMR","Soins sur des lieux de vie"];
 function stageCountdown(){
  const s=stageInfo(),start=at(s.debut,s.arrivee||"07:00"),end=s.fin?at(s.fin,"23:59"):null,now=Date.now(),title=s.service?esc(s.service):"Mon prochain stage";
- if(!start) return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Compte à rebours</span><h2>${title}</h2><p class="muted">Renseignez la date de début ci-dessous pour lancer le compte à rebours.</p></section>`;
+ if(!start) return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Compte à rebours</span><h2>${title}</h2><p class="muted"><a class="link" href="#stages/preparer">Renseignez la date de début</a> pour lancer le compte à rebours.</p></section>`;
  if(now<start) return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Début du stage · ${jMoins(start)}</span><h2>${title}</h2>${cdBox(start)}<p class="cd-date">${IC.cal}${esc(fmtFull(start))}${end?` · jusqu'au ${esc(fmtShort(end))}`:""}</p></section>`;
  if(end&&now>end){const auto=!s.noAuto&&s.fin?shDay(addDays(s.fin,SH_GRACE+1)):"";
   return `<section class="cd-card cd-stage" id="stage-cd"><span class="eyebrow">Stage terminé</span><h2>${title}</h2><p class="muted">Finissez vos bilans et votre portfolio, puis <a class="link" href="#carnet/imprimer">imprimez votre carnet de suivi</a>. ${auto?`Le stage sera rangé automatiquement dans votre historique le ${esc(auto)}, avec tout son carnet.`:"Ce stage a été rouvert depuis l'historique : archivez-le quand vous avez terminé."}</p><button class="btn block" data-act="sh-archive">Archiver maintenant et préparer le prochain stage</button></section>`;}
@@ -278,27 +278,30 @@ function vEntrainer(arg){
 function vStages(arg){
  shAutoArchive();
  const done=store.get("check",[]),methode=FICHES.filter(f=>f.cat==="stage"&&!f.id.startsWith("guide-"));
- const sub=(t,lead,body)=>`<div class="stack-lg"><a class="back" href="#stages">${IC.back}Stages</a>${vh("Stages",t,lead)}${body}</div>`;
- if(arg==="preparer")return sub("Préparer mon stage","Infos pratiques, check-list, sac, objectifs : tout ce qui se fait avant le premier jour.",`${stageForm()}
-  <section class="stack-sm"><div class="section-title"><h2>Avant le premier jour</h2><span class="muted">${done.length} / ${CHECKLIST.length}</span></div>
+ /* #stages/preparer, /checklist, /pendant, /services (et anciennes sous-pages) : la page entière, ouverte à la rubrique. */
+ const go={preparer:"stg-infos",checklist:"stg-check",pendant:"stg-carnet",services:"stg-svc"}[arg];
+ if(go)setTimeout(()=>{const e=document.getElementById(go);e&&e.scrollIntoView();},0);
+ const S=(id,body)=>`<div class="stack-lg stg-a" id="${id}">${body}</div>`;
+ const toc=[["sh-parcours","Parcours"],["stg-carnet","Carnet de suivi"],["stg-feuilles","Feuilles de travail"],["stg-infos","Infos du stage"],["stg-check","Check-list"],["sac","Sac"],["stg-posture","Posture"],["stg-obj","Objectifs"],methode.length?["stg-methode","Fiches méthode"]:null,["stg-svc","Par service"]].filter(Boolean);
+ return `<div class="stack-lg stg-page">${vh("Stages","Arriver préparé·e dans chaque service",`Compte à rebours, infos pratiques, check-list, posture et repères pour ${STAGES.length} services.`)}
+  <nav class="fv-toc stg-toc" aria-label="Rubriques de la page Stages">${toc.map(([id,t])=>`<a href="#stages" data-sec="${id}">${t}</a>`).join("")}</nav>
+  ${stageCountdown()}
+  ${ntAsk("stage")}
+  ${afBanner()}
+  ${shParcours()}
+  ${S("stg-carnet",carnetCard())}
+  ${S("stg-feuilles",feuillesCard())}
+  ${S("stg-infos",stageForm())}
+  <section class="stack-sm stg-a" id="stg-check"><div class="section-title"><h2>Avant le premier jour</h2><span class="muted">${done.length} / ${CHECKLIST.length}</span></div>
    <div class="progress"><i style="width:${done.length/CHECKLIST.length*100}%"></i></div>
    <div class="list" style="padding:4px 14px">${CHECKLIST.map((c,i)=>`<label class="chk"><input type="checkbox" data-act="check" data-i="${i}" ${done.includes(i)?"checked":""}><span>${esc(c)}</span></label>`).join("")}</div></section>
   ${sacSection()}
-  <section class="stack-sm"><h2>Objectifs selon le semestre</h2><div class="sheet-body"><div class="fv-tbl">${OBJECTIFS.map(o=>{const [a,b]=o.split(" : ");return `<div><span>${esc(a)}</span><span>${esc(b)}</span></div>`}).join("")}</div><span class="muted">Repères indicatifs : vos objectifs se construisent avec votre formateur et votre tuteur.</span></div></section>
-  ${methode.length?`<section class="stack-sm"><h2>Fiches méthode</h2><div class="list">${methode.map(f=>itemRow(f,"f")).join("")}</div></section>`:""}`);
- if(arg==="pendant")return sub("Pendant le stage","Carnet de suivi, feuilles de travail, démarche de soins et posture professionnelle.",`${carnetCard()}${feuillesCard()}
-  <section class="stack-sm"><h2>Posture professionnelle</h2><div class="sheet-body"><ul class="fv-list" style="--c:${CAT.stage.c}">${POSTURE.map(p=>`<li>${esc(p)}</li>`).join("")}</ul></div></section>
-  ${afBanner()}`);
- if(arg==="services")return sub("Par lieu de stage",`Pour chacun des ${STAGES.length} services : ce qu'il faut réviser, les soins rencontrés, des objectifs prêts à reprendre et les erreurs fréquentes.`,`<section class="stack-sm">${STAGES.map(svcCard).join("")}</section>`);
- const ent=(h,ic,c,t,d)=>`<a class="li" href="#stages/${h}"><span class="ic" style="--c:${c}">${ic}</span><span><span class="t">${t}</span><span class="s">${d}</span></span>${chev}</a>`;
- const mine=stageInfo().lieu;
- return `<div class="stack-lg">${vh("Stages","Arriver préparé·e dans chaque service","Le compte à rebours de votre prochain stage, puis tout ce qu'il faut avant, pendant et selon le service.")}
-  ${stageCountdown()}
-  ${ntAsk("stage")}
-  ${shParcours()}
-  <div class="list">${ent("preparer",IC.cal,"#9A7A2E","Préparer mon stage",`Infos du stage, check-list (${done.length}/${CHECKLIST.length}), sac, objectifs, fiches méthode`)}
-   ${ent("pendant",IC.sheet,"#2A6F5E","Pendant le stage","Carnet de suivi, feuilles de travail, démarche de soins, posture")}
-   ${ent("services",IC.book,"#2A5D85","Par lieu de stage",mine?`${esc(mine)} et ${STAGES.length-1} autres services`:`${STAGES.length} services : à réviser, soins, objectifs, pièges`)}</div></div>`;
+  <section class="stack-sm stg-a" id="stg-posture"><h2>Posture professionnelle</h2><div class="sheet-body"><ul class="fv-list" style="--c:${CAT.stage.c}">${POSTURE.map(p=>`<li>${esc(p)}</li>`).join("")}</ul></div></section>
+  <section class="stack-sm stg-a" id="stg-obj"><h2>Objectifs selon le semestre</h2><div class="sheet-body"><div class="fv-tbl">${OBJECTIFS.map(o=>{const [a,b]=o.split(" : ");return `<div><span>${esc(a)}</span><span>${esc(b)}</span></div>`}).join("")}</div><span class="muted">Repères indicatifs : vos objectifs se construisent avec votre formateur et votre tuteur.</span></div></section>
+  ${methode.length?`<section class="stack-sm stg-a" id="stg-methode"><h2>Fiches méthode</h2><div class="list">${methode.map(f=>itemRow(f,"f")).join("")}</div></section>`:""}
+  <section class="stack-sm stg-a" id="stg-svc"><div class="section-title"><h2>Par lieu de stage</h2><span class="muted">${STAGES.length} services</span></div>
+   <p class="muted">Pour chaque service : ce qu'il faut réviser, les soins que vous rencontrerez, des objectifs prêts à reprendre dans votre portfolio et les erreurs fréquentes.</p>
+   ${STAGES.map(svcCard).join("")}</section></div>`;
 }
 const COMP={1:"Évaluer une situation clinique et établir un diagnostic infirmier",2:"Concevoir et conduire un projet de soins infirmiers",3:"Accompagner une personne dans la réalisation de ses soins quotidiens",4:"Mettre en œuvre des actions à visée diagnostique et thérapeutique",5:"Initier et mettre en œuvre des soins éducatifs et préventifs",6:"Communiquer et conduire une relation dans un contexte de soins",7:"Analyser la qualité des soins et améliorer sa pratique professionnelle",8:"Rechercher et traiter des données professionnelles et scientifiques",9:"Organiser et coordonner des interventions soignantes",10:"Informer et former des professionnels et des personnes en formation"};
 const objText=t=>"• "+t.replace(/\*\*/g,"");
@@ -307,7 +310,7 @@ function svcCard(sv,i){
  const blk=(lab,cls,items)=>items&&items.length?`<div class="svc-blk ${cls}"><span class="svc-lab">${lab}</span><ul class="svc-list">${items.map(x=>`<li>${md(x)}</li>`).join("")}</ul></div>`:"";
  const links=ctChips(sv.fiches);
  const isMine=stageInfo().lieu===sv.nom;
- return `<details class="svc" ${isMine?"open":""}><summary><span class="svc-t">${esc(sv.nom)}${isMine?'<span class="svc-mine">Mon stage</span>':""}</span></summary><div class="det-body">
+ return `<details class="svc" ${isMine||state.svcOpen===sv.nom?"open":""}><summary data-act="svc-open" data-k="${esc(sv.nom)}"><span class="svc-t">${esc(sv.nom)}${isMine?'<span class="svc-mine">Mon stage</span>':""}</span></summary><div class="det-body">
   ${sv.intro?`<p class="svc-intro">${md(sv.intro)}</p>`:""}
   ${blk("Pathologies à connaître","t-patho",sv.patho)}
   ${blk("Thérapeutiques à connaître","t-thera",sv.thera)}
@@ -429,8 +432,9 @@ function render(top){
  if(CT_ROUTE[r.v]){const h=ctFoot(r);if(h)app.insertAdjacentHTML("beforeend",h);}
  const tab=TAB[r.v]||r.v;
  document.querySelectorAll("nav.tabs a").forEach(a=>a.dataset.v===tab?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current"));
- /* Retour d'une fiche, d'un cours ou d'une pathologie vers la liste Réviser : on retrouve la position dans la liste. */
- if(moved)window.scrollTo(0,["reviser","programme","ue"].includes(r.v)&&/^(patho|soin|med|fiche|cours)\//.test(lastKey||"")&&SCROLL[key]!=null?SCROLL[key]:0);
+ /* Retour d'un contenu vers Réviser, le Programme ou Stages : on retrouve la position dans la page. */
+ const back=["reviser","programme","ue"].includes(r.v)&&/^(patho|soin|med|fiche|cours)\//.test(lastKey||"")||r.v==="stages"&&/^(patho|soin|med|fiche|cours|carnet|feuille|stage-hist|outil)\//.test(lastKey||"");
+ if(moved)window.scrollTo(0,back&&SCROLL[key]!=null?SCROLL[key]:0);
  lastKey=key;
  if(r.v!=="accueil"&&r.v!=="perso"){state.hwEdit=false;state.hwSheet=false;}
  fvBind();pxBind();tbSync(r);
@@ -521,6 +525,7 @@ app.addEventListener("click",ev=>{
  else if(a==="calc-type"){state.calcType=k;state.ex=null;render();}
  else if(a==="calc-new"){state.ex=null;render();setTimeout(()=>{const i=document.getElementById("calc-in");i&&i.focus()},0);}
  else if(a==="calc-show")checkCalc(true);
+ else if(a==="svc-open"){state.svcOpen=b.parentElement.open?null:k;}
  else if(a==="ue-pg"){const o=state.uePg||(state.uePg={});o[k]=!b.parentElement.open;if(o[k]&&b.parentElement.classList.contains("ue-grp")){ev.preventDefault();const y=window.scrollY;render();window.scrollTo(0,y);}}
  else if(a==="ue-ref"){state.ueRef=k;store.set("ueRef",k);render();}
  else if(a==="sem"){state.sem=+k;store.set("sem",+k);render();}
