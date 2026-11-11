@@ -1,4 +1,4 @@
-/* Carnet IFSI — fiches de soins : fiche récap et cours détaillé, checklist interactive, mise en situation, quiz,
+/* Carnet IFSI — fiches de soins : fiche récap et cours détaillé, checklist interactive, mise en situation (questions de validation en cartes),
    et vue Réviser › Soins et techniques / Examens et surveillance (menu déroulant des catégories). Chargé après pathos.js, avant app.js. */
 const soK=s=>String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[’]/g,"'").replace(/\s+/g," ").trim();
 const SONAME={};SOINS.forEach(o=>[o.n,...o.nn].forEach(x=>{const k=soK(x);if(!SONAME[k])SONAME[k]=o;}));
@@ -165,7 +165,7 @@ function vSoin(id){
   toc=`<nav class="fv-toc" aria-label="Parties du cours">${secs.map((s,i)=>`<a href="#soin" data-sec="s-${i+1}"><b>${i+1}</b>${esc(s[0])}</a>`).join("")}</nav>`;
   body=(typeof VID!=="undefined"&&VID[id]?vdHtml(id):"")+(typeof rvBlock==="function"?rvBlock(id):"")+secs.map((s,i)=>`<section class="fv-sec" id="s-${i+1}"><div class="fv-sh"><span class="fv-num">${String(i+1).padStart(2,"0")}</span><h2>${s[0]}</h2></div>${s[1]}</section>`).join("")+
    (o.cas?soQ(o.cas,"cas",`${SVG.bulb}Mise en situation`):"")+
-   (o.q.length?`<section class="stack-sm"><h3 class="cn-g">Quiz</h3>${o.q.map((q,j)=>soQ(q,"q"+j,`Question ${j+1}`)).join("")}</section>`:"")+soOrdEx(o);
+   soOrdEx(o);
  }
  return `<article class="fv px so" style="--c:${col}">${hero}${toc}<div class="fv-body"><div class="px-head">${seg}</div>${body}
   ${links?`<section class="stack-sm"><h3 class="cn-g">Pour aller plus loin dans l'appli</h3><div class="chips wrapchips">${links}</div></section>`:""}
@@ -196,7 +196,7 @@ function soRev(cat,isF){
 }
 const soEntry=(c,isF)=>`<a class="li px-entry" role="button" tabindex="0" data-act="so-go" data-k="${c.id}" style="--c:${c.c}"><span class="bar"></span><span><span class="t">Toutes les fiches de ${c.id==="exam"?"surveillance et d'examens":"soins"} par catégorie</span><span class="s">${soCatN(c.id)} ${isF?"fiches récap":"cours détaillés"} · réalisation pas à pas, checklist, mise en situation</span></span><span class="end">${chev}</span></a>`;
 
-/* ---------- Recherche et quiz ---------- */
+/* ---------- Recherche et questions (partiels blancs) ---------- */
 function soIdx(){return SOINS.map(o=>({t:"s",it:{id:o.i,titre:o.n,cat:SO_SEC[o.s].cat,theme:SO_SEC[o.s].nom},txt:plainTxt([o.nn.join(" "),o.d.join(" "),o.ind.join(" "),o.mat.join(" "),o.et.join(" "),o.surv.join(" "),o.ri.join(" ")].join(" "))}));}
 function soMakeQuiz(){SOINS.forEach(o=>{const S=SO_SEC[o.s],add=(q,opts,a,e)=>{if(opts.length<3)return;const x=norm(Q(S.cat,S.u,q,opts,a,e));x.sid=o.i;QUIZ.push(x);};
  if(o.cas&&o.cas.o.length)add(`${o.n} — ${plainTxt(o.cas.s)} ${plainTxt(o.cas.q)}`,o.cas.o.map(plainTxt),o.cas.a,plainTxt(o.cas.e));

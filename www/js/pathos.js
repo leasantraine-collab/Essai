@@ -1,5 +1,5 @@
 /* Carnet IFSI — encyclopédie des pathologies : vues par spécialité, fiche récap et cours détaillé,
-   schémas d'organes (zone atteinte en couleur), quiz générés et schémas à compléter. Chargé après render.js, avant app.js. */
+   schémas d'organes (zone atteinte en couleur), questions générées (partiels blancs) et schémas à compléter. Chargé après render.js, avant app.js. */
 const SPE=Object.fromEntries(SPES.map(([id,nom,c,u])=>[id,{id,nom,c,u}]));
 const PBY=Object.fromEntries(PATHOS.map(p=>[p.i,p]));
 const progOf=s=>(PROGRAMME[s]||"").split("|").filter(Boolean);

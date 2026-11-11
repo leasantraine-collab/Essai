@@ -25,7 +25,7 @@ Elle reprend l'intégralité des contenus de l'artefact *Carnet IFSI* et les com
 - Fonctionne **hors ligne**, polices embarquées, aucune donnée envoyée
 - Retour matériel Android, retour haptique, barre d'état adaptée au thème
 - Notifications de rappel (planning, tâches, partiels, stage, mémoire, résumé du jour, minuteur), voir plus bas
-- Cartes de révision à répétition espacée (plus de 8 500 cartes créées automatiquement à partir des contenus, questions flash et urgences AFGSU comprises)
+- Cartes de révision à répétition espacée (plus de 9 000 cartes créées automatiquement à partir des contenus, questions de validation, questions flash et urgences AFGSU comprises)
 - **Mes cartes** : question / réponse ou texte à trous, explication, carte inversée, paquets, lien vers un contenu, ajout d'une liste collée ou d'un fichier (Quizlet, Anki, tableur) et partage d'un paquet en fichier texte (`www/js/mes-cartes.js`)
 - Partiels blancs chronométrés et notés sur 20, niveaux de calculs de doses et épreuve blanche « 10 calculs en 30 min »
 - Progression par UE, par compétence (2009) ou par domaine (2026)

@@ -1,4 +1,4 @@
-/* Carnet IFSI — grandes fiches des classes thérapeutiques : fiche récap et cours détaillé en 14 parties, quiz,
+/* Carnet IFSI — grandes fiches des classes thérapeutiques : fiche récap et cours détaillé en 13 parties, cartes,
    et vue Réviser › Thérapeutiques (menu déroulant des catégories). Chargé après soins.js, avant app.js. */
 const mdK=soK;
 const mdDone=()=>store.get("mddone",[]);
@@ -46,7 +46,7 @@ function vMed(id){
  ].filter(x=>x[1]);
  const hero=`<div class="fv-progress" aria-hidden="true"><i id="fv-bar"></i></div><header class="fv-hero"><div class="fv-top"><button class="fv-back" data-act="back">${SVG.back}Retour</button>${done?'<span class="fv-done-badge">Étudiée</span>':""}</div>
   <span class="fv-kicker">${esc(C.nom)} · ${esc(S.nom)}</span><h1>${esc(o.n)}</h1><div class="fv-ico" aria-hidden="true">${ICO[S.ico]||ICO.flask}</div>
-  <div class="fv-meta"><span>${plural(o.m.length,"médicament")}</span>${mdHasSch(o)?"<span>Schéma</span>":""}${o.q.length?`<span>Quiz · ${o.q.length}</span>`:""}</div></header>`;
+  <div class="fv-meta"><span>${plural(o.m.length,"médicament")}</span>${mdHasSch(o)?"<span>Schéma</span>":""}${(n=>n?`<span>${plural(n,"carte")}</span>`:"")(srsOfKey("m:"+id).length)}</div></header>`;
  const seg=`<div class="seg px-seg" role="group" aria-label="Mode de lecture"><button data-act="md-mode" data-k="recap" aria-pressed="${mode==="recap"}">Fiche récap</button><button data-act="md-mode" data-k="cours" aria-pressed="${mode==="cours"}">Cours détaillé</button></div>`;
  let body,toc="";
  if(mode==="recap"){
@@ -60,10 +60,9 @@ function vMed(id){
    ${o.r.length?`<div class="px-r md-r"><span class="cv-lab">${SVG.bulb}L'essentiel</span><ul>${o.r.map(x=>`<li>${pmd(x)}</li>`).join("")}</ul></div>`:""}
    <button class="btn block" data-act="md-mode" data-k="cours">Lire le cours détaillé</button></div>`;
  }else{
-  const all=[...secs,...(o.q.length?[["Quiz de validation",""]]:[])];
+  const all=secs;
   toc=`<nav class="fv-toc" aria-label="Parties de la fiche">${all.map((s,i)=>`<a href="#med" data-sec="s-${i+1}"><b>${i+1}</b>${esc(s[0])}</a>`).join("")}</nav>`;
-  body=secs.map((s,i)=>`<section class="fv-sec" id="s-${i+1}"><div class="fv-sh"><span class="fv-num">${String(i+1).padStart(2,"0")}</span><h2>${s[0]}</h2></div>${s[1]}</section>`).join("")+
-   (o.q.length?`<section class="fv-sec" id="s-${secs.length+1}"><div class="fv-sh"><span class="fv-num">${String(secs.length+1).padStart(2,"0")}</span><h2>Quiz de validation</h2></div><div class="stack-sm">${o.q.map((q,j)=>soQ(q,"q"+j,`Question ${j+1}`)).join("")}</div></section>`:"");
+  body=secs.map((s,i)=>`<section class="fv-sec" id="s-${i+1}"><div class="fv-sh"><span class="fv-num">${String(i+1).padStart(2,"0")}</span><h2>${s[0]}</h2></div>${s[1]}</section>`).join("");
  }
  return `<article class="fv px so md" style="--c:${col}">${hero}${toc}<div class="fv-body"><div class="px-head">${seg}</div>${body}
   ${links?`<section class="stack-sm"><h3 class="cn-g">Pour aller plus loin dans l'appli</h3><div class="chips wrapchips">${links}</div></section>`:""}
@@ -92,9 +91,9 @@ function mdRev(isF){
   <label class="search-field">${IC.search}<input id="mdq" type="search" placeholder="Classe ou médicament (DCI, nom commercial)" value="${esc(state.mdq||"")}" autocomplete="off" aria-label="Filtrer les classes thérapeutiques"></label>
   <div class="stack-lg" id="md-list">${mdRevList(isF)}</div>`;
 }
-const mdEntry=isF=>`<a class="li px-entry" role="button" tabindex="0" data-act="md-go" style="--c:${CAT.thera.c}"><span class="bar"></span><span><span class="t">Toutes les classes thérapeutiques par spécialité</span><span class="s">${mdN()} ${isF?"fiches récap":"cours détaillés"} · mécanisme, médicaments, effets indésirables, surveillance, quiz</span></span><span class="end">${chev}</span></a>`;
+const mdEntry=isF=>`<a class="li px-entry" role="button" tabindex="0" data-act="md-go" style="--c:${CAT.thera.c}"><span class="bar"></span><span><span class="t">Toutes les classes thérapeutiques par spécialité</span><span class="s">${mdN()} ${isF?"fiches récap":"cours détaillés"} · mécanisme, médicaments, effets indésirables, surveillance, cartes</span></span><span class="end">${chev}</span></a>`;
 
-/* ---------- Recherche et quiz ---------- */
+/* ---------- Recherche et questions (partiels blancs) ---------- */
 function mdIdx(){return MEDS.map(o=>({t:"m",it:{id:o.i,titre:o.n,cat:"thera",theme:MD_SEC[o.s].nom},txt:plainTxt([o.nn.join(" "),o.m.map(x=>x.dci+" "+x.br).join(" "),o.d.join(" "),o.ma.join(" "),o.ind.join(" "),o.ef.join(" "),o.eg.join(" "),o.sc.join(" ")].join(" "))}));}
 function mdMakeQuiz(){MEDS.forEach(o=>{const S=MD_SEC[o.s],add=(q,opts,a,e)=>{if(opts.length<3)return;const x=norm(Q("thera",S.u,q,opts,a,e));x.mid=o.i;QUIZ.push(x);};
  o.q.forEach(q=>add(`${o.n} : ${plainTxt(q.q)}`,q.o.map(plainTxt),q.a,plainTxt(q.e)));});}
