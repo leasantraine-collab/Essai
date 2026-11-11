@@ -2,7 +2,8 @@
    Les cartes sont créées automatiquement à partir des contenus : questions de vérification et tableaux des cours,
    phrases essentielles à compléter (les mots en gras deviennent des trous), définitions, signes, complications,
    traitements et rôle infirmier des pathologies, indications, matériel, surveillance et erreurs des soins,
-   mécanisme, indications, effets indésirables et surveillance des médicaments.
+   mécanisme, indications, effets indésirables et surveillance des médicaments, questions flash rédigées (bonne réponse et explication),
+   conduites à tenir AFGSU, et les cartes créées par l'étudiant (mes-cartes.js).
    Chaque réponse (À revoir, Difficile, Bien, Facile) espace la prochaine révision (algorithme de type SM-2).
    Chargé après qualite.js, avant app.js. */
 const SRS_IC={cards:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="14" height="14" rx="2.5"/><path d="M7 3h11.5A2.5 2.5 0 0 1 21 5.5V17"/><path d="M7 11h6M7 15h4"/></svg>',
@@ -14,12 +15,23 @@ const srsDayN=(d)=>{const x=d?new Date(d):new Date();return Math.floor((x.getTim
 const srsH=t=>{let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))|0;return (h>>>0).toString(36);};
 
 /* ---------- Création des cartes ---------- */
-let SRS_CARDS=null,SRS_BY=null;
+let SRS_CARDS=null,SRS_BY=null,SRS_AUTO=null,SRS_QK={};
+/* À appeler quand les cartes personnelles changent : les cartes automatiques restent en cache. */
+function srsReset(){SRS_CARDS=null;SRS_BY=null;SRS_META=null;}
+/* Questions rédigées : retenues seulement si elles se comprennent sans les propositions. */
+const SRS_QBAD=/parmi|de ces questions|suivant|ci-dessous|ci-dessus|ci-contre|image|schéma|planche|propositions?\b|affirmations?\b/i;
 const srsList=(a,n)=>(Array.isArray(a)?a:[a]).filter(Boolean).slice(0,n||6);
 const srsBold=t=>/\*\*(.+?)\*\*/.test(t);
 function srsCards(){
- if(SRS_CARDS)return SRS_CARDS;const out=[];
- const add=(key,tag,type,q,a,ctx)=>{if(!q||!a||(Array.isArray(a)&&!a.length))return;out.push({id:key+"#"+tag,key,type,q,a,ctx});};
+ if(SRS_CARDS)return SRS_CARDS;
+ const mine=typeof mcCards==="function"?mcCards():[];
+ SRS_CARDS=srsAuto().concat(mine);
+ SRS_BY={};SRS_CARDS.forEach(c=>{(SRS_BY[c.key]=SRS_BY[c.key]||[]).push(c);});
+ return SRS_CARDS;
+}
+function srsAuto(){
+ if(SRS_AUTO)return SRS_AUTO;const out=[];
+ const add=(key,tag,type,q,a,ctx,ex)=>{if(!q||!a||(Array.isArray(a)&&!a.length))return;const c={id:key+"#"+tag,key,type,q,a,ctx};if(ex)c.ex=ex;out.push(c);};
  const cloze=(key,txt,ctx)=>{if(!txt||!srsBold(txt))return;const bold=(txt.match(/\*\*(.+?)\*\*/g)||[]).join("").length;if(bold>txt.length*.6)return;add(key,"z"+srsH(txt),"cloze",txt,txt,ctx);};
  /* Pathologies */
  (typeof PATHOS!=="undefined"?PATHOS:[]).forEach(p=>{const k="p:"+p.i,c=p.n;
@@ -63,14 +75,24 @@ function srsCards(){
    else if(b.t==="valeurs")(b.rows||[]).forEach(r=>add(k,"n"+srsH(r[0]+r[1]),"qa",`${f.titre} · ${r[0]}${r[1]?" "+r[1]:""} ?`,r[2],f.titre));
    else if(b.t==="signes")add(k,"g"+srsH(b.h||""),"qa",`${f.titre} · ${b.h} ?`,srsList(b.items,8),f.titre);
    else if(b.t==="retenir")cloze(k,b.txt,f.titre);});});
- const seen=new Set();SRS_CARDS=out.filter(c=>!seen.has(c.id)&&seen.add(c.id));
- SRS_BY={};SRS_CARDS.forEach(c=>{(SRS_BY[c.key]=SRS_BY[c.key]||[]).push(c);});
- return SRS_CARDS;
+ /* Urgences AFGSU : conduite à tenir et erreurs à éviter */
+ const afUe=(QUIZ.find(q=>q.af)||{}).ue;
+ (typeof AF!=="undefined"?AF:[]).forEach(f=>{const k="a:"+f.id;SRS_QK[k]={fam:"a:afgsu",ue:afUe};
+  add(k,"agir","qa",`Urgence : ${f.t}. Que faites-vous ?`,srsList(f.agir,7),"Urgences AFGSU");
+  add(k,"ne","qa",`Urgence : ${f.t}. Que ne faut-il pas faire ?`,srsList(f.ne,5),"Urgences AFGSU");});
+ /* Questions flash rédigées : la bonne réponse et son explication */
+ QUIZ.forEach(q=>{if(q.pid||q.sid||q.mid||!q.o||q.o[q.a]==null||SRS_QBAD.test(q.q)||/^(toutes|aucune)/i.test(q.o[q.a]))return;
+  const k="q:"+srsH(q.q);SRS_QK[k]={fam:q.af?"a:afgsu":"q:"+q.cat,ue:q.ue};
+  add(k,"q","qa",q.q,`**${String(q.o[q.a]).replace(/\*\*/g,"")}**`,q.af?"Urgences AFGSU":"Question flash · "+((CAT[q.cat]||{}).nom||""),q.e);});
+ const seen=new Set();SRS_AUTO=out.filter(c=>!seen.has(c.id)&&seen.add(c.id));
+ return SRS_AUTO;
 }
 const srsOfKey=k=>{srsCards();return SRS_BY[k]||[];};
 
 /* ---------- Paquets ---------- */
 function srsKeyMeta(key){const [k,id]=key.split(/:(.*)/s);
+ if(k==="q"||k==="a"){srsAuto();return SRS_QK[key]||{};}
+ if(k==="u")return {};
  if(k==="p"){const p=typeof PATHOS!=="undefined"&&PATHOS.find(x=>x.i===id);return p?{fam:"p:"+p.s,ue:typeof UE_SP!=="undefined"?UE_SP[p.s]:null}:{};}
  if(k==="s"){const s=typeof SOINS!=="undefined"&&SOINS.find(x=>x.i===id);return s?{fam:"s:"+s.s,ue:typeof UE_SO!=="undefined"?UE_SO[s.s]:null}:{};}
  if(k==="m"){const m=typeof MEDS!=="undefined"&&MEDS.find(x=>x.i===id);return m?{fam:"m:"+m.s,ue:typeof UE_MD!=="undefined"?UE_MD[m.s]:null}:{};}
@@ -81,8 +103,11 @@ function srsStudiedKeys(){const s=new Set();
  const add=(p,l)=>{try{(l||[]).forEach(id=>s.add(p+":"+id));}catch(e){}};
  add("f",typeof reviewed==="function"?reviewed():[]);add("c",typeof studied==="function"?studied():[]);
  add("p",typeof pxDone==="function"?pxDone():[]);add("s",typeof soDone==="function"?soDone():[]);add("m",typeof mdDone==="function"?mdDone():[]);return s;}
-/* Un paquet : "etudies", "favoris", "ue:<code>" (référentiel courant), "fam:<p|s|m|c|f>:<section>". */
+/* Un paquet : "etudies", "favoris", "mes" (toutes mes cartes), "mes:<paquet>", "ue:<code>" (référentiel courant),
+   "fam:<p|s|m|c|f|q|a>:<section>". */
 function srsInDeck(card,deck){
+ if(deck==="mes")return !!card.user;
+ if(deck.startsWith("mes:"))return !!card.user&&card.deck===deck.slice(4);
  if(deck==="etudies")return srsStudiedKeys().has(card.key);
  if(deck==="favoris")return favs().includes(card.key);
  if(deck.startsWith("ue:")){const m=srsMeta(card.key);return !!(m.ue&&(m.ue[state.ueRef]||[]).includes(deck.slice(3)));}
@@ -95,10 +120,12 @@ function srsDeckCards(deck){
  return C.filter(c=>srsInDeck(c,deck));}
 function srsDeckLabel(deck){
  if(deck==="etudies")return "Ce que j'ai étudié";if(deck==="favoris")return "Mes favoris";
+ if(deck==="mes")return "Toutes mes cartes";if(deck.startsWith("mes:"))return deck.slice(4);
  if(deck.startsWith("ue:")){const u=(UE[state.ueRef]||UE["2026"]).list.find(x=>x[0]===deck.slice(3));return u?`UE ${u[0]} · ${u[1]}`:deck;}
  const [,k,s]=deck.split(":");
  if(k==="p"){const x=SPES.find(y=>y[0]===s);return x?x[1]:s;}if(k==="s"){const x=SO_SECS.find(y=>y[0]===s);return x?x[1]:s;}
- if(k==="m"){const x=MD_SECS.find(y=>y[0]===s);return x?x[1]:s;}const c=CATS.find(y=>y.id===s);return c?c.nom:s;}
+ if(k==="m"){const x=MD_SECS.find(y=>y[0]===s);return x?x[1]:s;}if(k==="a")return "Urgences AFGSU";
+ const c=CATS.find(y=>y.id===s);return c?c.nom:s;}
 function srsSelCards(){const D=srsSet().decks;if(!D.length)return [];const ids=new Set(),out=[];
  D.forEach(d=>srsDeckCards(d).forEach(c=>{if(!ids.has(c.id)){ids.add(c.id);out.push(c);}}));return out;}
 
@@ -123,7 +150,9 @@ function srsStreak(){const L=store.get("srsLog",{}),t=srsDayN();let n=0,d=L[t]?t
 function srsBuild(cards,opt){
  opt=opt||{};const st=srsSt(),t=srsDayN(),dc=srsDayCount(),S=srsSet();
  const due=cards.filter(c=>srsDue(st,c,t)).sort(()=>Math.random()-.5);
- const lim=opt.all?1e9:Math.max(0,S.news-dc.n);let nw=cards.filter(c=>srsIsNew(st,c)).slice(0,lim);
+ const lim=opt.all?1e9:opt.lim||Math.max(0,S.news-dc.n);
+ /* Les cartes écrites par l'étudiant passent avant les nouvelles cartes automatiques. */
+ let nw=cards.filter(c=>srsIsNew(st,c));nw=nw.filter(c=>c.user).concat(nw.filter(c=>!c.user)).slice(0,lim);
  if(!due.length&&!nw.length&&opt.cram)return cards.slice().sort(()=>Math.random()-.5).slice(0,30).map(c=>c.id);
  const q=[];let i=0;due.forEach((c,k)=>{q.push(c.id);if((k+1)%3===0&&i<nw.length)q.push(nw[i++].id);});while(i<nw.length)q.push(nw[i++].id);
  return q;}
@@ -140,12 +169,18 @@ function srsRate(g){
  z.seen++;if(g>0)z.ok++;else{z.ko++;const pos=Math.min(z.q.length,z.i+4);z.q.splice(pos,0,id);}
  z.i++;z.show=false;haptic(g===0?"MEDIUM":"LIGHT");render();}
 const srsMd=t=>md(String(t||""));
+/* Texte saisi par l'étudiant : retours à la ligne et listes (« - » ou « • » en début de ligne). */
+function srsRich(t){const out=[];let ul=null;
+ String(t||"").split(/\n/).forEach(l=>{const m=l.match(/^\s*(?:[-•*]|\d+[.)])\s+(.*)$/);
+  if(m){if(!ul){ul=[];out.push(ul);}ul.push(m[1]);}else{ul=null;if(l.trim())out.push(l.trim());}});
+ return out.map(x=>Array.isArray(x)?`<ul class="srs-ul">${x.map(y=>`<li>${srsMd(y)}</li>`).join("")}</ul>`:`<p>${srsMd(x)}</p>`).join("");}
 function srsFace(c,back){
  if(c.type==="cloze"){const h=back?srsMd(c.q).replace(/<b>/g,'<b class="srs-fill">'):esc(c.q).replace(/\*\*(.+?)\*\*/g,(m,x)=>`<span class="srs-blank" aria-label="mot à trouver">${"_".repeat(Math.min(14,Math.max(4,x.length)))}</span>`).replace(/==(.+?)==/g,"$1");
-  return `<p class="srs-cloze">${h}</p>`;}
- if(!back)return `<h2 class="srs-q">${srsMd(c.q)}</h2>`;
- return Array.isArray(c.a)?`<ul class="srs-ul">${c.a.map(x=>`<li>${srsMd(x)}</li>`).join("")}</ul>`:`<p class="srs-a">${srsMd(c.a)}</p>`;}
-const SRS_ROUTE={f:"fiche",c:"cours",p:"patho",s:"soin",m:"med"};
+  return `<p class="srs-cloze">${c.user?h.replace(/\n/g,"<br>"):h}</p>${back&&c.ex?`<div class="srs-ex">${srsRich(c.ex)}</div>`:""}`;}
+ if(!back)return c.user?`<div class="srs-q srs-rich">${srsRich(c.q)}</div>`:`<h2 class="srs-q">${srsMd(c.q)}</h2>`;
+ const a=c.user?`<div class="srs-a srs-rich">${srsRich(c.a)}</div>`:Array.isArray(c.a)?`<ul class="srs-ul">${c.a.map(x=>`<li>${srsMd(x)}</li>`).join("")}</ul>`:`<p class="srs-a">${srsMd(c.a)}</p>`;
+ return a+(c.ex?`<p class="srs-ex">${srsMd(c.ex)}</p>`:"");}
+const SRS_ROUTE={f:"fiche",c:"cours",p:"patho",s:"soin",m:"med",a:"outil/urgences"};
 function vSrsRun(){
  const z=state.srs;
  if(z.i>=z.q.length){const pct=z.seen?Math.round(z.ok/z.seen*100):0,min=Math.max(1,Math.round((Date.now()-z.start)/6e4));
@@ -157,8 +192,9 @@ function vSrsRun(){
  const btn=(g,l,cls)=>`<button class="srs-b ${cls}" data-act="srs-rate" data-k="${g}"><b>${l}</b><small>${srsIvTxt(srsNext(s,g,t)[1]*(g===0?0:1))}</small></button>`;
  return `<div class="stack-lg srs-run"><div class="stack-sm"><div class="q-top"><span class="eyebrow">${esc(z.label||"Cartes")} · ${z.i+1} sur ${z.q.length}</span><button class="q-close" data-act="srs-quit">Quitter</button></div>
   <div class="progress"><i style="width:${z.i/z.q.length*100}%"></i></div></div>
-  <div class="srs-card${z.show?" back":""}"><span class="srs-ctx">${s?"Révision":"Nouvelle carte"} · ${esc(c.ctx||"")}</span>${srsFace(c,false)}
-   ${z.show?`<div class="srs-ans">${c.type==="cloze"?srsFace(c,true):srsFace(c,true)}</div><a class="link srs-src" href="#${SRS_ROUTE[k]}/${encodeURIComponent(cid)}">Ouvrir le contenu</a>`:""}</div>
+  <div class="srs-card${z.show?" flipped":""}"><span class="srs-ctx">${s?"Révision":"Nouvelle carte"} · ${esc(c.ctx||"")}</span>${srsFace(c,false)}
+   ${z.show?`<div class="srs-ans">${srsFace(c,true)}</div><div class="srs-links">${SRS_ROUTE[k]?`<a class="link srs-src" href="#${SRS_ROUTE[k]}/${encodeURIComponent(cid)}">Ouvrir le contenu</a>`:""}
+    ${c.user?`<a class="link" href="#mescartes/edit/${esc(c.user)}">Modifier ma carte</a>`:`<button class="link" data-act="mc-copy" data-k="${esc(c.id)}">Copier dans mes cartes</button>`}</div>`:""}</div>
   ${z.show?`<div class="srs-bs" role="group" aria-label="Comment avez-vous répondu ?">${btn(0,"À revoir","r0")}${btn(1,"Difficile","r1")}${btn(2,"Bien","r2")}${btn(3,"Facile","r3")}</div>
    <p class="ot-hint srs-hint">Soyez honnête : « À revoir » fait revenir la carte dans quelques minutes, « Facile » l'éloigne davantage.</p>`
   :`<button class="btn block srs-show" data-act="srs-show">Afficher la réponse</button><p class="ot-hint srs-hint">Répondez dans votre tête (ou à voix haute), puis vérifiez.</p>`}</div>`;
@@ -169,7 +205,8 @@ function srsDeckGroups(){const C=srsCards(),fam={};
  const grp=(pre,lab,order)=>[lab,order.map(s=>"fam:"+pre+":"+s).filter(d=>fam[d.slice(4)])];
  const ueL=(UE[state.ueRef]||UE["2026"]).list;
  return [grp("p","Pathologies par spécialité",SPES.map(x=>x[0])),grp("s","Soins par thème",SO_SECS.map(x=>x[0])),grp("m","Médicaments par classe",MD_SECS.map(x=>x[0])),
-  grp("c","Cours par catégorie",CATS.map(x=>x.id)),grp("f","Fiches par catégorie",CATS.map(x=>x.id)),["Par UE ("+(UE[state.ueRef]||UE["2026"]).sub+")",ueL.map(u=>"ue:"+u[0])]];}
+  grp("c","Cours par catégorie",CATS.map(x=>x.id)),grp("f","Fiches par catégorie",CATS.map(x=>x.id)),grp("q","Questions flash par thème",CATS.map(x=>x.id)),grp("a","Urgences AFGSU",["afgsu"]),
+  ["Par UE ("+(UE[state.ueRef]||UE["2026"]).sub+")",ueL.map(u=>"ue:"+u[0])]];}
 function vSrsHome(){
  const S=srsSet(),sel=srsSelCards(),st=srsSt(),cn=srsCounts(sel,st),dc=srsDayCount(),nwToday=Math.min(cn.nw,Math.max(0,S.news-dc.n)),streak=srsStreak();
  const all=srsCards(),known=all.filter(c=>st[c.id]).length,L=store.get("srsLog",{}),t=srsDayN();
@@ -182,24 +219,33 @@ function vSrsHome(){
  const days=[...Array(14)].map((_,i)=>{const d=t-13+i,v=L[d];return `<i class="${v?v[0]>=30?"h3":v[0]>=10?"h2":"h1":""}" title="${v?v[0]:0}"></i>`;}).join("");
  return `<div class="stack-lg">
   <section class="srs-today"><div class="srs-t-top"><span class="nt-ic">${SRS_IC.cards}</span><div><span class="eyebrow">Aujourd'hui</span><h2>${S.decks.length?(cn.due+nwToday?`${plural(cn.due+nwToday,"carte")} à réviser`:"Tout est à jour"):"Choisissez vos paquets"}</h2>
-   <small>${S.decks.length?`${cn.due} à revoir · ${nwToday} nouvelle${nwToday>1?"s":""} (sur ${S.news} par jour)`:"Les cartes sont créées automatiquement à partir des contenus. Commencez par ce que vous avez déjà étudié."}</small></div></div>
+   <small>${S.decks.length?`${cn.due} à revoir · ${nwToday} nouvelle${nwToday>1?"s":""} (sur ${S.news} par jour)`:"Des cartes sont déjà prêtes pour chaque contenu, et vous pouvez écrire les vôtres. Commencez par ce que vous avez déjà étudié."}</small></div></div>
    ${S.decks.length?`<button class="btn block" data-act="srs-go" ${cn.due+nwToday?"":"disabled"}>${IC.play}Commencer la révision</button>`:`<button class="btn block" data-act="srs-quick" ${nSt?"":"disabled"}>${IC.play}${nSt?`Réviser ce que j'ai étudié · ${plural(nSt,"carte")}`:"Étudiez d'abord une fiche ou un cours"}</button>`}
    <div class="srs-kpi"><span><b>${streak}</b>jour${streak>1?"s":""} d'affilée</span><span><b>${known}</b>carte${known>1?"s":""} apprise${known>1?"s":""}</span><span><b>${r30[0]?Math.round(r30[1]/r30[0]*100)+" %":"–"}</b>réussite sur 30 j</span></div>
    <div class="srs-heat" aria-label="Activité des 14 derniers jours">${days}</div></section>
+  ${typeof mcHome==="function"?mcHome():""}
   <section class="stack-sm"><div class="section-title"><h2>Mes paquets</h2><span class="muted">${S.decks.length?plural(sel.length,"carte"):""}</span></div>
    <p class="muted">Touchez un paquet pour l'ajouter à vos révisions quotidiennes. ${all.length.toLocaleString("fr-FR")} cartes disponibles.</p>
-   <div class="chips wrapchips">${nSt?chip("etudies",nSt):""}${nFav?chip("favoris",nFav):""}${semUE.map(d=>[d,srsDeckCards(d).length]).filter(x=>x[1]).map(([d,n])=>chip(d,n)).join("")}</div>
+   <div class="chips wrapchips">${typeof mcPaquets==="function"?mcPaquets().map(([p,n])=>chip("mes:"+p,n)).join(""):""}${nSt?chip("etudies",nSt):""}${nFav?chip("favoris",nFav):""}${semUE.map(d=>[d,srsDeckCards(d).length]).filter(x=>x[1]).map(([d,n])=>chip(d,n)).join("")}</div>
    ${groups}
    ${S.decks.length?`<button class="link" data-act="srs-clear">Vider ma sélection</button>`:""}</section>
   <section class="stack-sm"><h2>Réglages</h2><div class="list nt-list"><label class="nt-row" for="srs-news"><span><b>Nouvelles cartes par jour</b><small>15 à 20 suffisent : les révisions s'ajoutent ensuite chaque jour.</small></span><select id="srs-news" data-srs="news">${[5,10,15,20,30,50].map(n=>`<option ${S.news===n?"selected":""}>${n}</option>`).join("")}</select></label></div></section>
   <p class="disclaimer">La répétition espacée : chaque carte revient juste avant que vous l'oubliiez. Quelques minutes par jour suffisent à retenir durablement.</p></div>`;
 }
 /* Bouton en bas d'un contenu */
-function srsCta(it){const L=srsOfKey(it.key);if(!L.length)return "";const c=srsCounts(L);
- return `<button class="a4-cta srs-cta" data-act="srs-content" data-k="${esc(it.key)}"><span class="a4-cta-ic">${SRS_IC.cards}</span><span><b>Réviser en cartes · ${plural(L.length,"carte")}</b><small>${c.nw===L.length?"Testez-vous sur ce contenu, puis il revient au bon moment":`${c.due} à revoir · ${c.nw} nouvelle${c.nw>1?"s":""} · ${c.mature} bien acquise${c.mature>1?"s":""}`}</small></span>${IC.play}</button>`;}
+function srsCta(it){const L=srsOfKey(it.key),c=srsCounts(L),mine=L.filter(x=>x.user).length;
+ const add=`<a class="srs-mine" href="#mescartes/new/${encodeURIComponent(it.key)}">${IC.plus||"+"}<span>Créer ma carte sur ce contenu${mine?` <small>· ${plural(mine,"carte")} à moi</small>`:""}</span></a>`;
+ if(!L.length)return add;
+ return `<button class="a4-cta srs-cta" data-act="srs-content" data-k="${esc(it.key)}"><span class="a4-cta-ic">${SRS_IC.cards}</span><span><b>Réviser en cartes · ${plural(L.length,"carte")}</b><small>${c.nw===L.length?"Testez-vous sur ce contenu, puis il revient au bon moment":`${c.due} à revoir · ${c.nw} nouvelle${c.nw>1?"s":""} · ${c.mature} bien acquise${c.mature>1?"s":""}`}</small></span>${IC.play}</button>${add}`;}
+/* Séance sur une liste de contenus (clés « s:id »…) : cartes dues, puis jusqu'à 20 nouvelles. */
+function srsKeysCards(keys){const K=new Set(keys);return srsCards().filter(c=>K.has(c.key));}
+function srsKeysGo(keys,label){return srsStart(srsKeysCards(keys),label,{lim:20,cram:true});}
+/* Lance une séance sur un paquet : cartes dues, puis jusqu'à 20 nouvelles. */
+function srsDeckGo(deck,label){return srsStart(srsDeckCards(deck),label||srsDeckLabel(deck),{lim:20,cram:true});}
 function srsAct(b,a){const k=b.dataset.k;
  if(a==="srs-go")srsStart(srsSelCards(),"Révision du jour");
  else if(a==="srs-quick"){const S=srsSet();S.decks=["etudies"];store.set("srsSet",S);srsStart(srsSelCards(),"Révision du jour");}
+ else if(a==="srs-deckgo")srsDeckGo(k,b.dataset.l);
  else if(a==="srs-content"){const it=ctItem(...k.split(/:(.*)/s).slice(0,2));srsStart(srsOfKey(k),it?it.titre:"Cartes",{all:true,cram:true});}
  else if(a==="srs-show"){if(state.srs){state.srs.show=true;render();}}
  else if(a==="srs-rate")srsRate(+k);

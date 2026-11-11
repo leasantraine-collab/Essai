@@ -6,7 +6,7 @@ Elle reprend l'intégralité des contenus de l'artefact *Carnet IFSI* et les com
 
 - **197 fiches** récap, dont 116 fiches complètes illustrées
 - **32 cours complets** (chapitres, analogies, pièges, questions de vérification)
-- **195 questions de quiz** expliquées et 15 cas cliniques
+- **Cartes de révision** à répétition espacée, et **cartes personnelles** que l'étudiant écrit lui-même
 - **11 générateurs de calculs de dose** (débits, PSE, insuline, mg/kg/h, dilutions…)
 - **35 schémas** dessinés
 - Préparation aux **stages** : check-list, posture, objectifs, **18 services**
@@ -20,12 +20,13 @@ Elle reprend l'intégralité des contenus de l'artefact *Carnet IFSI* et les com
 - Navigation en 5 onglets : Accueil, Réviser, S'entraîner, Stages, Programme
 - Tableau de bord de progression, reprise du dernier contenu ouvert
 - Recherche plein texte dans toutes les fiches et tous les cours
-- Favoris, quiz express (10 questions), révision de ses erreurs
+- Favoris, cartes du jour, erreurs de partiel transformées en cartes
 - Réglages : thème auto/clair/sombre, taille du texte, référentiel
 - Fonctionne **hors ligne**, polices embarquées, aucune donnée envoyée
 - Retour matériel Android, retour haptique, barre d'état adaptée au thème
 - Notifications de rappel (planning, tâches, partiels, stage, mémoire, résumé du jour, minuteur), voir plus bas
-- Cartes de révision à répétition espacée (plus de 8 500 cartes créées automatiquement à partir des contenus)
+- Cartes de révision à répétition espacée (plus de 8 500 cartes créées automatiquement à partir des contenus, questions flash et urgences AFGSU comprises)
+- **Mes cartes** : question / réponse ou texte à trous, explication, carte inversée, paquets, lien vers un contenu, ajout d'une liste collée ou d'un fichier (Quizlet, Anki, tableur) et partage d'un paquet en fichier texte (`www/js/mes-cartes.js`)
 - Partiels blancs chronométrés et notés sur 20, niveaux de calculs de doses et épreuve blanche « 10 calculs en 30 min »
 - Progression par UE, par compétence (2009) ou par domaine (2026)
 - Export PDF du carnet de stage, du parcours et des feuilles de travail ; exemples rédigés (recueil, projet de soins, analyse de pratique)

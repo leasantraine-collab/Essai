@@ -442,7 +442,7 @@ F("ecologie","role","Environnement","Soins écoresponsables","4.8|C.2",
 F("espacee","methode","Mémorisation","La répétition espacée","6.1|E.3",
  P("On retient mieux en revoyant une notion juste avant de l'oublier.")+
  K("1re révision","le lendemain","2e révision","3 jours après","3e révision","1 semaine après","4e révision","3 semaines après")+
- C("Se tester (quiz, fiche cachée) est plus efficace que relire. C'est le principe de la mémorisation active.")),
+ C("Se tester (cartes, fiche cachée) est plus efficace que relire. C'est le principe de la mémorisation active.")),
 F("planning","methode","Organisation","Construire son planning de révisions","6.1|E.3",
  U("Lister les UE et les dates d'évaluation","Découper en petites séances de 25 à 45 minutes","Mélanger les matières plutôt que tout faire d'un bloc","Garder des créneaux pour les révisions espacées","Prévoir des pauses et du sommeil : la mémoire se consolide la nuit")),
 F("fiche-efficace","methode","Méthode","Faire une fiche efficace","6.1|E.3",

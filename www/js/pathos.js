@@ -7,7 +7,7 @@ const progOf=s=>(PROGRAMME[s]||"").split("|").filter(Boolean);
 const PNAME={};PATHOS.forEach(p=>[p.n,...(p.nn||[])].forEach(x=>{if(!PNAME[x])PNAME[x]=p;}));
 const pathosOf=s=>{const l=progOf(s).map(n=>PNAME[n]).filter(Boolean);PATHOS.forEach(p=>{if(p.s===s&&!l.includes(p))l.push(p);});return [...new Set(l)];};
 const PROG_ALL=[...new Set(SPES.flatMap(([s])=>progOf(s)))];
-const pxSpeQ=s=>{const ids=new Set(pathosOf(s).map(p=>p.i));return QUIZ.map((q,i)=>i).filter(i=>ids.has(QUIZ[i].pid));};
+const pxSpeQ=s=>srsDeckCards("fam:p:"+s);
 const pxDone=()=>store.get("pxdone",[]);
 const SPE_ICO={cardio:"heart",pneumo:"lungs",neuro:"brain",rhumato:"bone",pedia:"baby",ophtalmo:"eye",nephro:"kidney",hemato:"drop",infectio:"thermo",dermato:"peau",endoc:"gland",nutri:"scale",urg:"alert",onco:"tube",geria:"face",psy:"brain",gyneco:"baby",orl:"face",pallia:"face",transv:"gauge",immuno:"drop",gastro:"gut",chir:"tube"};
 
@@ -41,7 +41,7 @@ function pxRevList(isF){
 function pxRev(isF){
  const s=pxSpeCur(),S=SPE[s],dn=pxDone(),n=S?pathosOf(s).length:PATHOS.length;
  const tools=S?(()=>{const nq=pxSpeQ(s).length,ex=PEXOS.filter(e=>e.spe.includes(s)).length,d=pathosOf(s).filter(p=>dn.includes(p.i)).length;
-   return nq||ex||d?`<div class="px-spebtns">${nq?`<button class="btn sm" data-act="px-quiz" data-k="${s}">${IC.bolt}Quiz · ${nq}</button>`:""}${ex?`<a class="btn sm ghost" href="#entrainer/schemas">Schémas · ${ex}</a>`:""}${d?`<span class="muted px-spedone">${d} étudiée${d>1?"s":""}</span>`:""}</div>`:"";})():"";
+   return nq||ex||d?`<div class="px-spebtns">${nq?`<button class="btn sm" data-act="srs-deckgo" data-k="fam:p:${s}">${SRS_IC.cards}Cartes · ${nq}</button>`:""}${ex?`<a class="btn sm ghost" href="#entrainer/schemas">Schémas · ${ex}</a>`:""}${d?`<span class="muted px-spedone">${d} étudiée${d>1?"s":""}</span>`:""}</div>`:"";})():"";
  return `<span class="eyebrow px-revlab" id="px-top">Spécialité</span>
   <div class="px-revbar" id="px-revbar"><label class="px-sel" style="--c:${S?S.c:"var(--brand)"}"><span class="dot"></span><b>${esc(S?S.nom:"Toutes les spécialités")}</b><small>${n}</small><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
    <select id="pxspe" aria-label="Choisir une spécialité"><option value="all"${s==="all"?" selected":""}>Toutes les spécialités (${PATHOS.length})</option>${SPES.map(([id,nom])=>`<option value="${id}"${s===id?" selected":""}>${esc(nom)} (${pathosOf(id).length})</option>`).join("")}</select></label></div>
@@ -138,7 +138,7 @@ function vPatho(id){
   ["Rôle infirmier",p.ri&&p.ri.length?`<ul class="fv-checks">${p.ri.map(x=>`<li>${SVG.check}<span>${pmd(x)}</span></li>`).join("")}</ul>`:""]].filter(x=>x[1]);
  const hero=`<div class="fv-progress" aria-hidden="true"><i id="fv-bar"></i></div><header class="fv-hero"><div class="fv-top"><button class="fv-back" data-act="back">${SVG.back}${esc(S.nom)}</button>${done?'<span class="fv-done-badge">Étudiée</span>':""}</div>
   <span class="fv-kicker">Pathologie · ${esc(S.nom)}</span><h1>${esc(p.n)}</h1><div class="fv-ico" aria-hidden="true">${ICO[SPE_ICO[p.s]]||ICO.heart}</div>
-  <div class="fv-meta"><span>Fiche récap + cours</span><span>${secs.length} parties</span>${qs.length?`<span>${qs.length} questions</span>`:""}</div></header>`;
+  <div class="fv-meta"><span>Fiche récap + cours</span><span>${secs.length} parties</span>${(n=>n?`<span>${plural(n,"carte")}</span>`:"")(srsOfKey("p:"+id).length)}</div></header>`;
  const seg=`<div class="seg px-seg" role="group" aria-label="Mode de lecture"><button data-act="px-mode" data-k="recap" aria-pressed="${mode==="recap"}">Fiche récap</button><button data-act="px-mode" data-k="cours" aria-pressed="${mode==="cours"}">Cours détaillé</button></div>`;
  let body,toc="";
  if(mode==="recap"){
@@ -166,8 +166,8 @@ function vPatho(id){
  }
  return `<article class="fv px" style="--c:${S.c}">${hero}${toc}<div class="fv-body"><div class="px-head">${seg}</div>${body}
   ${links?`<section class="stack-sm"><h3 class="cn-g">Pour aller plus loin dans l'appli</h3><div class="chips wrapchips">${links}</div></section>`:""}
-  <div class="fv-end"><h3>${done?"Pathologie étudiée":"Vous avez terminé"}</h3><p class="muted">Marquez-la comme étudiée, puis testez-vous.</p>
-   <div class="row2"><button class="btn ${done?"ghost":"ok"}" data-act="px-done" data-k="${id}">${done?"Retirer des étudiées":"J'ai étudié cette pathologie"}</button>${qs.length?`<button class="btn ghost" data-act="px-qp" data-k="${id}">${IC.bolt}Me tester · ${qs.length}</button>`:""}</div>
+  <div class="fv-end"><h3>${done?"Pathologie étudiée":"Vous avez terminé"}</h3><p class="muted">Marquez-la comme étudiée, puis testez-vous avec les cartes, juste en dessous.</p>
+   <div class="row2"><button class="btn ${done?"ghost":"ok"}" data-act="px-done" data-k="${id}">${done?"Retirer des étudiées":"J'ai étudié cette pathologie"}</button></div>
    ${next?`<a class="card cat fv-next" style="--c:${S.c}" href="#patho/${next.i}"><span class="eyebrow">Pathologie suivante</span><h3>${esc(next.n)}</h3></a>`:""}</div></div></article>`;
 }
 
@@ -270,22 +270,12 @@ function vSchemas(){
    ${st.done?`<div class="feedback ${allOk?"ok":"ko"}"><b>${allOk?"Parfait !":`${score} bonne${score>1?"s":""} réponse${score>1?"s":""} sur ${n}`}</b><span>${allOk?"Vous maîtrisez ce schéma.":E.map?"Les zones en couleur sur le schéma sont celles à revoir.":"Relisez l'ordre correct ci-dessous."}</span></div>
     ${correction}<button class="btn block" data-act="px-exo-reset">Recommencer</button>`:`<button class="btn block" data-act="px-exo-check">Vérifier</button>`}</div>`;
 }
-/* Bloc ajouté à l'accueil du quiz : quiz par spécialité et schémas. */
-function pxQuizBlock(){
- const sp=SPES.filter(([s])=>pxSpeQ(s).length);if(!sp.length)return "";
- return `<section class="stack-sm"><div class="section-title"><h2>Pathologies par spécialité</h2><a href="#pathos">Les cours</a></div>
-  <div class="chips wrapchips">${sp.map(([s,nom,c])=>`<button class="chip" style="--c:${c}" data-act="px-quiz" data-k="${s}"><i></i>${esc(nom)} · ${pxSpeQ(s).length}</button>`).join("")}</div>
-  <a class="list" href="#entrainer/schemas"><span class="li"><span class="ic acc">${IC.bolt}</span><span><span class="t">Schémas à compléter</span><span class="s">${PEXOS.length} exercices : schémas d'organes et étapes à remettre dans l'ordre</span></span>${chev}</span></a></section>`;
-}
-
 /* ---------- Actions ---------- */
 function pathoAct(b,a){const k=b.dataset.k;
  if(a==="px-open"){state.pxMode=k;return;}
  if(a==="px-spe"){state.pxSpe=k;store.set("pxspe",k);render();pxBind(true);return;}
  if(a==="px-go"){nav("reviser/pathos");return;}
  if(a==="px-mode"){state.pxMode=k;render();const t=document.querySelector(".px-head");if(t)t.scrollIntoView();return;}
- if(a==="px-quiz"){launchQuiz(pxSpeQ(k).sort(()=>Math.random()-.5).slice(0,20),"Quiz "+SPE[k].nom);return;}
- if(a==="px-qp"){launchQuiz(QUIZ.map((q,i)=>i).filter(i=>QUIZ[i].pid===k),"Quiz · "+PBY[k].n);return;}
  if(a==="px-done"){let d=pxDone();const on=!d.includes(k);d=on?[...d,k]:d.filter(x=>x!==k);store.set("pxdone",d);haptic();if(on)toast("Pathologie marquée comme étudiée");render();return;}
  if(a==="px-exo"){state.exo=k;state.exoAns=null;state.train="schemas";if(route().v==="entrainer")render();return;}
  if(a==="px-exo-check"){const E=PEXOS.find(e=>e.id===state.exoAns.id);if(Object.keys(state.exoAns.a).filter(i=>state.exoAns.a[i]).length<(E.map?E.keys.length:E.steps.length)){toast("Complétez toutes les cases");return;}state.exoAns.done=true;haptic();render();return;}

@@ -136,7 +136,7 @@ function soOrdEx(o){const idx=soOrdIdx(o);if(!idx.length)return "";const opts=px
 /* ---------- Vue d'une fiche de soin ---------- */
 function vSoin(id){
  const o=SOBY[id];if(!o)return notFound();
- const S=SO_SEC[o.s],C=CAT[S.cat],mode=state.soMode||"recap",done=soDone().includes(id),qs=QUIZ.filter(q=>q.sid===id);
+ const S=SO_SEC[o.s],C=CAT[S.cat],mode=state.soMode||"recap",done=soDone().includes(id);
  const list=soSecFiches(o.s),k=list.indexOf(o),next=list[k+1],col=SO_COL(o.s);
  const badges=`<div class="so-badges">${o.st.map(s=>`<span class="so-st so-${s}">${SO_ST[s]||esc(s)}</span>`).join("")}</div>`;
  const links=ctChips(o.f);
@@ -169,8 +169,8 @@ function vSoin(id){
  }
  return `<article class="fv px so" style="--c:${col}">${hero}${toc}<div class="fv-body"><div class="px-head">${seg}</div>${body}
   ${links?`<section class="stack-sm"><h3 class="cn-g">Pour aller plus loin dans l'appli</h3><div class="chips wrapchips">${links}</div></section>`:""}
-  <div class="fv-end"><h3>${done?"Soin étudié":"Vous avez terminé"}</h3><p class="muted">Marquez-le comme étudié, puis testez-vous.</p>
-   <div class="row2"><button class="btn ${done?"ghost":"ok"}" data-act="so-done" data-k="${id}">${done?"Retirer des étudiés":"J'ai étudié ce soin"}</button>${qs.length?`<button class="btn ghost" data-act="so-quiz" data-k="${id}">${IC.bolt}Me tester · ${qs.length}</button>`:""}</div>
+  <div class="fv-end"><h3>${done?"Soin étudié":"Vous avez terminé"}</h3><p class="muted">Marquez-le comme étudié, puis testez-vous avec les cartes, juste en dessous.</p>
+   <div class="row2"><button class="btn ${done?"ghost":"ok"}" data-act="so-done" data-k="${id}">${done?"Retirer des étudiés":"J'ai étudié ce soin"}</button></div>
    ${next?`<a class="card cat fv-next" style="--c:${col}" href="#soin/${next.i}" data-act="so-open" data-k="${mode}"><span class="eyebrow">Soin suivant</span><h3>${esc(next.n)}</h3></a>`:""}</div></div></article>`;
 }
 
@@ -183,8 +183,8 @@ function soRevList(cat,isF){const s=soSecCur(cat),q=soK(state.soq||""),dn=soDone
  return h||`<div class="empty">Aucun soin ne correspond à « ${esc(state.soq)} ».</div>`;}
 function soRev(cat,isF){
  const s=soSecCur(cat),S=s==="all"?null:SO_SEC[s],n=S?soSecFiches(s).length:soCatN(cat),dn=soDone();
- const tools=S?(()=>{const ids=new Set(soSecFiches(s).map(o=>o.i)),nq=QUIZ.filter(q=>ids.has(q.sid)).length,d=[...ids].filter(i=>dn.includes(i)).length;
-   return nq||d?`<div class="px-spebtns">${nq?`<button class="btn sm" data-act="so-sec-quiz" data-k="${s}">${IC.bolt}Quiz · ${nq}</button>`:""}${d?`<span class="muted px-spedone">${d} étudié${d>1?"s":""}</span>`:""}</div>`:"";})():"";
+ const tools=S?(()=>{const ids=new Set(soSecFiches(s).map(o=>o.i)),nq=srsKeysCards([...ids].map(i=>"s:"+i)).length,d=[...ids].filter(i=>dn.includes(i)).length;
+   return nq||d?`<div class="px-spebtns">${nq?`<button class="btn sm" data-act="so-sec-cards" data-k="${s}">${SRS_IC.cards}Cartes · ${nq}</button>`:""}${d?`<span class="muted px-spedone">${d} étudié${d>1?"s":""}</span>`:""}</div>`:"";})():"";
 
  return `<span class="eyebrow px-revlab" id="px-top">Catégorie</span>
   <div class="px-revbar"><label class="px-sel" style="--c:${S?SO_COL(s):"var(--brand)"}"><span class="dot"></span><b>${esc(S?S.nom:"Toutes les catégories")}</b><small>${n}</small><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
@@ -223,8 +223,7 @@ function soAct(b,a){const k=b.dataset.k;
   b.textContent="Recommencer";b.dataset.act="so-ord-reset";haptic();return;}
  if(a==="so-ord-reset"){render();return;}
  if(a==="so-done"){let d=soDone();const on=!d.includes(k);d=on?[...d,k]:d.filter(x=>x!==k);store.set("sodone",d);haptic();if(on)toast("Soin marqué comme étudié");render();return;}
- if(a==="so-quiz"){launchQuiz(QUIZ.map((q,i)=>i).filter(i=>QUIZ[i].sid===k),"Quiz · "+SOBY[k].n);return;}
- if(a==="so-sec-quiz"){const ids=new Set(soSecFiches(k).map(o=>o.i));launchQuiz(QUIZ.map((q,i)=>i).filter(i=>ids.has(QUIZ[i].sid)).sort(()=>Math.random()-.5).slice(0,20),"Quiz · "+SO_SEC[k].nom);return;}
+ if(a==="so-sec-cards"){srsKeysGo(soSecFiches(k).map(o=>"s:"+o.i),SO_SEC[k].nom);return;}
 }
 function soInput(t){const cat=state.filter;
  if(t.id==="sosec"){if(soSecCur(cat)!==t.value){(state.soSec=state.soSec||{})[cat]=t.value;store.set("sosec_"+cat,t.value);render();pxBind(true);}return true;}

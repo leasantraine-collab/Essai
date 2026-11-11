@@ -13,7 +13,7 @@ const exNote=(ok,n)=>n?Math.round(ok/n*40)/2:0;
 const exFmtN=x=>String(x).replace(".",",");
 const exMmss=ms=>{ms=Math.max(0,ms);const s=Math.ceil(ms/1000);return `${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;};
 
-/* ---------- Résultats par UE (quiz, cartes, calculs, partiels) ---------- */
+/* ---------- Résultats par UE (cartes, calculs, partiels ; les réponses des anciens quiz restent comptées) ---------- */
 const EX_CALC_UE=()=>typeof ueFill==="function"?ueFill(ueSplit(CAT_UE.calcul),"calcul"):{"2009":["2.11","4.4"],"2026":["B.3"]};
 function exRecord(src,ref,ok,ue){
  const S=store.get("exUE",{"2009":{},"2026":{}});
@@ -80,7 +80,7 @@ function vPbRes(){
   <div class="score-hero">${ring(pct,140)}<h1>${exFmtN(R.note)} / 20</h1><p class="lead">${R.ok} bonne${R.ok>1?"s":""} réponse${R.ok>1?"s":""} sur ${R.n} en ${plural(Math.max(1,min),"minute")}. ${R.note>=16?"Excellent : ce partiel est maîtrisé.":R.note>=10?"Moyenne atteinte : consolidez les UE en dessous de 75 %.":"Sous la moyenne : reprenez les cours des UE les plus faibles, puis refaites un partiel."}</p></div>
   ${ueRows?`<section class="stack-sm"><h2>Par UE</h2><div class="sheet-body pb-ues">${ueRows}</div></section>`:""}
   ${catRows?`<section class="stack-sm"><h2>Vos points faibles</h2><div class="sheet-body"><ul class="clean pa-ul">${catRows}</ul>
-   <div class="btn-row">${weakUE.length?`<button class="btn" data-act="pb-cards" data-k="${esc(weakUE.join(","))}">${SRS_IC.cards}Réviser ces UE en cartes</button>`:""}<button class="btn ghost" data-act="quiz-wrong">Revoir mes erreurs en quiz</button></div></div></section>`:""}
+   <div class="btn-row">${weakUE.length?`<button class="btn" data-act="pb-cards" data-k="${esc(weakUE.join(","))}">${SRS_IC.cards}Réviser ces UE en cartes</button>`:""}${wrong.some(([x])=>x.q)?`<button class="btn ghost" data-act="mc-from-pb">Mettre mes erreurs en cartes</button>`:""}</div></div></section>`:""}
   ${corr?`<section class="stack-sm"><div class="section-title"><h2>Correction</h2><span class="muted">${plural(wrong.length,"erreur")}</span></div>${corr}</section>`:`<div class="callout"><b>Sans faute !</b> Toutes vos réponses sont justes.</div>`}
   <div class="btn-row"><button class="btn" data-act="pb-again">Nouveau partiel blanc</button><button class="btn ghost" data-act="pb-quit">Terminer</button></div></div>`;}
 function vPbHome(){
@@ -177,7 +177,7 @@ function vProgression(){
   <div class="pg-bars"><span class="pg-lab">Réussite</span><span class="pb-ue-bar"><i style="width:${x.n?Math.round((x.ema||0)*100):0}%;--c:${c==="ok"?"var(--ok)":c==="mid"?"#C59B4E":c==="ko"?"var(--bad)":"var(--line-2)"}"></i></span><b>${x.n?Math.round(x.ema*100)+" %":"–"}</b>
    <span class="pg-lab">Contenus vus</span><span class="pb-ue-bar"><i style="width:${x.t?x.d/x.t*100:0}%;--c:var(--brand)"></i></span><b>${x.d}/${x.t}</b></div>
   <div class="pg-foot"><span class="pg-tag ${c}">${l}</span><span class="muted">${plural(x.n,"réponse")}</span></div></div>`;};
- const act=x=>`<div class="pg-act"><span><b>UE ${esc(x.u[0])}</b> ${esc(x.u[1])} · ${Math.round(x.ema*100)} %</span><span class="pg-btns"><button class="chip" data-act="pg-cards" data-k="${esc(x.u[0])}">${SRS_IC.cards}Cartes</button><button class="chip" data-act="pg-quiz" data-k="${esc(x.u[0])}">${IC.bolt}Quiz</button><button class="chip" data-act="pg-pb" data-k="${esc(x.u[0])}">${EX_IC.clock}Partiel</button></span></div>`;
+ const act=x=>`<div class="pg-act"><span><b>UE ${esc(x.u[0])}</b> ${esc(x.u[1])} · ${Math.round(x.ema*100)} %</span><span class="pg-btns"><button class="chip" data-act="pg-cards" data-k="${esc(x.u[0])}">${SRS_IC.cards}Cartes</button><button class="chip" data-act="pg-pb" data-k="${esc(x.u[0])}">${EX_IC.clock}Partiel</button></span></div>`;
  let grp="";
  if(r==="2009")grp=Object.entries(COMP).map(([n,t])=>{const L=(COMP_UE[n]||[]).map(c=>S[c]).filter(v=>v&&v[0]);const N=L.reduce((s,v)=>s+v[0],0),E=N?L.reduce((s,v)=>s+v[2]*v[0],0)/N:null;
   return `<div class="pg-comp"><span><b>C${n}</b> ${esc(t)}</span><span class="pb-ue-bar"><i style="width:${E==null?0:Math.round(E*100)}%;--c:${E==null?"var(--line-2)":E>=.8?"var(--ok)":E>=.6?"#C59B4E":"var(--bad)"}"></i></span><b>${E==null?"–":Math.round(E*100)+" %"}</b></div>`;}).join("");
@@ -185,11 +185,11 @@ function vProgression(){
   return `<div class="pg-comp"><span><b>${esc(g)}</b> ${esc(t)}</span><span class="pb-ue-bar"><i style="width:${E==null?0:Math.round(E*100)}%;--c:${E==null?"var(--line-2)":E>=.8?"var(--ok)":E>=.6?"#C59B4E":"var(--bad)"}"></i></span><b>${E==null?"–":Math.round(E*100)+" %"}</b></div>`;}).join("");
  const src=(k,l)=>{const v=T[k];return `<span><b>${v?Math.round(v[1]/v[0]*100)+" %":"–"}</b>${l}${v?` · ${v[0]}`:""}</span>`;};
  const semRows=rows.filter(x=>x.u[3].includes(sem)),otherRows=rows.filter(x=>!x.u[3].includes(sem));
- return `<div class="stack-lg">${backBtn("S'entraîner")}${vh("Progression","Ma progression par UE",`${esc(R.sub)} · réussite calculée sur vos réponses aux quiz, cartes, partiels blancs et calculs, en donnant plus de poids aux plus récentes.`)}
-  <div class="srs-kpi pg-kpi">${src("q","quiz")}${src("card","cartes")}${src("partiel","partiels")}${src("calc","calculs")}</div>
+ return `<div class="stack-lg">${backBtn("S'entraîner")}${vh("Progression","Ma progression par UE",`${esc(R.sub)} · réussite calculée sur vos réponses aux cartes, partiels blancs et calculs, en donnant plus de poids aux plus récentes.`)}
+  <div class="srs-kpi pg-kpi">${src("card","cartes")}${src("partiel","partiels")}${src("calc","calculs")}</div>
   ${weak.length?`<section class="stack-sm"><h2>À revoir en priorité</h2><div class="sheet-body pg-acts">${weak.map(act).join("")}</div></section>`:""}
   ${strong.length?`<section class="stack-sm"><h2>Vos points forts</h2><div class="sheet-body pg-acts">${strong.map(x=>`<div class="pg-act"><span><b>UE ${esc(x.u[0])}</b> ${esc(x.u[1])} · ${Math.round(x.ema*100)} %</span></div>`).join("")}</div></section>`:""}
-  ${!ranked.length?`<div class="callout"><b>Encore peu de réponses</b><p>Faites quelques quiz, une séance de cartes ou un partiel blanc : vos résultats par UE apparaîtront ici.</p></div>`:""}
+  ${!ranked.length?`<div class="callout"><b>Encore peu de réponses</b><p>Faites une séance de cartes, un partiel blanc ou quelques calculs : vos résultats par UE apparaîtront ici.</p></div>`:""}
   <section class="stack-sm"><h2>${r==="2009"?"Par compétence":"Par domaine"}</h2><div class="sheet-body pg-comps">${grp}</div>${r==="2009"?`<p class="ot-hint">Repère indicatif : chaque compétence regroupe les UE qui y contribuent le plus.</p>`:""}</section>
   <section class="stack-sm"><h2>UE du semestre ${sem}</h2>${semRows.map(row).join("")||`<p class="muted">Aucune UE.</p>`}</section>
   <details class="ot-det"><summary>Les autres UE</summary><div class="stack-sm">${otherRows.map(row).join("")}</div></details></div>`;}
@@ -215,8 +215,7 @@ function exAct(b,a){const k=b.dataset.k;
  else if(a==="cx-go"){const z=state.cxs;if(!z)return;const n=+k;if(n<0||n>=z.items.length)return;z.i=n;render();setTimeout(()=>{const i=document.getElementById("cx-in");i&&!i.disabled&&i.focus({preventScroll:true});},40);}
  else if(a==="cx-submit")cxSubmit();
  else if(a==="cx-quit"){if(state.cxs&&!state.cxs.res&&state.cxs.mode==="exam"&&!b.dataset.armed){b.dataset.armed="1";b.textContent="Toucher pour abandonner";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent="Quitter";}},3000);return;}clearInterval(EX_T.iv);state.cxs=null;render(true);}
- else if(a==="pg-cards"){const S=srsSet();if(!S.decks.includes("ue:"+k))S.decks.push("ue:"+k);store.set("srsSet",S);srsStart(srsDeckCards("ue:"+k),"UE "+k);}
- else if(a==="pg-quiz"){const r=state.ueRef;launchQuiz(QUIZ.map((q,i)=>(q.ue&&q.ue[r]||[]).includes(k)?i:-1).filter(i=>i>=0).sort(()=>Math.random()-.5).slice(0,20),"Quiz UE "+k);}
+ else if(a==="pg-cards"){const S=srsSet();if(!S.decks.includes("ue:"+k))S.decks.push("ue:"+k);store.set("srsSet",S);srsDeckGo("ue:"+k,"UE "+k);}
  else if(a==="pg-pb"){const C=pbCfg();C.scope=k;state.pbCfg=C;store.set("pbCfg",C);state.train="partiels";location.hash="entrainer/partiels";}
 }
 function exInput(t){

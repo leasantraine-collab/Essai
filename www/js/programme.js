@@ -1,5 +1,5 @@
 /* Carnet IFSI — classement automatique des contenus dans les UE du Programme.
-   Chaque contenu (cours, fiche, soin, classe thérapeutique, pathologie, question de quiz) est rangé d'après ses codes UE ;
+   Chaque contenu (cours, fiche, soin, classe thérapeutique, pathologie, question de partiel) est rangé d'après ses codes UE ;
    s'il n'en a que pour un référentiel, l'autre est déduit par correspondance ; s'il n'en a aucun, sa catégorie donne une UE par défaut.
    Tout contenu ajouté plus tard est donc classé sans intervention. Chargé après meds.js, avant app.js. */
 const ueSplit=u=>{const [x,y]=String(u||"").split("|");return {"2009":(x||"").trim().split(/\s+/).filter(Boolean),"2026":(y||"").trim().split(/\s+/).filter(Boolean)};};
@@ -44,7 +44,6 @@ function ueSummary(L){const p=[];
  if(L.nSo)p.push(L.nSo+" soin"+(L.nSo>1?"s":""));
  if(L.nMd)p.push(L.nMd+" médicament"+(L.nMd>1?"s":""));
  if(L.nPx)p.push(L.nPx+" pathologie"+(L.nPx>1?"s":""));
- if(L.q.length)p.push(plural(L.q.length,"question"));
  return p.join(" · ");}
 /* Bloc repliable d'un groupe de contenus dans la page d'une UE. */
 const ueGroup=(k,c,title,n,rows)=>{const open=(state.uePg||{})[k];
@@ -52,7 +51,7 @@ const ueGroup=(k,c,title,n,rows)=>{const open=(state.uePg||{})[k];
 /* Contenus d'une UE : cours complets en tête, puis soins, médicaments, pathologies, fiches. */
 function ueBody(code,r){const L=ueContent(code,r),dS=soDone(),dM=mdDone(),dP=pxDone(),k=r+code;
  const sec=(t,sub,h)=>h?`<section class="stack-sm"><div class="section-title"><h2>${t}</h2></div>${sub?`<p class="muted ue-note">${sub}</p>`:""}${h}</section>`:"";
- return (["4.3","B.3"].includes(code)?afBanner():"")+sec("Cours complets",L.full.length?"Cours détaillés en chapitres, avec schémas, exemples, pièges et quiz.":"",L.full.length?ueSections(L.full,"c",code):"")+
+ return (["4.3","B.3"].includes(code)?afBanner():"")+sec("Cours complets",L.full.length?"Cours détaillés en chapitres, avec schémas, exemples, pièges et questions de vérification.":"",L.full.length?ueSections(L.full,"c",code):"")+
   sec("Autres cours","",L.autres.length?`<div class="list">${L.autres.map(i=>itemRow(i,"c")).join("")}</div>`:"")+
   sec("Soins et techniques",L.nSo?`${L.nSo} soins, chacun avec fiche récap et cours détaillé.`:"",L.so.map(([s,l])=>ueGroup(k+"so"+s,SO_COL(s),SO_SEC[s].nom,l.length,()=>l.map(o=>soRow(o,false,dS)).join(""))).join(""))+
   sec("Médicaments",L.nMd?`${L.nMd} grandes fiches de classes thérapeutiques.`:"",L.md.map(([s,l])=>ueGroup(k+"md"+s,MD_COL(s),MD_SEC[s].nom,l.length,()=>l.map(o=>mdRow(o,false,dM)).join(""))).join(""))+
