@@ -466,9 +466,9 @@ function fvRender(f){
 let fvOff=null;
 function fvBind(){
  if(fvOff){fvOff();fvOff=null;}
- const art=document.querySelector(".fv");if(!art)return;
+ const art=document.querySelector(".fv,.stg-page");if(!art)return;
  const bar=document.getElementById("fv-bar"),links=[...document.querySelectorAll(".fv-toc a")],secs=links.map(a=>document.getElementById(a.dataset.sec));
- const onScroll=()=>{const h=document.documentElement,max=h.scrollHeight-h.clientHeight;bar.style.width=(max>0?Math.min(100,h.scrollTop/max*100):0)+"%";
+ const onScroll=()=>{const h=document.documentElement,max=h.scrollHeight-h.clientHeight;if(bar)bar.style.width=(max>0?Math.min(100,h.scrollTop/max*100):0)+"%";
   let cur=0;secs.forEach((s,i)=>{if(s&&s.getBoundingClientRect().top<140)cur=i;});
   links.forEach((a,i)=>a.classList.toggle("on",i===cur));
   const on=links[cur];if(on&&on.parentNode){const p=on.parentNode;const l=on.offsetLeft-p.clientWidth/2+on.clientWidth/2;if(Math.abs(p.scrollLeft-l)>40)p.scrollTo({left:l});}};

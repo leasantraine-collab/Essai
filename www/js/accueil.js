@@ -95,13 +95,13 @@ function hwCat(){if(hwCat.ok)return HW;hwCat.ok=1;Object.assign(HW,{
    return n?hwTile({act:"exam-edit",ic:IC.cal,c:"#B55E3A",big:esc(jMoins(n.ts)),lab:esc(n.nom)}):hwTile({act:"exam-edit",ic:IC.cal,c:"#B55E3A",big:"+",lab:"Ajouter mes partiels"});}},
  stage:{n:"Mon stage",d:"Compte à rebours, jour de stage et accès au carnet",g:"stage",ic:CAT_IC.stage,c:"#9A7A2E",sz:1,
   r:()=>{const S=hwStage(),act=[];
-   if(S.k==="none")return hwSec("Mon stage",`<a href="#stages">Renseigner</a>`,`<a class="list" href="#stages"><span class="li"><span class="ic tb-ic" style="--c:#9A7A2E">${CAT_IC.stage}</span><span><span class="t">Préparer mon prochain stage</span><span class="s">Dates, service, tuteur, objectifs : le compte à rebours démarre tout seul</span></span>${chev}</span></a>`);
+   if(S.k==="none")return hwSec("Mon stage",`<a href="#stages/preparer">Renseigner</a>`,`<a class="list" href="#stages/preparer"><span class="li"><span class="ic tb-ic" style="--c:#9A7A2E">${CAT_IC.stage}</span><span><span class="t">Préparer mon prochain stage</span><span class="s">Dates, service, tuteur, objectifs : le compte à rebours démarre tout seul</span></span>${chev}</span></a>`);
    if(S.k==="during")act.push(`<a class="btn" href="#carnet/journal">${IC.cal}Noter ma journée</a>`);
    act.push(`<a class="btn ghost" href="#carnet">${IC.sheet}Carnet de suivi</a>`);
-   if(S.k==="before"){const n=store.get("check",[]).length;act.push(`<a class="btn ghost" href="#stages">Check-list ${n}/${CHECKLIST.length}</a>`);}
+   if(S.k==="before"){const n=store.get("check",[]).length;act.push(`<a class="btn ghost" href="#stages/checklist">Check-list ${n}/${CHECKLIST.length}</a>`);}
    return `<div class="stack-sm">${stageCountdown().replace('id="stage-cd"','')}<div class="hw-acts">${act.join("")}</div></div>`;},
   s:()=>{const S=hwStage(),sv=S.s.service?esc(S.s.service):"";
-   if(S.k==="none")return hwTile({h:"#stages",ic:CAT_IC.stage,c:"#9A7A2E",big:"–",lab:"Mon stage : à renseigner"});
+   if(S.k==="none")return hwTile({h:"#stages/preparer",ic:CAT_IC.stage,c:"#9A7A2E",big:"–",lab:"Mon stage : à renseigner"});
    if(S.k==="before")return hwTile({h:"#stages",ic:CAT_IC.stage,c:"#9A7A2E",big:esc(jMoins(S.start)),lab:`avant le stage${sv?" · "+sv:""}`});
    if(S.k==="after")return hwTile({h:"#stages",ic:CAT_IC.stage,c:"#9A7A2E",big:"Fini",lab:`Stage terminé${sv?" · "+sv:""}`});
    return hwTile({h:"#carnet/journal",ic:CAT_IC.stage,c:"#9A7A2E",big:`J${S.jour}${S.tot?`<small>/${S.tot}</small>`:""}`,lab:`de stage${sv?" · "+sv:""}`});}},

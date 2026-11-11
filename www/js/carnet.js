@@ -75,7 +75,7 @@ function cnSoins(c){
 }
 function cnObjectifsSec(c){
  const objs=cnObjectifs();
- return `<div class="cn-help"><p>Vos objectifs viennent de « Mes objectifs de stage ». Faites le point chaque semaine, puis avec votre tuteur au bilan.</p><a class="link" href="#stages">Trouver des objectifs dans le guide des lieux de stage</a></div>
+ return `<div class="cn-help"><p>Vos objectifs viennent de « Mes objectifs de stage ». Faites le point chaque semaine, puis avec votre tuteur au bilan.</p><a class="link" href="#stages/services">Trouver des objectifs dans le guide des lieux de stage</a></div>
  ${objs.length?`<div class="stack-sm">${objs.map(o=>{const k=cnHash(o),v=c.obj[k]||{};return `<div class="cn-obj sheet-body"><p class="t">${esc(o)}</p>
   <div class="seg three" role="group" aria-label="Avancée">${CN_STATUTS.map(([s,l])=>`<button data-act="cn-statut" data-k="${k}" data-f="${s}" aria-pressed="${(v.statut||"todo")===s}">${l}</button>`).join("")}</div>
   <div class="cd-form">${cnField(`obj|${k}|note`,"Actions menées, exemples, remarques du tuteur",v.note)}</div></div>`}).join("")}</div>`:`<div class="empty">Aucun objectif pour l'instant. Ajoutez-en ci-dessous ou depuis le guide des lieux de stage.</div>`}
