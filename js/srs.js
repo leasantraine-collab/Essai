@@ -48,7 +48,8 @@ function srsAuto(){
   add(k,"ci","qa",`Contre-indications et précautions : ${s.n} ?`,srsList(s.ci,5),c);
   add(k,"mat","qa",`Quel matériel préparer : ${s.n} ?`,srsList(s.mat,10),c);
   add(k,"surv","qa",`Que surveiller : ${s.n} ?`,srsList(s.surv,5),c);
-  add(k,"err","qa",`Quelles erreurs éviter : ${s.n} ?`,srsList(s.err,4),c);});
+  add(k,"err","qa",`Quelles erreurs éviter : ${s.n} ?`,srsList(s.err,4),c);
+  srsOwnQ(add,k,s.q,c);});
  /* Médicaments */
  (typeof MEDS!=="undefined"?MEDS:[]).forEach(m=>{const k="m:"+m.i,c=m.n;
   add(k,"d","qa",`Que sont les ${m.n.charAt(0).toLowerCase()+m.n.slice(1)} ?`,srsList(m.d,1)[0],c);
@@ -58,7 +59,8 @@ function srsAuto(){
   add(k,"ci","qa",`Contre-indications : ${m.n} ?`,srsList(m.ci,5),c);
   add(k,"ef","qa",`Effets indésirables : ${m.n} ?`,srsList(m.ef,6),c);
   add(k,"sv","qa",`Surveillance infirmière : ${m.n} ?`,[...srsList(m.sc,4),...srsList(m.sb,2)],c);
-  add(k,"err","qa",`Quelles erreurs éviter : ${m.n} ?`,srsList(m.err,4),c);});
+  add(k,"err","qa",`Quelles erreurs éviter : ${m.n} ?`,srsList(m.err,4),c);
+  srsOwnQ(add,k,m.q,c);});
  /* Cours */
  COURS.filter(c=>c.chap&&!c.pro).forEach(c=>{const k="c:"+c.id;
   c.chap.forEach(ch=>(ch.b||[]).forEach(b=>{
@@ -88,6 +90,9 @@ function srsAuto(){
  return SRS_AUTO;
 }
 const srsOfKey=k=>{srsCards();return SRS_BY[k]||[];};
+/* Questions de validation rédigées pour un soin ou une classe thérapeutique : bonne réponse et explication. */
+function srsOwnQ(add,k,L,ctx){(Array.isArray(L)?L:[]).forEach(q=>{if(!q||!q.o||q.o[q.a]==null||SRS_QBAD.test(q.q)||/^(toutes|aucune)/i.test(String(q.o[q.a])))return;
+ add(k,"q"+srsH(String(q.q)),"qa",(q.s?String(q.s).trim()+" ":"")+q.q,`**${String(q.o[q.a]).replace(/\*\*/g,"")}**`,ctx,q.e);});}
 
 /* ---------- Paquets ---------- */
 function srsKeyMeta(key){const [k,id]=key.split(/:(.*)/s);

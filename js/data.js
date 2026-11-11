@@ -1,4 +1,4 @@
-/* Carnet IFSI — contenus pédagogiques (catégories, UE, fiches, cours, quiz, stages, générateur de calculs).
+/* Carnet IFSI — contenus pédagogiques (catégories, UE, fiches, cours, questions, stages, générateur de calculs).
    Repris tels quels de l'artefact Carnet IFSI. */
 const store={get(k,d){try{const v=localStorage.getItem("ifsi_"+k);return v?JSON.parse(v):d}catch(e){return d}},
              set(k,v){try{localStorage.setItem("ifsi_"+k,JSON.stringify(v))}catch(e){}}};
