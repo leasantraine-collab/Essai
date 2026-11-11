@@ -203,7 +203,7 @@ function vCarnet(arg){
   <div class="chips cn-tabs" role="tablist" aria-label="Sections du carnet">${CN_SECS.map(([k,l])=>`<button class="chip" role="tab" data-act="cn-sec" data-k="${k}" aria-pressed="${k===sec}">${l}</button>`).join("")}</div>
   <div class="section-title"><h2>${CN_SECS.find(s=>s[0]===sec)[1]}</h2>${sec!=="imprimer"?`<span class="muted" id="cn-saved">Enregistré sur cet appareil</span>`:""}</div>
   <div class="stack">${body}</div>
-  <a class="btn block cn-final" href="#carnet/apercu">${IC.sheet}Voir mon carnet de suivi${cnSvc()?" · "+esc(cnSvc().nom):" personnalisé"}</a></div>`;
+  <a class="btn block cn-final" href="#carnet/apercu">${IC.sheet}${cnSvc()?"Mon carnet · "+esc(cnSvc().nom):"Voir mon carnet de suivi"}</a></div>`;
 }
 function carnetCard(){
  const c=carnet(),S=cnStats(c);

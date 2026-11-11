@@ -41,7 +41,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.53 · 11 novembre 2026";
+const APP_VERSION="1.54 · 11 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,
@@ -364,7 +364,7 @@ function vUE(code){
  const L=ueContent(u[0],state.ueRef),sm=ueSummary(L);
  return `<div class="stack-lg">${backBtn("Programme")}
   <header class="vh"><span class="eyebrow">UE ${u[0]} · ${esc(R.groups[u[2]])}</span><h1>${esc(u[1])}</h1><p class="muted">Enseignée en ${u[3].map(s=>"S"+s).join(", ")} · ${esc(R.sub)}</p>${sm?`<p class="ue-sum">${esc(sm)}</p>`:""}</header>
-  ${(n=>n?`<button class="btn block" data-act="srs-deckgo" data-k="ue:${esc(u[0])}" data-l="UE ${esc(u[0])}">${SRS_IC.cards}Réviser cette UE en cartes · ${plural(n,"carte")}</button>`:"")(srsDeckCards("ue:"+u[0]).length)}
+  ${(n=>n?`<button class="btn block" data-act="srs-deckgo" data-k="ue:${esc(u[0])}" data-l="UE ${esc(u[0])}">${SRS_IC.cards}Réviser l'UE en cartes<span class="btn-n" aria-label="${plural(n,"carte")}">${n}</span></button>`:"")(srsDeckCards("ue:"+u[0]).length)}
   ${ueBody(u[0],state.ueRef)}
   ${!sm?`<div class="empty">Les contenus de cette UE arrivent bientôt.</div>`:""}</div>`;
 }

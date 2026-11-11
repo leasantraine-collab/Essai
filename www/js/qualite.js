@@ -129,7 +129,7 @@ function qInput(t){if(t.id==="q-rel-nom"){const R=qRelecteur();R.nom=t.value.sli
 const qPedago=(txt)=>`<p class="q-pedago">${QIC.info}<span><b>Outil pédagogique.</b> ${txt||"Pour s'entraîner et réviser : ne l'utilisez pas pour préparer ou administrer un traitement réel. En pratique, la prescription, le protocole du service et la double vérification font foi."} <a href="#legal/pedagogie">En savoir plus</a></span></p>`;
 function qWelcome(){if(store.get("bienvenue","")===QUAL_CGU_V)return "";
  return `<section class="nt-ask q-welcome"><span class="nt-ic">${QIC.shield}</span><div><b>Bienvenue dans Carnet IFSI</b><small>Un outil pour réviser et préparer vos stages. Il ne remplace ni vos cours, ni les protocoles de votre établissement, ni la prescription médicale. Vos données restent sur votre appareil.</small>
-  <div class="nt-btns"><button class="btn" data-act="q-welcome-ok">J'ai compris</button><a class="link" href="#legal/cgu">Conditions d'utilisation</a><a class="link" href="#legal/confidentialite">Confidentialité</a></div></div></section>`;}
+  <div class="nt-btns"><button class="btn" data-act="q-welcome-ok">J'ai compris</button><span class="q-links"><a class="link" href="#legal/cgu">Conditions d'utilisation</a><a class="link" href="#legal/confidentialite">Confidentialité</a></span></div></div></section>`;}
 
 /* ---------- Pages ---------- */
 const QP=(h,body)=>`<section class="stack-sm"><h2>${h}</h2><div class="sheet-body q-legal">${body}</div></section>`;

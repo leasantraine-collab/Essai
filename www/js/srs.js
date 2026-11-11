@@ -35,47 +35,47 @@ function srsAuto(){
  const cloze=(key,txt,ctx)=>{if(!txt||!srsBold(txt))return;const bold=(txt.match(/\*\*(.+?)\*\*/g)||[]).join("").length;if(bold>txt.length*.6)return;add(key,"z"+srsH(txt),"cloze",txt,txt,ctx);};
  /* Pathologies */
  (typeof PATHOS!=="undefined"?PATHOS:[]).forEach(p=>{const k="p:"+p.i,c=p.n;
-  add(k,"d","qa",`Qu'est-ce que : ${p.n} ?`,p.d,c);
-  add(k,"sg","qa",`Quels sont les signes de : ${p.n} ?`,srsList(p.sg),c);
-  add(k,"al","qa",`Quels signes d'alerte surveiller : ${p.n} ?`,srsList(p.al),c);
-  add(k,"co","qa",`Quelles sont les complications : ${p.n} ?`,srsList(p.co),c);
-  add(k,"tt","qa",`Quels traitements : ${p.n} ?`,srsList(p.tt,5),c);
-  add(k,"ri","qa",`Quel rôle infirmier : ${p.n} ?`,srsList(p.ri),c);});
+  add(k,"d","qa",`Définition : ${p.n}`,p.d,c);
+  add(k,"sg","qa",`Signes cliniques : ${p.n}`,srsList(p.sg),c);
+  add(k,"al","qa",`Signes d'alerte à surveiller : ${p.n}`,srsList(p.al),c);
+  add(k,"co","qa",`Complications : ${p.n}`,srsList(p.co),c);
+  add(k,"tt","qa",`Traitements : ${p.n}`,srsList(p.tt,5),c);
+  add(k,"ri","qa",`Rôle infirmier : ${p.n}`,srsList(p.ri),c);});
  /* Soins */
  (typeof SOINS!=="undefined"?SOINS:[]).forEach(s=>{const k="s:"+s.i,c=s.n;
-  add(k,"d","qa",`En quoi consiste le soin : ${s.n} ?`,srsList(s.d,1)[0],c);
-  add(k,"ind","qa",`Indications : ${s.n} ?`,srsList(s.ind,5),c);
-  add(k,"ci","qa",`Contre-indications et précautions : ${s.n} ?`,srsList(s.ci,5),c);
-  add(k,"mat","qa",`Quel matériel préparer : ${s.n} ?`,srsList(s.mat,10),c);
-  add(k,"surv","qa",`Que surveiller : ${s.n} ?`,srsList(s.surv,5),c);
-  add(k,"err","qa",`Quelles erreurs éviter : ${s.n} ?`,srsList(s.err,4),c);
+  add(k,"d","qa",`En quoi consiste le soin : ${s.n}`,srsList(s.d,1)[0],c);
+  add(k,"ind","qa",`Indications : ${s.n}`,srsList(s.ind,5),c);
+  add(k,"ci","qa",`Contre-indications et précautions : ${s.n}`,srsList(s.ci,5),c);
+  add(k,"mat","qa",`Matériel à préparer : ${s.n}`,srsList(s.mat,10),c);
+  add(k,"surv","qa",`Surveillance : ${s.n}`,srsList(s.surv,5),c);
+  add(k,"err","qa",`Erreurs à éviter : ${s.n}`,srsList(s.err,4),c);
   srsOwnQ(add,k,s.q,c);});
  /* Médicaments */
  (typeof MEDS!=="undefined"?MEDS:[]).forEach(m=>{const k="m:"+m.i,c=m.n;
-  add(k,"d","qa",`Que sont les ${m.n.charAt(0).toLowerCase()+m.n.slice(1)} ?`,srsList(m.d,1)[0],c);
-  add(k,"ma","qa",`Mécanisme d'action : ${m.n} ?`,srsList(m.ma,1)[0],c);
-  add(k,"dci","qa",`Principaux médicaments : ${m.n} ?`,(m.m||[]).slice(0,6).map(x=>`**${x.dci}**${x.br?` (${x.br})`:""}`),c);
-  add(k,"ind","qa",`Indications : ${m.n} ?`,srsList(m.ind,5),c);
-  add(k,"ci","qa",`Contre-indications : ${m.n} ?`,srsList(m.ci,5),c);
-  add(k,"ef","qa",`Effets indésirables : ${m.n} ?`,srsList(m.ef,6),c);
-  add(k,"sv","qa",`Surveillance infirmière : ${m.n} ?`,[...srsList(m.sc,4),...srsList(m.sb,2)],c);
-  add(k,"err","qa",`Quelles erreurs éviter : ${m.n} ?`,srsList(m.err,4),c);
+  add(k,"d","qa",`Définition : ${m.n}`,srsList(m.d,1)[0],c);
+  add(k,"ma","qa",`Mécanisme d'action : ${m.n}`,srsList(m.ma,1)[0],c);
+  add(k,"dci","qa",`Principaux médicaments : ${m.n}`,(m.m||[]).slice(0,6).map(x=>`**${x.dci}**${x.br?` (${x.br})`:""}`),c);
+  add(k,"ind","qa",`Indications : ${m.n}`,srsList(m.ind,5),c);
+  add(k,"ci","qa",`Contre-indications : ${m.n}`,srsList(m.ci,5),c);
+  add(k,"ef","qa",`Effets indésirables : ${m.n}`,srsList(m.ef,6),c);
+  add(k,"sv","qa",`Surveillance infirmière : ${m.n}`,[...srsList(m.sc,4),...srsList(m.sb,2)],c);
+  add(k,"err","qa",`Erreurs à éviter : ${m.n}`,srsList(m.err,4),c);
   srsOwnQ(add,k,m.q,c);});
  /* Cours */
  COURS.filter(c=>c.chap&&!c.pro).forEach(c=>{const k="c:"+c.id;
   c.chap.forEach(ch=>(ch.b||[]).forEach(b=>{
    if(b.t==="verif")(b.items||[]).forEach(([q,a])=>add(k,"v"+srsH(q),"qa",q,a,c.titre));
-   else if(b.t==="table")(b.rows||[]).slice(0,8).forEach(([x,y])=>{if(x&&y&&String(x).length<80)add(k,"t"+srsH(x+y),"qa",`${ch.h} · ${String(x).replace(/\*\*/g,"")} ?`,y,c.titre);});
-   else if(b.t==="valeurs")(b.rows||[]).forEach(r=>add(k,"n"+srsH(r[0]),"qa",`Valeur normale : ${r[0]}${r[1]?` (${r[1]})`:""} ?`,r[2],c.titre));
-   else if(b.t==="signes"&&b.e)add(k,"g"+srsH(b.e),"qa",`${b.e} : quels signes ?`,srsList(b.items,8),c.titre);
+   else if(b.t==="table")(b.rows||[]).slice(0,8).forEach(([x,y])=>{if(x&&y&&String(x).length<80)add(k,"t"+srsH(x+y),"qa",`${ch.h} · ${String(x).replace(/\*\*/g,"")}`,y,c.titre);});
+   else if(b.t==="valeurs")(b.rows||[]).forEach(r=>add(k,"n"+srsH(r[0]),"qa",`Valeur normale : ${r[0]}${r[1]?` (${r[1]})`:""}`,r[2],c.titre));
+   else if(b.t==="signes"&&b.e)add(k,"g"+srsH(b.e),"qa",`Signes : ${b.e}`,srsList(b.items,8),c.titre);
    else if(b.t==="retenir")cloze(k,b.txt,c.titre);}));
   c.ess.forEach(e=>cloze(k,e,c.titre));});
  /* Fiches */
  FICHES.filter(f=>f.pages).forEach(f=>{const k="f:"+f.id;
   f.pages.flat().forEach(b=>{
-   if(b.t==="def"&&b.txt)add(k,"d"+srsH(b.h||""),"qa",/^définition/i.test(b.h||"")?`Définir : ${f.titre} ?`:`${f.titre} · ${b.h} ?`,b.txt,f.titre);
-   else if(b.t==="valeurs")(b.rows||[]).forEach(r=>add(k,"n"+srsH(r[0]+r[1]),"qa",`${f.titre} · ${r[0]}${r[1]?" "+r[1]:""} ?`,r[2],f.titre));
-   else if(b.t==="signes")add(k,"g"+srsH(b.h||""),"qa",`${f.titre} · ${b.h} ?`,srsList(b.items,8),f.titre);
+   if(b.t==="def"&&b.txt)add(k,"d"+srsH(b.h||""),"qa",/^définition/i.test(b.h||"")?`Définir : ${f.titre} ?`:`${f.titre} · ${b.h}`,b.txt,f.titre);
+   else if(b.t==="valeurs")(b.rows||[]).forEach(r=>add(k,"n"+srsH(r[0]+r[1]),"qa",`${f.titre} · ${r[0]}${r[1]?" "+r[1]:""}`,r[2],f.titre));
+   else if(b.t==="signes")add(k,"g"+srsH(b.h||""),"qa",`${f.titre} · ${b.h}`,srsList(b.items,8),f.titre);
    else if(b.t==="retenir")cloze(k,b.txt,f.titre);});});
  /* Urgences AFGSU : conduite à tenir et erreurs à éviter */
  const afUe=(QUIZ.find(q=>q.af)||{}).ue;
@@ -224,12 +224,12 @@ function vSrsHome(){
  const days=[...Array(14)].map((_,i)=>{const d=t-13+i,v=L[d];return `<i class="${v?v[0]>=30?"h3":v[0]>=10?"h2":"h1":""}" title="${v?v[0]:0}"></i>`;}).join("");
  return `<div class="stack-lg">
   <section class="srs-today"><div class="srs-t-top"><span class="nt-ic">${SRS_IC.cards}</span><div><span class="eyebrow">Aujourd'hui</span><h2>${S.decks.length?(cn.due+nwToday?`${plural(cn.due+nwToday,"carte")} à réviser`:"Tout est à jour"):"Choisissez vos paquets"}</h2>
-   <small>${S.decks.length?`${cn.due} à revoir · ${nwToday} nouvelle${nwToday>1?"s":""} (sur ${S.news} par jour)`:"Des cartes sont déjà prêtes pour chaque contenu, et vous pouvez écrire les vôtres. Commencez par ce que vous avez déjà étudié."}</small></div></div>
-   ${S.decks.length?`<button class="btn block" data-act="srs-go" ${cn.due+nwToday?"":"disabled"}>${IC.play}Commencer la révision</button>`:`<button class="btn block" data-act="srs-quick" ${nSt?"":"disabled"}>${IC.play}${nSt?`Réviser ce que j'ai étudié · ${plural(nSt,"carte")}`:"Étudiez d'abord une fiche ou un cours"}</button>`}
-   <div class="srs-kpi"><span><b>${streak}</b>jour${streak>1?"s":""} d'affilée</span><span><b>${known}</b>carte${known>1?"s":""} apprise${known>1?"s":""}</span><span><b>${r30[0]?Math.round(r30[1]/r30[0]*100)+" %":"–"}</b>réussite sur 30 j</span></div>
+   <small>${S.decks.length?`${cn.due} à revoir · ${nwToday} nouvelle${nwToday>1?"s":""} (sur ${S.news} par jour)`:`Des cartes sont déjà prêtes pour chaque contenu, et vous pouvez écrire les vôtres. ${nSt?"Commencez par ce que vous avez déjà étudié.":"Choisissez un paquet : une UE, une spécialité, un type de contenu."}`}</small></div></div>
+   ${S.decks.length?`<button class="btn block" data-act="srs-go" ${cn.due+nwToday?"":"disabled"}>${IC.play}Commencer la révision</button>`:(nSt?`<button class="btn block" data-act="srs-quick">${IC.play}Réviser ce que j'ai étudié<span class="btn-n" aria-label="${plural(nSt,"carte")}">${nSt}</span></button>`:`<button class="btn ghost block" data-act="srs-pick">Choisir un paquet de cartes</button>`)}
+   <div class="srs-kpi"><span><b>${streak}</b>jour${streak>1?"s":""} d'affilée</span><span><b>${known}</b>carte${known>1?"s":""} apprise${known>1?"s":""}</span><span><b>${r30[0]?Math.round(r30[1]/r30[0]*100)+" %":"–"}</b>réussite sur 30&nbsp;jours</span></div>
    <div class="srs-heat" aria-label="Activité des 14 derniers jours">${days}</div></section>
   ${typeof mcHome==="function"?mcHome():""}
-  <section class="stack-sm"><div class="section-title"><h2>Mes paquets</h2><span class="muted">${S.decks.length?plural(sel.length,"carte"):""}</span></div>
+  <section class="stack-sm" id="srs-decks"><div class="section-title"><h2>Mes paquets</h2><span class="muted">${S.decks.length?plural(sel.length,"carte"):""}</span></div>
    <p class="muted">Touchez un paquet pour l'ajouter à vos révisions quotidiennes. ${all.length.toLocaleString("fr-FR")} cartes disponibles.</p>
    <div class="chips wrapchips">${typeof mcPaquets==="function"?mcPaquets().map(([p,n])=>chip("mes:"+p,n)).join(""):""}${nSt?chip("etudies",nSt):""}${nFav?chip("favoris",nFav):""}${semUE.map(d=>[d,srsDeckCards(d).length]).filter(x=>x[1]).map(([d,n])=>chip(d,n)).join("")}</div>
    ${groups}
@@ -249,6 +249,7 @@ function srsKeysGo(keys,label){return srsStart(srsKeysCards(keys),label,{lim:20,
 function srsDeckGo(deck,label){return srsStart(srsDeckCards(deck),label||srsDeckLabel(deck),{lim:20,cram:true});}
 function srsAct(b,a){const k=b.dataset.k;
  if(a==="srs-go")srsStart(srsSelCards(),"Révision du jour");
+ else if(a==="srs-pick"){const e=document.getElementById("srs-decks");if(e)e.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});}
  else if(a==="srs-quick"){const S=srsSet();S.decks=["etudies"];store.set("srsSet",S);srsStart(srsSelCards(),"Révision du jour");}
  else if(a==="srs-deckgo")srsDeckGo(k,b.dataset.l);
  else if(a==="srs-content"){const it=ctItem(...k.split(/:(.*)/s).slice(0,2));srsStart(srsOfKey(k),it?it.titre:"Cartes",{all:true,cram:true});}

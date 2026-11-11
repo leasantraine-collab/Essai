@@ -134,7 +134,7 @@
 :root[data-theme="dark"] .a4-prev .a4-print{box-shadow:0 0 0 14px #fff,0 4px 22px 14px rgba(0,0,0,.5)}
 
 /* Accès depuis un cours ou une fiche récap */
-.a4-cta{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border-radius:16px;border:1.5px dashed color-mix(in srgb,var(--accent) 55%,var(--line));background:color-mix(in srgb,var(--accent) 7%,var(--surface));color:var(--ink);text-decoration:none;margin:4px 0 2px}
+.a4-cta{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border-radius:16px;border:1px solid color-mix(in srgb,var(--accent) 26%,var(--line));background:color-mix(in srgb,var(--accent) 6%,var(--surface));box-shadow:var(--shadow);color:var(--ink);text-decoration:none;margin:4px 0 2px}
 .a4-cta-ic{width:38px;height:38px;border-radius:11px;background:var(--accent);color:#fff;display:grid;place-items:center}
 .a4-cta svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .a4-cta>svg{color:var(--accent)}
