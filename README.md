@@ -105,7 +105,7 @@ npx cap sync
 
 ## Icône et écran de démarrage
 
-Sources dans `resources/`. Pour régénérer : `npm run assets`.
+Sources dans `resources/` : `icon.svg` (icône complète) et `icon-foreground.svg` (livre ouvert et tracé de pouls, premier plan Android), d'où sont tirés les PNG. Pour régénérer les icônes et écrans de démarrage Android et iOS : `npm run assets`. Les icônes du site sont dans `www/icons/`.
 
 ---
 
