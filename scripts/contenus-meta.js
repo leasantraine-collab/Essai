@@ -21,7 +21,16 @@ for(const f of files){
  for(const [k,list] of Object.entries(S))for(const [id,obj] of list){const key=k+":"+id;if(seen[key]!==obj){seen[key]=obj;owner[key]=f;}}
 }
 const dateOf={};
-for(const f of new Set(Object.values(owner))){let d="";try{d=execSync(`git log -1 --follow --format=%cs -- "${f}"`,{cwd:ROOT}).toString().trim();}catch(e){}dateOf[f]=d||new Date().toISOString().slice(0,10);}
+/* Date de la dernière vraie modification du fichier : les déplacements (git mv) et les commits de restructuration ne comptent pas.
+   contenus/cours-data.js a été extrait de www/js/data.js (commit 07380b1) : avant cela, son historique est celui de data.js. */
+const ORIGINE={"contenus/cours-data.js":"07380b1^ -- www/js/data.js"};
+/* Commits de restructuration sans changement de contenu (séparation gratuit / réservé) : ignorés */
+const IGNORE=["07380b1"];
+const gdate=a=>{try{const L=execSync(`git log --format="%h %cs" ${a}`,{cwd:ROOT}).toString().trim().split("\n").filter(Boolean);
+ const ok=L.find(l=>!IGNORE.some(h=>l.startsWith(h)));return ok?ok.split(" ")[1]:"";}catch(e){return "";}};
+for(const f of new Set(Object.values(owner))){let d=gdate(`--follow --diff-filter=AM -- "${f}"`);
+ if(ORIGINE[f]){const since=gdate(`--diff-filter=M 07380b1.. -- "${f}"`);d=since||gdate(ORIGINE[f]);}
+ dateOf[f]=d||new Date().toISOString().slice(0,10);}
 const byDate={};for(const [key,f] of Object.entries(owner))(byDate[dateOf[f]]=byDate[dateOf[f]]||[]).push(key);
 const js=`/* Généré par scripts/contenus-meta.js — ne pas modifier à la main.
    Date de dernière modification de chaque contenu (f fiche, c cours, p pathologie, s soin, m médicament). */
