@@ -8,7 +8,11 @@
    La bibliothèque Supabase (js/vendor/supabase.js) n'est chargée qu'au besoin. Les jetons de session et la clé sont
    rangés hors du préfixe ifsi_ : ils ne partent pas dans les sauvegardes. */
 const AC_ON=()=>!!(typeof SB_URL!=="undefined"&&SB_URL&&SB_KEY);
-const AC_PK="carnet_pk",AC_SESS="carnet-sb";
+const AC_PK="carnet_pk",AC_SESS="carnet-sb",AC_ABO="carnet_abo";
+/* Jours de grâce ajoutés par le serveur après la fin d'une période payée (voir supabase/functions/stripe-webhook) */
+const AC_GRACE=3*864e5;
+const acInfo=()=>{try{return JSON.parse(localStorage.getItem(AC_ABO)||"null");}catch(e){return null;}};
+const acWebPay=()=>!!(typeof ABO_PRIX!=="undefined"&&ABO_PRIX&&!(typeof isNative!=="undefined"&&isNative));
 let acSb=null,acUser=null,acWait=null;
 const acSt=()=>state.ac||(state.ac={mode:"login",email:"",busy:false,msg:"",err:""});
 const acPk=()=>{try{return JSON.parse(localStorage.getItem(AC_PK)||"null");}catch(e){return null;}};
@@ -39,7 +43,9 @@ function acErr(e){const m=String(e&&(e.message||e.error_description||e)||"");
   [/token has expired|invalid.*(token|otp)|otp.*(expired|invalid)/i,"Code incorrect ou expiré. Demandez-en un nouveau si besoin."],[/rate limit|too many|security purposes/i,"Trop de tentatives : réessayez dans quelques minutes."],
   [/unable to validate email|invalid email|email address .* is invalid/i,"Adresse e-mail invalide."],[/failed to fetch|network|réseau|load failed/i,"Pas de connexion internet : réessayez une fois connecté·e."],
   [/code_inconnu/,"Ce code n'existe pas. Vérifiez-le (lettres et chiffres, tirets compris)."],[/code_expire/,"Ce code n'est plus valable."],[/code_deja_utilise/,"Vous avez déjà utilisé ce code sur ce compte."],
-  [/code_epuise/,"Ce code a déjà été utilisé le nombre de fois prévu."],[/non_connecte|jwt|not authenticated/i,"Session expirée : reconnectez-vous."],[/pas_abonne/,"Pas d'abonnement en cours sur ce compte."]];
+  [/code_epuise/,"Ce code a déjà été utilisé le nombre de fois prévu."],[/non_connecte|jwt|not authenticated/i,"Session expirée : reconnectez-vous."],[/pas_abonne/,"Pas d'abonnement en cours sur ce compte."],
+  [/abonnement_actif/,"Résiliez d'abord votre abonnement mensuel (Gérer mon abonnement) : vous pourrez supprimer le compte une fois la période payée terminée."],
+  [/non-2xx|FunctionsHttpError|FunctionsFetchError|edge function|paiement_indisponible/i,"Le paiement n'est pas disponible pour le moment. Réessayez dans un instant."]];
  const f=T.find(([r])=>r.test(m));return f?f[1]:"Une erreur est survenue. Réessayez dans un instant.";}
 
 /* ---------- Clé des contenus réservés ---------- */
@@ -48,6 +54,7 @@ async function acKid(k){try{const b=Uint8Array.from(atob(k),c=>c.charCodeAt(0)),
 /* Demande la clé au serveur. Renvoie "on" (abonnement en cours, clé gardée), "off" (pas d'abonnement) ou lève une erreur réseau. */
 async function acRefresh(){
  const sb=await acLoad();const {data:{session}}=await sb.auth.getSession();if(!session){localStorage.removeItem(AC_PK);return "off";}
+ try{const r=await sb.rpc("mon_abonnement");if(!r.error)localStorage.setItem(AC_ABO,JSON.stringify(r.data||null));}catch(e){}
  const {data,error}=await sb.rpc("cle_contenus");
  if(error){if(/pas_abonne/.test(error.message)){localStorage.removeItem(AC_PK);return "off";}throw error;}
  localStorage.setItem(AC_PK,JSON.stringify({k:data.k,u:data.u,kid:await acKid(data.k),uid:session.user.id}));return "on";}
@@ -56,7 +63,15 @@ function acReload(msg){toast(msg);setTimeout(()=>location.reload(),900);}
 
 /* Au démarrage : met à jour l'accès en arrière-plan (fin d'abonnement, nouvelle clé). */
 function acBoot(){
- if(!AC_ON()||!acHasSession()||!navigator.onLine)return;
+ if(!AC_ON())return;
+ /* Retour de la page de paiement Stripe : le serveur reçoit la confirmation en quelques secondes */
+ if(/[?&]paiement=ok/.test(location.search)){try{history.replaceState(null,"",location.pathname+location.hash);}catch(e){}
+  toast("Paiement reçu : activation de votre abonnement…");let n=0;
+  const poll=()=>acRefresh().then(r=>{if(r==="on"&&acActive()){if(!PREM.on)acReload("Abonnement actif : bienvenue !");else render();}else if(++n<12)setTimeout(poll,2500);else toast("Activation plus longue que prévu : touchez « Mettre à jour mon accès » dans un instant");}).catch(()=>{if(++n<12)setTimeout(poll,2500);});
+  setTimeout(poll,1500);return;}
+ /* Appli Android ou iPhone : au retour au premier plan (après un abonnement pris sur le site, par exemple) */
+ try{const A=typeof plug==="function"&&plug("App");if(A)A.addListener("appStateChange",s=>{if(s&&s.isActive&&acHasSession()&&navigator.onLine)acRefresh().then(r=>{if(r==="on"&&!PREM.on&&acActive())acReload("Abonnement actif : ouverture des contenus");}).catch(()=>{});});}catch(e){}
+ if(!acHasSession()||!navigator.onLine)return;
  setTimeout(()=>{acRefresh().then(r=>{
   if(r==="on"&&!PREM.on&&acActive())acReload("Abonnement actif : ouverture des contenus");
   else if(r==="off"&&PREM.on&&PREM.src==="compte")toast("Votre abonnement est terminé : les contenus réservés se fermeront au prochain lancement");
@@ -65,10 +80,27 @@ function acBoot(){
 
 /* ---------- Écran Mon compte ---------- */
 function acStatusCard(){
- const on=PREM.on||acActive(),u=acUntil();
- return `<section class="ac-status ${on?"on":""}"><span class="ac-ic">${on?IC.check:QIC.shield}</span><div>
-  <b>${PREM.src==="ouvert"?"Phase de lancement : tout est ouvert":on?"Abonnement actif":"Version gratuite"}</b>
-  <small>${PREM.src==="ouvert"?"Pendant le lancement, tous les contenus sont accessibles sans abonnement.":on&&u?`Accès à tous les contenus jusqu'au ${esc(acDate(u))}.`:"Fiches récap, un contenu complet par rubrique, quelques cartes par jour, outils et stage de base."}</small></div></section>`;}
+ const on=PREM.on||acActive(),u=acUntil(),i=acInfo(),m=i&&i.mensuel,fin=m&&i.periode_fin?new Date(Date.parse(i.periode_fin)-AC_GRACE).toISOString():null;
+ const t=PREM.src==="ouvert"?"Phase de lancement : tout est ouvert":m&&i.statut==="past_due"?"Paiement refusé":m&&i.resilie?"Abonnement résilié":m?"Abonnement mensuel actif":on?"Abonnement actif":"Version gratuite";
+ const s=PREM.src==="ouvert"?"Pendant le lancement, tous les contenus sont accessibles sans abonnement."
+  :m&&i.statut==="past_due"?"Le dernier prélèvement n'a pas abouti : mettez à jour votre carte dans « Gérer mon abonnement » pour garder l'accès."
+  :m&&i.resilie&&fin?`Aucun nouveau prélèvement. Accès à tous les contenus jusqu'au ${esc(acDate(fin))}.`
+  :m&&fin?`Renouvelé automatiquement chaque mois · prochain prélèvement vers le ${esc(acDate(fin))}. Résiliable à tout moment.`
+  :on&&u?`Accès à tous les contenus jusqu'au ${esc(acDate(u))}.`:"Fiches récap, un contenu complet par rubrique, quelques cartes par jour, outils et stage de base.";
+ return `<section class="ac-status ${on&&!(m&&i.statut==="past_due")?"on":""}"><span class="ac-ic">${on?IC.check:QIC.shield}</span><div><b>${t}</b><small>${s}</small></div></section>`;}
+/* Abonnement mensuel : souscrire (site web) ou gérer (carte, factures, résiliation) */
+function acSubBlock(logged){
+ const i=acInfo(),m=i&&i.mensuel,st=acSt(),em=st.where==="abo"&&(st.err||st.msg)?`<p class="ac-msg${st.err?" err":""}" role="${st.err?"alert":"status"}">${esc(st.err||st.msg)}</p>`:"";
+ if(logged&&m)return `<section class="stack-sm"><h2>Abonnement mensuel</h2>${!(typeof isNative!=="undefined"&&isNative)
+  ?`<div class="list"><button class="li" data-act="ac-gerer" style="grid-template-columns:minmax(0,1fr)"><span><span class="t" style="color:var(--brand)">Gérer mon abonnement</span><span class="s">Carte bancaire, factures, résiliation</span></span></button></div>
+   ${em}<p class="muted">La résiliation prend effet à la fin du mois en cours : vous gardez l'accès jusque-là, sans nouveau prélèvement.</p>`
+  :`<p class="muted">Pour changer de carte, voir vos factures ou résilier : connectez-vous sur le site web de Carnet IFSI, Réglages › Mon compte.</p>`}</section>`;
+ if(!acWebPay()||PREM.src==="ouvert")return "";
+ return `<section class="ac-offer"><span class="eyebrow">Abonnement mensuel</span><b class="ac-price">${esc(ABO_PRIX)}<small> par mois</small></b>
+  <p>Tous les contenus et outils, sans limite. Sans engagement : résiliable à tout moment, en quelques clics.</p>
+  ${logged?`<button class="btn block" data-act="ac-sub" ${st.busy?"disabled":""}>${st.busy?"Ouverture du paiement…":"S'abonner"}</button>
+  ${em}${i&&i.client?`<button class="link" data-act="ac-gerer">Mes factures et paiements</button>`:""}<small class="muted">Paiement sécurisé par Stripe. Renouvelé chaque mois jusqu'à résiliation.</small>`
+  :`<small class="muted">Créez un compte ou connectez-vous ci-dessous pour vous abonner.</small>`}</section>`;}
 function acPerks(){
  const L=[["Tous les cours détaillés","pathologies, soins, médicaments, cours d'UE, anatomie, mémoire"],["« Comprendre en images » et vidéos des gestes",""],
   ["Cartes de révision sans limite","et partiels blancs de 20 à 40 questions"],["Tous les niveaux de calculs","et l'épreuve « 10 calculs en 30 min »"],
@@ -77,11 +109,12 @@ function acPerks(){
 function vCompte(){
  const st=acSt(),head=`${backBtn("Réglages")}${vh("Réglages","Mon compte",AC_ON()?"Votre compte sert seulement à l'abonnement : votre progression, votre carnet et vos notes restent sur cet appareil.":"")}`;
  if(!AC_ON())return `<div class="stack-lg">${head}${acStatusCard()}<div class="callout"><b>Les comptes arrivent bientôt.</b><p>Vous pourrez créer un compte et activer un abonnement avec un code d'accès.</p></div>${acPerks()}</div>`;
- const msg=st.err?`<p class="ac-msg err" role="alert">${esc(st.err)}</p>`:st.msg?`<p class="ac-msg" role="status">${esc(st.msg)}</p>`:"";
+ const msgAll=st.err?`<p class="ac-msg err" role="alert">${esc(st.err)}</p>`:st.msg?`<p class="ac-msg" role="status">${esc(st.msg)}</p>`:"";
+ const msgAt=w=>(st.where||"form")===w?msgAll:"",msg=msgAt("form");
  const dis=st.busy?"disabled":"";
  if(acUser){
-  return `<div class="stack-lg">${head}${acStatusCard()}
-   <section class="stack-sm"><h2>Code d'accès</h2><form id="ac-code-form" class="cd-form sheet-body" autocomplete="off">
+  return `<div class="stack-lg">${head}${acStatusCard()}${acSubBlock(true)}
+   <section class="stack-sm"><h2>${acWebPay()?"Vous avez un code d'accès ?":"Code d'accès"}</h2><form id="ac-code-form" class="cd-form sheet-body" autocomplete="off">
     <label for="ac-code">Saisissez votre code<input id="ac-code" placeholder="IFSI-XXXX-XXXX" autocapitalize="characters" spellcheck="false" maxlength="24" required></label>
     ${msg}<button class="btn block" ${dis}>${st.busy?"Vérification…":"Activer le code"}</button></form>
     <p class="muted">Un code ajoute des jours d'abonnement à ce compte. Il s'utilise une seule fois par compte.</p></section>
@@ -90,7 +123,7 @@ function vCompte(){
     <div class="set-row"><span>Adresse e-mail</span><span class="muted ac-mail">${esc(acUser.email||"")}</span></div>
     <button class="li" data-act="ac-refresh" style="grid-template-columns:minmax(0,1fr)"><span><span class="t" style="color:var(--brand)">Mettre à jour mon accès</span><span class="s">Après un achat ou un code activé sur un autre appareil</span></span></button>
     <button class="li" data-act="ac-out" style="grid-template-columns:minmax(0,1fr)"><span><span class="t" style="color:var(--brand)">Se déconnecter</span><span class="s">Les contenus réservés se ferment sur cet appareil</span></span></button>
-    <button class="li" data-act="ac-del" style="grid-template-columns:minmax(0,1fr)"><span><span class="t" style="color:var(--bad)">Supprimer mon compte</span><span class="s">Efface le compte et l'abonnement restant ; vos données sur l'appareil ne bougent pas</span></span></button></div></section>
+    <button class="li" data-act="ac-del" style="grid-template-columns:minmax(0,1fr)"><span><span class="t" style="color:var(--bad)">Supprimer mon compte</span><span class="s">Efface le compte et l'accès restant ; un abonnement mensuel se résilie d'abord. Vos données sur l'appareil ne bougent pas</span></span></button></div>${msgAt("compte")}</section>
    <p class="disclaimer">Voir les <a href="#legal/cgu">conditions d'utilisation</a> et la <a href="#legal/confidentialite">confidentialité</a>.</p></div>`;
  }
  const seg=`<div class="seg" role="group" aria-label="Compte"><button data-act="ac-mode" data-k="login" aria-pressed="${["login","forgot","reset"].includes(st.mode)}">Se connecter</button><button data-act="ac-mode" data-k="signup" aria-pressed="${["signup","verify"].includes(st.mode)}">Créer un compte</button></div>`;
@@ -110,11 +143,11 @@ function vCompte(){
   <label for="ac-otp">Code reçu par e-mail<input id="ac-otp" inputmode="numeric" autocomplete="one-time-code" maxlength="8" required></label>
   <label for="ac-pw">Nouveau mot de passe (8 caractères minimum)<input id="ac-pw" type="password" autocomplete="new-password" minlength="8" required></label>${msg}
   <button class="btn block" ${dis}>${st.busy?"Enregistrement…":"Changer le mot de passe"}</button></form>`;
- return `<div class="stack-lg">${head}${acStatusCard()}${seg}${form}${acPerks()}</div>`;
+ return `<div class="stack-lg">${head}${acStatusCard()}${acSubBlock(false)}${seg}${form}${acPerks()}</div>`;
 }
 
 /* ---------- Actions ---------- */
-async function acRun(fn,ok){const st=acSt();st.busy=true;st.err="";st.msg="";render();
+async function acRun(fn,ok,where="form"){const st=acSt();st.busy=true;st.err="";st.msg="";st.where=where;render();
  try{await fn(await acLoad());if(ok)ok();}catch(e){st.err=acErr(e);}finally{st.busy=false;render();}}
 function acSubmit(f){
  const st=acSt(),v=id=>{const e=document.getElementById(id);return e?e.value.trim():"";};
@@ -140,14 +173,16 @@ function acSubmit(f){
 }
 function acAct(b,a){
  const st=acSt();
+ if(a==="ac-sub"||a==="ac-gerer")return acRun(async sb=>{const {data,error}=await sb.functions.invoke("paiement",{body:{action:a==="ac-sub"?"abonner":"gerer"}});
+   if(error)throw error;if(!data||!data.url)throw new Error("paiement_indisponible");location.href=data.url;},null,"abo");
  if(a==="ac-mode"){st.mode=b.dataset.k;st.err="";st.msg="";render();setTimeout(()=>{const i=document.querySelector("#app form input");i&&i.focus();},50);}
  else if(a==="ac-resend")acRun(async sb=>{const {error}=await sb.auth.resend({type:"signup",email:st.email});if(error)throw error;st.msg="Nouveau code envoyé.";});
- else if(a==="ac-refresh")acRun(async()=>{const r=await acRefresh();if(r==="on"&&!PREM.on)acReload("Abonnement actif : ouverture des contenus");else st.msg=r==="on"?"Accès à jour.":"Pas d'abonnement en cours sur ce compte.";});
- else if(a==="ac-out")acRun(async sb=>{await sb.auth.signOut().catch(()=>{});acUser=null;const was=PREM.on&&PREM.src==="compte";localStorage.removeItem(AC_PK);
-   if(was)acReload("Déconnecté·e");else toast("Déconnecté·e");});
+ else if(a==="ac-refresh")acRun(async()=>{const r=await acRefresh();if(r==="on"&&!PREM.on)acReload("Abonnement actif : ouverture des contenus");else st.msg=r==="on"?"Accès à jour.":"Pas d'abonnement en cours sur ce compte.";},null,"compte");
+ else if(a==="ac-out")acRun(async sb=>{await sb.auth.signOut().catch(()=>{});acUser=null;const was=PREM.on&&PREM.src==="compte";localStorage.removeItem(AC_PK);localStorage.removeItem(AC_ABO);
+   if(was)acReload("Déconnecté·e");else toast("Déconnecté·e");},null,"compte");
  else if(a==="ac-del"){if(!b.dataset.armed){b.dataset.armed="1";b.querySelector(".t").textContent="Toucher à nouveau pour supprimer définitivement";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.querySelector(".t").textContent="Supprimer mon compte";}},4000);return;}
   acRun(async sb=>{const {error}=await sb.rpc("supprimer_mon_compte");if(error)throw error;await sb.auth.signOut().catch(()=>{});acUser=null;
-   const was=PREM.on&&PREM.src==="compte";localStorage.removeItem(AC_PK);if(was)acReload("Compte supprimé");else toast("Compte supprimé");});}
+   const was=PREM.on&&PREM.src==="compte";localStorage.removeItem(AC_PK);localStorage.removeItem(AC_ABO);if(was)acReload("Compte supprimé");else toast("Compte supprimé");},null,"compte");}
 }
 /* Ligne de l'écran Réglages */
 function acSetRow(){const on=PREM.on||acActive(),u=acUntil();

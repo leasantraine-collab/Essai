@@ -758,3 +758,12 @@ a.back{text-decoration:none}
 .cn-entry.pr-locked .pr-tag{margin-top:6px;align-self:flex-start;width:max-content}
 .cn-entry.pr-locked>span:nth-child(2){display:flex;flex-direction:column}
 .cd-form label.ac-ok a{color:var(--brand);font-weight:650}
+.ac-offer{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:18px;border-radius:20px;background:linear-gradient(160deg,var(--brand-soft),var(--surface) 75%);border:1px solid color-mix(in srgb,var(--brand) 25%,var(--line));box-shadow:var(--shadow)}
+.ac-offer .eyebrow{color:var(--brand)}
+.ac-price{font-family:var(--f-display);font-size:2rem;line-height:1.1;color:var(--ink)}
+.ac-price small{font-family:var(--f-body);font-size:.95rem;font-weight:600;color:var(--muted)}
+.ac-offer p{margin:0;color:var(--ink-2);font-size:.94rem;line-height:1.5}
+.ac-offer .btn{margin-top:4px}
+.ac-offer .link{align-self:center}
+.ac-offer small.muted{font-size:.8rem;align-self:center;text-align:center}
+:root[data-theme="dark"] .ac-offer{background:linear-gradient(160deg,color-mix(in srgb,var(--brand) 14%,var(--surface)),var(--surface) 75%)}
