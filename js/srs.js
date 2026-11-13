@@ -163,6 +163,8 @@ function srsBuild(cards,opt){
  return q;}
 function srsStart(cards,label,opt){const q=srsBuild(cards,opt);
  if(!q.length){toast("Rien à réviser pour l'instant : revenez demain");return false;}
+ /* Version gratuite : quelques cartes par jour */
+ if(!premOn()){const left=premCardsLeft();if(left<=0){toast(`Vos ${PR.cartesJour} cartes gratuites du jour sont faites`);if(location.hash!=="#entrainer/cartes")location.hash="entrainer/cartes";else render();return false;}if(q.length>left)q.length=left;}
  state.srs={q,i:0,show:false,label,ok:0,ko:0,seen:0,start:Date.now(),back:location.hash};state.train="cartes";
  if(location.hash!=="#entrainer/cartes")location.hash="entrainer/cartes";else render(true);return true;}
 function srsRate(g){
@@ -172,7 +174,9 @@ function srsRate(g){
  const Lg=store.get("srsLog",{});const e=Lg[t]||[0,0];e[0]++;if(g>0)e[1]++;Lg[t]=e;Object.keys(Lg).forEach(k=>{if(+k<t-180)delete Lg[k];});store.set("srsLog",Lg);
  if(typeof exRecord==="function"&&c)exRecord("card",c.key,g>0,srsMeta(c.key).ue);
  z.seen++;if(g>0)z.ok++;else{z.ko++;const pos=Math.min(z.q.length,z.i+4);z.q.splice(pos,0,id);}
- z.i++;z.show=false;haptic(g===0?"MEDIUM":"LIGHT");render();}
+ z.i++;z.show=false;haptic(g===0?"MEDIUM":"LIGHT");
+ if(!premOn()&&premCardsLeft()<=0&&z.i<z.q.length){state.srs=null;toast(`Vos ${PR.cartesJour} cartes gratuites du jour sont faites`);}
+ render();}
 const srsMd=t=>md(String(t||""));
 /* Texte saisi par l'étudiant : retours à la ligne et listes (« - » ou « • » en début de ligne). */
 function srsRich(t){const out=[];let ul=null;
@@ -228,6 +232,7 @@ function vSrsHome(){
    ${S.decks.length?`<button class="btn block" data-act="srs-go" ${cn.due+nwToday?"":"disabled"}>${IC.play}Commencer la révision</button>`:(nSt?`<button class="btn block" data-act="srs-quick">${IC.play}Réviser ce que j'ai étudié<span class="btn-n" aria-label="${plural(nSt,"carte")}">${nSt}</span></button>`:`<button class="btn ghost block" data-act="srs-pick">Choisir un paquet de cartes</button>`)}
    <div class="srs-kpi"><span><b>${streak}</b>jour${streak>1?"s":""} d'affilée</span><span><b>${known}</b>carte${known>1?"s":""} apprise${known>1?"s":""}</span><span><b>${r30[0]?Math.round(r30[1]/r30[0]*100)+" %":"–"}</b>réussite sur 30&nbsp;jours</span></div>
    <div class="srs-heat" aria-label="Activité des 14 derniers jours">${days}</div></section>
+  ${premOn()?"":premCardsLeft()<=0?premWall({title:`Vos ${PR.cartesJour} cartes du jour sont faites`,text:"Revenez demain pour 10 nouvelles cartes, ou révisez sans limite avec l'abonnement."}):`<p class="pr-note">${PR_LOCK}Version gratuite : ${PR.cartesJour} cartes par jour · encore ${premCardsLeft()} aujourd'hui.</p>`}
   ${typeof mcHome==="function"?mcHome():""}
   <section class="stack-sm" id="srs-decks"><div class="section-title"><h2>Mes paquets</h2><span class="muted">${S.decks.length?plural(sel.length,"carte"):""}</span></div>
    <p class="muted">Touchez un paquet pour l'ajouter à vos révisions quotidiennes. ${all.length.toLocaleString("fr-FR")} cartes disponibles.</p>

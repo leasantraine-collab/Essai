@@ -35,12 +35,12 @@ const TOOLS=[
 let tbOpen=false,tbLast=null;
 function tbInit(){
  const rail=document.createElement("aside");rail.className="tb-rail";rail.setAttribute("aria-label","Boîte à outils");
- rail.innerHTML=`<a class="tb-head" href="#outils" title="Tous les outils">${OT_IC.box}<span>Outils</span></a>`+TOOLS.map(t=>`<a href="#outil/${t.id}" data-tool="${t.id}" title="${esc(t.n)}">${OT_IC[t.id]}<span>${esc(t.s)}</span></a>`).join("");
+ rail.innerHTML=`<a class="tb-head" href="#outils" title="Tous les outils">${OT_IC.box}<span>Outils</span></a>`+TOOLS.map(t=>`<a href="#outil/${t.id}" data-tool="${t.id}" title="${esc(t.n)}"${premToolOk(t.id)?"":' class="pr-locked"'}>${OT_IC[t.id]}<span>${esc(t.s)}</span></a>`).join("");
  const tab=document.createElement("button");tab.type="button";tab.className="tb-tab";tab.setAttribute("aria-label","Ouvrir la boîte à outils");tab.setAttribute("aria-expanded","false");tab.innerHTML=`${OT_IC.box}<span>Outils</span>`;
  const back=document.createElement("div");back.className="tb-back";
  const dr=document.createElement("div");dr.className="tb-drawer";dr.setAttribute("role","dialog");dr.setAttribute("aria-modal","true");dr.setAttribute("aria-label","Boîte à outils");dr.setAttribute("aria-hidden","true");
  dr.innerHTML=`<div class="tb-dh"><div><span class="eyebrow">Boîte à outils</span><h2>Mes outils</h2></div><button class="icon-btn" type="button" data-tb="close" aria-label="Fermer">${IC.x}</button></div>
-  <nav class="list tb-list" aria-label="Outils">${TOOLS.map(t=>`<a class="li" href="#outil/${t.id}" data-tool="${t.id}"><span class="ic tb-ic" style="--c:${t.c}">${OT_IC[t.id]}</span><span><span class="t">${esc(t.n)}</span><span class="s">${esc(t.d)}</span></span>${chev}</a>`).join("")}</nav>
+  <nav class="list tb-list" aria-label="Outils">${TOOLS.map(t=>`<a class="li" href="#outil/${t.id}" data-tool="${t.id}"><span class="ic tb-ic" style="--c:${t.c}">${OT_IC[t.id]}</span><span><span class="t">${esc(t.n)}${premToolOk(t.id)?"":" "+PR_LOCK}</span><span class="s">${esc(t.d)}</span></span>${chev}</a>`).join("")}</nav>
   <a class="btn ghost block" href="#outils">Voir la page des outils</a>`;
  document.body.append(rail,tab,back,dr);
  if(store.get("tbSeen",0))document.body.classList.add("tb-known");
@@ -72,7 +72,7 @@ function tbSync(r){
 /* ---------- Vues ---------- */
 function vOutils(){
  return `<div class="stack-lg">${vh("Boîte à outils","Mes outils","Des outils pratiques pour les cours, les stages et le mémoire. Tout ce que vous saisissez reste sur cet appareil.")}
-  <div class="ot-grid">${TOOLS.map(t=>`<a class="qa ot-tile" href="#outil/${t.id}"><span class="ic tb-ic" style="--c:${t.c}">${OT_IC[t.id]}</span><b>${esc(t.n)}</b><small>${esc(t.d)}</small></a>`).join("")}</div>
+  <div class="ot-grid">${TOOLS.map(t=>`<a class="qa ot-tile${premToolOk(t.id)?"":" pr-locked"}" href="#outil/${t.id}"><span class="ic tb-ic" style="--c:${t.c}">${OT_IC[t.id]}</span><b>${esc(t.n)}</b><small>${esc(t.d)}</small>${premToolOk(t.id)?"":prTag()}</a>`).join("")}</div>
   <p class="disclaimer">Outils d'aide à la réflexion et à l'organisation : ils ne remplacent ni la prescription, ni les protocoles du service, ni la double vérification.</p></div>`;
 }
 function vOutil(arg){

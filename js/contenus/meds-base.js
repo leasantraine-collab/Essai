@@ -31,6 +31,8 @@ const MD_SECS=[
 ];
 const MD_SEC={};MD_SECS.forEach(([id,nom,u,ico],n)=>{MD_SEC[id]={id,nom,u,ico,n};});
 const MEDS=[],MDBY={};
+/* Version publiée générée par scripts/premium.js : fiches déjà découpées (objets). */
+function MDJ(L){L.forEach(o=>{MEDS.push(o);MDBY[o.i]=o;});}
 function MD(sec,txt){
  txt.split(/\n(?==)/).forEach(b=>{b=b.trim();if(!b.startsWith("="))return;const L=b.split("\n"),h=L[0].slice(1).split("|").map(x=>x.trim());
   const o={n:h[0],i:h[1],s:sec,nn:[],d:[],ma:[],sch:null,m:[],ind:[],ci:[],ef:[],eg:[],it:[],v:[],sc:[],sb:[],p:[],edu:[],cat:[],r:[],err:[],q:[],f:[]};
