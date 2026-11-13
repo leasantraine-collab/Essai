@@ -7,6 +7,7 @@ Elle reprend l'intégralité des contenus de l'artefact *Carnet IFSI* et les com
 - **197 fiches** récap, dont 116 fiches complètes illustrées
 - **32 cours complets** (chapitres, analogies, pièges, questions de vérification)
 - **Cartes de révision** à répétition espacée, et **cartes personnelles** que l'étudiant écrit lui-même
+- **Version gratuite et abonnement** : compte, codes d'accès, contenus réservés chiffrés
 - **11 générateurs de calculs de dose** (débits, PSE, insuline, mg/kg/h, dilutions…)
 - **35 schémas** dessinés
 - Préparation aux **stages** : check-list, posture, objectifs, **18 services**
@@ -36,9 +37,15 @@ Elle reprend l'intégralité des contenus de l'artefact *Carnet IFSI* et les com
 
 ```
 www/                 l'application (HTML/CSS/JS sans compilation)
-  js/data.js         contenus d'origine de l'artefact
-  js/contenus/       contenus ajoutés (anatomie, pathologies, soins, médicaments,
-                     sciences humaines, quiz et cas, stages, calculs)
+  js/data.js         contenus d'origine de l'artefact (fiches, quiz, stages)
+  js/contenus/       contenus publiés : fiches, quiz, stages, et version gratuite
+                     des cours, pathologies, soins et médicaments (générée)
+  premium/pack.js    contenus réservés aux abonnés, chiffrés (générés)
+  js/compte.js       compte et abonnement (Supabase), js/premium.js : verrous
+contenus/            sources complètes des contenus réservés (cours, pathologies,
+                     soins, médicaments, images) et leur ordre de chargement
+scripts/premium.js   sépare gratuit et réservé, chiffre le paquet, vérifie
+supabase/schema.sql  comptes, abonnements, codes d'accès (à exécuter dans Supabase)
   js/render.js       rendu des fiches, cours et schémas
   js/app.js          navigation, vues, progression, réglages
   css/content.css    styles des contenus
@@ -89,6 +96,10 @@ Les rappels sont calculés sur l'appareil par `www/js/notifs.js` (Réglages › 
 - **Web** : le navigateur ne peut pas réveiller une page à heure fixe sans serveur d'envoi. Les rappels s'affichent quand l'appli est ouverte ou en arrière-plan, ceux manqués à la réouverture, et via la synchronisation périodique du service worker quand le navigateur la propose (Chrome Android, appli installée). Sur iPhone, il faut d'abord ajouter le site à l'écran d'accueil.
 - L'export `.ics` du planning contient les mêmes alarmes : l'agenda du téléphone prévient alors même sans l'appli.
 
+## Comptes et abonnements
+
+La version gratuite et l'abonnement (codes d'accès) sont décrits dans `docs/abonnements.md` : mise en route de Supabase, création de codes, modification des contenus. En phase de lancement, tout est ouvert et les comptes sont désactivés.
+
 ## Avant la mise en vente
 
 - Compléter l'éditeur, l'adresse, le contact et le directeur de publication dans `www/js/qualite.js` (objet `QUAL`) : les champs vides apparaissent en rouge dans les mentions légales.
@@ -97,9 +108,11 @@ Les rappels sont calculés sur l'appareil par `www/js/notifs.js` (Réglages › 
 
 ## Modifier les contenus
 
-Les contenus sont dans `www/js/data.js` et `www/js/contenus/*.js` (fiches, cours, quiz, stages, UE), les schémas dans `www/js/render.js`. Un nouveau fichier de contenus doit être ajouté dans `www/index.html` et `www/sw.js`. Après une modification :
+Les fiches, quiz et stages sont dans `www/js/data.js` et `www/js/contenus/*.js` ; les cours, pathologies, soins, médicaments et « comprendre en images » dans `contenus/` (sources complètes), les schémas dans `www/js/render.js`. Un nouveau fichier de contenus s'ajoute dans `contenus/ordre.txt`. Après une modification :
 
 ```bash
+node scripts/premium.js --ouvert      # ou --cle-fichier … une fois les contenus réservés fermés
+node scripts/contenus-meta.js
 npx cap sync
 ```
 

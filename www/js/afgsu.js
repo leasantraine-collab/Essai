@@ -116,7 +116,7 @@ function afNumbers(){
  return `<div class="af-nums">${n.map(([k,a,b])=>`<a class="af-num" href="tel:${k}"><b>${k}</b><span>${a}</span><small>${b}</small></a>`).join("")}${s.tel?`<a class="af-num af-int" href="tel:${esc(s.tel.replace(/\s/g,""))}"><b>${esc(s.tel)}</b><span>Interne</span><small>urgence vitale</small></a>`:""}</div>`;
 }
 function afBanner(){
- return `<a class="af-banner" href="#outil/urgences"><span class="af-ic">${OT_IC.urgences}</span><span><b>Urgences · fiches réflexes AFGSU</b><small>${AF.length} fiches : arrêt cardiaque, étouffement, hémorragie, malaises, traumatismes, situations exceptionnelles</small></span>${chev}</a>`;
+ return `<a class="af-banner" href="#outil/urgences"><span class="af-ic">${OT_IC.urgences}</span><span><b>Urgences · fiches réflexes AFGSU${premToolOk("urgences")?"":" "+PR_LOCK}</b><small>${AF.length} fiches : arrêt cardiaque, étouffement, hémorragie, malaises, traumatismes, situations exceptionnelles</small></span>${chev}</a>`;
 }
 function afHome(){
  return `<section class="af-home" aria-label="Urgences"><a class="af-home-top" href="#outil/urgences"><span class="af-ic">${OT_IC.urgences}</span><span><b>Urgences · AFGSU</b><small>Fiches réflexes pour réagir vite</small></span>${chev}</a>

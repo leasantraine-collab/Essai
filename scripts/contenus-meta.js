@@ -9,18 +9,19 @@ const fs=require("fs"),vm=require("vm"),path=require("path"),{execSync}=require(
 const ROOT=path.join(__dirname,".."),WWW=path.join(ROOT,"www");
 const ctx={localStorage:{getItem:()=>null,setItem(){}},document:{addEventListener(){},getElementById(){return null}},window:{addEventListener(){}},navigator:{},matchMedia:()=>({matches:false}),console};
 vm.createContext(ctx);
-const html=fs.readFileSync(path.join(WWW,"index.html"),"utf8");
-const files=[...html.matchAll(/src="(js\/[^"]+)"/g)].map(m=>m[1]).filter(f=>f.startsWith("js/contenus/")||/js\/(data|render)\.js$/.test(f));
+/* Ordre des contenus : contenus/ordre.txt (sources complètes, y compris les contenus réservés aux abonnés) */
+const files=fs.readFileSync(path.join(ROOT,"contenus/ordre.txt"),"utf8").split("\n").map(l=>l.trim()).filter(l=>l&&!l.startsWith("#"))
+ .map(l=>{const [w,f]=l.split(":");return w==="src"?"contenus/"+f:"www/"+f;}).concat(["www/js/render.js"]);
 const LISTS={f:["FICHES","id","titre"],c:["COURS","id","titre"],p:["PATHOS","i","n"],s:["SOINS","i","n"],m:["MEDS","i","n"]};
 const owner={},seen={};
 const snap=()=>{const out={};for(const [k,[arr,idk]] of Object.entries(LISTS)){let A;try{A=vm.runInContext(`typeof ${arr}!=="undefined"?${arr}:null`,ctx);}catch(e){A=null;}out[k]=A?A.map(x=>[x[idk],x]):[];}return out;};
 for(const f of files){
- vm.runInContext(fs.readFileSync(path.join(WWW,f),"utf8").replace(/^const /gm,"var ").replace(/^let /gm,"var "),ctx,{filename:f});
+ vm.runInContext(fs.readFileSync(path.join(ROOT,f),"utf8").replace(/^const /gm,"var ").replace(/^let /gm,"var "),ctx,{filename:f});
  const S=snap();
  for(const [k,list] of Object.entries(S))for(const [id,obj] of list){const key=k+":"+id;if(seen[key]!==obj){seen[key]=obj;owner[key]=f;}}
 }
 const dateOf={};
-for(const f of new Set(Object.values(owner))){let d="";try{d=execSync(`git log -1 --format=%cs -- "www/${f}"`,{cwd:ROOT}).toString().trim();}catch(e){}dateOf[f]=d||new Date().toISOString().slice(0,10);}
+for(const f of new Set(Object.values(owner))){let d="";try{d=execSync(`git log -1 --follow --format=%cs -- "${f}"`,{cwd:ROOT}).toString().trim();}catch(e){}dateOf[f]=d||new Date().toISOString().slice(0,10);}
 const byDate={};for(const [key,f] of Object.entries(owner))(byDate[dateOf[f]]=byDate[dateOf[f]]||[]).push(key);
 const js=`/* Généré par scripts/contenus-meta.js — ne pas modifier à la main.
    Date de dernière modification de chaque contenu (f fiche, c cours, p pathologie, s soin, m médicament). */

@@ -840,6 +840,8 @@ const SO_LISTE=`1. SOINS D'HYGIÈNE ET DE CONFORT
 const SO_SEC={},SO_IDX={};SO_SECS.forEach(([id,nom,cat,u],k)=>{SO_SEC[id]={id,nom,cat,u,n:k+1,names:[]};SO_IDX[k+1]=id;});
 (()=>{let cur=null;SO_LISTE.split("\n").forEach(l=>{const m=l.match(/^(\d+)\. /);if(m){cur=SO_SEC[SO_IDX[+m[1]]];return;}if(cur&&l.startsWith("- "))cur.names.push(l.slice(2).trim());});})();
 const SOINS=[],SOBY={};
+/* Version publiée générée par scripts/premium.js : fiches déjà découpées (objets). */
+function SOJ(L){L.forEach(o=>{SOINS.push(o);SOBY[o.i]=o;});}
 function SO(sec,txt){
  txt.split(/\n(?==)/).forEach(b=>{b=b.trim();if(!b.startsWith("="))return;const L=b.split("\n"),h=L[0].slice(1).split("|").map(x=>x.trim());
   const o={n:h[0],i:h[1],s:sec,st:(h[2]||"rp").split(/\s+/),nn:[],d:[],ind:[],ci:[],r:[],mat:[],prep:[],et:[],surv:[],ri:[],err:[],tr:[],T:null,edu:[],cas:null,q:[],f:[]};

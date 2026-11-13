@@ -41,7 +41,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.55 · 11 novembre 2026";
+const APP_VERSION="1.56 · 13 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,
@@ -88,7 +88,7 @@ applyTheme();
 
 /* ---------- Routage ---------- */
 const ROOTS=["accueil","reviser","entrainer","stages","programme"];
-const PARENT={mescartes:"entrainer",a4:"reviser",perso:"accueil","stage-hist":"stages",outil:"outils",outils:"accueil",med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil",notifs:"reglages",legal:"reglages",progression:"entrainer"};
+const PARENT={compte:"reglages",mescartes:"entrainer",a4:"reviser",perso:"accueil","stage-hist":"stages",outil:"outils",outils:"accueil",med:"reviser",soin:"reviser",patho:"pathos",pathos:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil",notifs:"reglages",legal:"reglages",progression:"entrainer"};
 function route(){const [v,...rest]=decodeURIComponent(location.hash.slice(1)).split("/");return {v:VIEWS[v]?v:"accueil",arg:rest.join("/")};}
 function nav(h){if(location.hash==="#"+h)render(true);else location.hash=h;}
 let depth=0;
@@ -170,7 +170,7 @@ const chev='<svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
 function itemRow(it,t){
  const done=t==="f"?reviewed().includes(it.id):studied().includes(it.id),fav=isFav(t+":"+it.id);
  const soon=t==="c"&&it.pro;
- const tag=soon?'<span class="tag soon">À venir</span>':done?`<span class="tag done">${t==="f"?"Révisée":"Étudié"}</span>`:t==="c"&&it.chap?`<span class="tag">${esc(it.duree)}</span>`:"";
+ const tag=soon?'<span class="tag soon">À venir</span>':premLocked(it)?prTag():done?`<span class="tag done">${t==="f"?"Révisée":"Étudié"}</span>`:t==="c"&&it.chap?`<span class="tag">${esc(it.duree)}</span>`:"";
  const sub=t==="f"?esc(it.theme):it.chap?`${it.chap.length} chapitres`:soon?"Contenu en préparation":`${it.sections.length} parties · ${esc(it.duree)}`;
  return `<${soon?"div":"a"} class="li" ${soon?"":`href="#${t==="f"?"fiche":"cours"}/${it.id}"`} style="--c:${CAT[it.cat].c}${soon?";opacity:.6;cursor:default":""}"><span class="bar"></span><span><span class="t">${fav?`<span style="color:var(--gold)">★</span> `:""}${esc(it.titre)}</span><span class="s">${sub}</span></span><span class="end">${tag}${soon?"":chev}</span></${soon?"div":"a"}>`;
 }
@@ -232,6 +232,7 @@ function vFiche(id){
 }
 function vCoursView(id){
  const c=COURS.find(x=>x.id===id);if(!c||c.pro)return notFound();
+ if(premLocked(c))return premGuard({v:"cours",arg:id});
  store.set("last",{t:"c",id});state.cours=id;
  if(c.chap)return withFav(cvRender(c),"c:"+id).replace(`${SVG.back}Cours</button>`,`${SVG.back}Retour</button>`);
  const cat=CAT[c.cat];
@@ -289,8 +290,8 @@ function vStages(arg){
   ${ntAsk("stage")}
   ${afBanner()}
   ${shParcours()}
-  ${S("stg-carnet",carnetCard())}
-  ${S("stg-feuilles",feuillesCard())}
+  ${S("stg-carnet",premOn()?carnetCard():premMini("Carnet de suivi de stage","Journal de bord, soins réalisés, objectifs, bilans, heures, carnet à imprimer","#carnet"))}
+  ${S("stg-feuilles",premOn()?feuillesCard():premMini("Feuilles de travail","Recueil de données, projet de soins, planification, analyse de pratique, avec exemples","#feuille/recueil"))}
   ${S("stg-infos",stageForm())}
   <section class="stack-sm stg-a" id="stg-check"><div class="section-title"><h2>Avant le premier jour</h2><span class="muted">${done.length} / ${CHECKLIST.length}</span></div>
    <div class="progress"><i style="width:${done.length/CHECKLIST.length*100}%"></i></div>
@@ -310,6 +311,7 @@ function svcCard(sv,i){
  const blk=(lab,cls,items)=>items&&items.length?`<div class="svc-blk ${cls}"><span class="svc-lab">${lab}</span><ul class="svc-list">${items.map(x=>`<li>${md(x)}</li>`).join("")}</ul></div>`:"";
  const links=ctChips(sv.fiches);
  const isMine=stageInfo().lieu===sv.nom;
+ if(!premOn()&&i>=PR.services)return `<details class="svc pr-svc"><summary><span class="svc-t">${esc(sv.nom)}${isMine?'<span class="svc-mine">Mon stage</span>':""}</span>${PR_LOCK}</summary><div class="det-body">${premWall({title:"Guide du service : "+sv.nom,text:"Ce qu'il faut réviser, les soins rencontrés, des objectifs prêts à reprendre et les erreurs fréquentes. Les guides « "+esc(STAGES.slice(0,PR.services).map(x=>x.nom).join(" » et « "))+" » sont ouverts gratuitement."})}</div></details>`;
  return `<details class="svc" ${isMine||state.svcOpen===sv.nom?"open":""}><summary data-act="svc-open" data-k="${esc(sv.nom)}"><span class="svc-t">${esc(sv.nom)}${isMine?'<span class="svc-mine">Mon stage</span>':""}</span></summary><div class="det-body">
   ${sv.intro?`<p class="svc-intro">${md(sv.intro)}</p>`:""}
   ${blk("Pathologies à connaître","t-patho",sv.patho)}
@@ -399,6 +401,7 @@ function vRecherche(){
 function vReglages(){
  const s=settings(),seg=(name,opts)=>`<div class="seg ${opts.length===3?"three":""}">${opts.map(([k,l])=>`<button data-act="set" data-n="${name}" data-k="${k}" aria-pressed="${s[name]===k}">${l}</button>`).join("")}</div>`;
  return `<div class="stack-lg">${backBtn("Accueil")}${vh("Réglages","Préférences")}
+  ${acSetRow()}
   <div class="set-group"><span class="eyebrow">Affichage</span><div class="list">
    <div class="set-row"><span>Thème</span>${seg("theme",[["auto","Auto"],["light","Clair"],["dark","Sombre"]])}</div>
    <div class="set-row"><span>Taille du texte</span>${seg("size",[["m","Normale"],["l","Grande"]])}</div></div></div>
@@ -418,9 +421,9 @@ function vReglages(){
 }
 
 /* ---------- Rendu ---------- */
-const VIEWS={mescartes:vMesCartes,outils:vOutils,outil:vOutil,med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,"stage-hist":vStageHist,perso:vPerso,a4:vA4,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages,notifs:vNotifs,legal:vLegal,progression:vProgression};
+const VIEWS={compte:vCompte,mescartes:vMesCartes,outils:vOutils,outil:vOutil,med:vMed,soin:vSoin,pathos:vPathos,patho:vPatho,feuille:vFeuille,carnet:vCarnet,accueil:vAccueil,reviser:vReviser,fiche:vFiche,cours:vCoursView,entrainer:vEntrainer,stages:vStages,"stage-hist":vStageHist,perso:vPerso,a4:vA4,programme:vProgramme,ue:vUE,recherche:vRecherche,reglages:vReglages,notifs:vNotifs,legal:vLegal,progression:vProgression};
 ["patho","soin","med"].forEach(v=>{const f=VIEWS[v],k={patho:"p",soin:"s",med:"m"}[v];VIEWS[v]=id=>withFav(f(id),k+":"+id);});
-const TAB={mescartes:"entrainer",a4:"reviser",perso:"accueil","stage-hist":"stages",med:"reviser",soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil",notifs:"accueil",legal:"accueil",progression:"entrainer"};
+const TAB={compte:"accueil",mescartes:"entrainer",a4:"reviser",perso:"accueil","stage-hist":"stages",med:"reviser",soin:"reviser",pathos:"reviser",patho:"reviser",feuille:"stages",carnet:"stages",fiche:"reviser",cours:"reviser",ue:"programme",recherche:"accueil",reglages:"accueil",notifs:"accueil",legal:"accueil",progression:"entrainer"};
 let lastKey=null;
 const SCROLL={};
 function render(top){
@@ -428,8 +431,9 @@ function render(top){
  const r=route(),key=r.v+"/"+r.arg,moved=top&&key!==lastKey;
  if(moved&&lastKey)SCROLL[lastKey]=window.scrollY;
  if(moved)depth=ROOTS.includes(r.v)||lastKey===null?0:depth+1;
- app.innerHTML=VIEWS[r.v](r.arg);
- if(CT_ROUTE[r.v]){const h=ctFoot(r);if(h)app.insertAdjacentHTML("beforeend",h);}
+ const wall=typeof premGuard==="function"&&premGuard(r);
+ app.innerHTML=wall||VIEWS[r.v](r.arg);
+ if(CT_ROUTE[r.v]&&!wall){const h=ctFoot(r);if(h)app.insertAdjacentHTML("beforeend",h);}
  const tab=TAB[r.v]||r.v;
  document.querySelectorAll("nav.tabs a").forEach(a=>a.dataset.v===tab?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current"));
  /* Retour d'un contenu vers Réviser, le Programme ou Stages : on retrouve la position dans la page. */
@@ -438,6 +442,7 @@ function render(top){
  lastKey=key;
  if(r.v!=="accueil"&&r.v!=="perso"){state.hwEdit=false;state.hwSheet=false;}
  fvBind();pxBind();tbSync(r);
+ if(r.v==="compte")acWarm();
  if(r.v==="recherche"){const q=document.getElementById("q");if(q&&top&&!state.q)setTimeout(()=>q.focus(),60);}
 }
 
@@ -452,6 +457,7 @@ function checkCalc(show){
  const s=stats();s.exTot++;if(e.done==="ok")s.exOk++;store.set("stats",s);render();
 }
 app.addEventListener("submit",ev=>{if(ev.target.id==="calc-form"){ev.preventDefault();checkCalc(false);}
+ else if(ev.target.id.startsWith("ac-")){ev.preventDefault();acSubmit(ev.target);}
  else if(ev.target.id==="mc-form"){ev.preventDefault();mcSave(false);}
  else if(ev.target.id==="mc-imp-form"){ev.preventDefault();mcImpSubmit();}
  else if(ev.target.id==="mc-ren-form"){ev.preventDefault();mcRenSubmit(ev.target);}
@@ -496,6 +502,7 @@ app.addEventListener("click",ev=>{
  if(a.startsWith("q-")){qAct(b,a);return;}
  if(a.startsWith("srs-")){srsAct(b,a);return;}
  if(a.startsWith("mc-")){mcAct(b,a);return;}
+ if(a.startsWith("ac-")){acAct(b,a);return;}
  if(a.startsWith("pdf-")){pdfAct(b,a);return;}
  if(/^(pb|cx|pg)-/.test(a)){exAct(b,a);return;}
  if(a.startsWith("cn-")){carnetAct(b,a);return;}
@@ -596,4 +603,5 @@ tbInit();
 try{ntInit();}catch(e){}
 try{shAutoArchive();}catch(e){}
 render(true);
+try{acBoot();}catch(e){}
 try{const sp=plug("SplashScreen");sp&&setTimeout(()=>sp.hide(),120);}catch(e){}

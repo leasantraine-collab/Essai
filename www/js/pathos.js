@@ -157,6 +157,7 @@ function vPatho(id){
    <div class="px-r role"><span class="cv-lab">${SVG.check}Rôle infirmier</span><ul>${(p.ri||[]).slice(0,6).map(x=>`<li>${pmd(x)}</li>`).join("")}</ul></div>
    ${p.r?`<div class="fv-key"><h3>${SVG.bulb}À retenir</h3><p>${pmd(p.r)}</p></div>`:""}
    <button class="btn block" data-act="px-mode" data-k="cours">Lire le cours détaillé</button></div>`;
+ }else if(premLocked(p)){body=premCoursWall("de cette pathologie","px-mode");
  }else{
   toc=`<nav class="fv-toc" aria-label="Parties du cours">${secs.map((s,i)=>`<a href="#patho" data-sec="p-${i+1}"><b>${i+1}</b>${esc(s[0])}</a>`).join("")}</nav>`;
   body=secs.map((s,i)=>`<section class="fv-sec" id="p-${i+1}"><div class="fv-sh"><span class="fv-num">${String(i+1).padStart(2,"0")}</span><h2>${s[0]}</h2></div>${s[1]}</section>`).join("")+
@@ -262,7 +263,7 @@ function vSchemas(){
  const correction=E.map?`<figure class="sch-fig" style="cursor:default"><div class="sch-head"><span class="sch-kick">Correction</span><strong>${esc(M.titre)}</strong></div>${M.draw([])}</figure>`
   :`<ol class="px-order">${E.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>`;
  const groups=SPES.filter(([g])=>PEXOS.some(e=>e.spe[0]===g)).map(([g,l])=>[g,l]);
- return `<div class="stack-sm">${groups.map(([g,l])=>`<span class="eyebrow">${l}</span><div class="chips wrapchips" role="group" aria-label="${l}">${PEXOS.filter(e=>e.spe[0]===g).map(e=>`<button class="chip" data-act="px-exo" data-k="${e.id}" aria-pressed="${e.id===E.id}">${e.steps?"↕ ":""}${esc(e.titre)}</button>`).join("")}</div>`).join("")}</div>
+ return `<div class="stack-sm">${groups.map(([g,l])=>`<span class="eyebrow">${l}</span><div class="chips wrapchips" role="group" aria-label="${l}">${PEXOS.filter(e=>e.spe[0]===g).map(e=>`<button class="chip${premExoOk(e)?"":" pr-locked"}" data-act="px-exo" data-k="${e.id}" aria-pressed="${e.id===E.id}">${e.steps?"↕ ":""}${esc(e.titre)}${premExoOk(e)?"":" "+PR_LOCK}</button>`).join("")}</div>`).join("")}</div>
   <div class="calc-card"><div class="row"><span class="eyebrow">${E.map?"Schéma à compléter":"À remettre dans l'ordre"} · ${esc(E.titre)}</span>${st.done?`<span class="muted" style="font-size:.85rem">${score} / ${n}</span>`:""}</div>
    <p class="muted">${E.map?"Associez chaque numéro du schéma à la bonne structure, puis vérifiez.":esc(E.q)}</p>
    ${E.map?`<figure class="sch-fig" style="cursor:default">${M.draw(st.done?E.keys.filter((k,i)=>!ok(i)):[],E.keys)}</figure>`:""}
@@ -277,7 +278,7 @@ function pathoAct(b,a){const k=b.dataset.k;
  if(a==="px-go"){nav("reviser/pathos");return;}
  if(a==="px-mode"){state.pxMode=k;render();const t=document.querySelector(".px-head");if(t)t.scrollIntoView();return;}
  if(a==="px-done"){let d=pxDone();const on=!d.includes(k);d=on?[...d,k]:d.filter(x=>x!==k);store.set("pxdone",d);haptic();if(on)toast("Pathologie marquée comme étudiée");render();return;}
- if(a==="px-exo"){state.exo=k;state.exoAns=null;state.train="schemas";if(route().v==="entrainer")render();return;}
+ if(a==="px-exo"){const e=PEXOS.find(x=>x.id===k);if(e&&!premExoOk(e)){toast("Ce schéma est réservé aux abonnés : un schéma par spécialité est ouvert");return;}state.exo=k;state.exoAns=null;state.train="schemas";if(route().v==="entrainer")render();return;}
  if(a==="px-exo-check"){const E=PEXOS.find(e=>e.id===state.exoAns.id);if(Object.keys(state.exoAns.a).filter(i=>state.exoAns.a[i]).length<(E.map?E.keys.length:E.steps.length)){toast("Complétez toutes les cases");return;}state.exoAns.done=true;haptic();render();return;}
  if(a==="px-exo-reset"){state.exoAns=null;render();return;}
  if(a==="px-film-check"){const box=document.getElementById("pf-box"),I=PIMG[k];if(!box||!I)return;const sel=[...box.querySelectorAll("select")];

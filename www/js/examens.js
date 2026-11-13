@@ -22,7 +22,7 @@ function exRecord(src,ref,ok,ue){
 
 /* ---------- Partiels blancs ---------- */
 const PB_DEF={scope:"",n:20,sec:60,calc:true};
-const pbCfg=()=>Object.assign({},PB_DEF,state.pbCfg||store.get("pbCfg",{}));
+const pbCfg=()=>{const C=Object.assign({},PB_DEF,state.pbCfg||store.get("pbCfg",{}));if(!premOn()&&C.n>PR.partielQ)C.n=PR.partielQ;return C;};
 const pbHist=()=>store.get("pblancs",[]);
 const exUEs=()=>(UE[state.ueRef]||UE["2026"]).list;
 function pbPool(scope){const r=state.ueRef,codes=scope.startsWith("sem:")?exUEs().filter(u=>u[3].includes(+scope.slice(4))).map(u=>u[0]):[scope];
@@ -94,7 +94,7 @@ function vPbHome(){
    <div class="stack-sm"><h3>1. Sur quoi ?</h3><div class="chips wrapchips">${chip("sem:"+sem,`Tout le semestre ${sem}`)}${semUE.map(u=>chip(u[0],`UE ${u[0]}`)).join("")}</div>
     <details class="ot-det"><summary>Autres UE et semestres</summary><div class="chips wrapchips">${[1,2,3,4,5,6].filter(s=>s!==sem).map(s=>chip("sem:"+s,`Semestre ${s}`)).join("")}${other.map(u=>chip(u[0],`UE ${u[0]}`)).join("")}</div></details>
     ${C.scope?`<p class="ot-hint">${esc(pbScopeLabel(C.scope))} · ${plural(n,"question")} disponibles${withCalc?", calculs de doses compris":""}.</p>`:""}</div>
-   <div class="stack-sm"><h3>2. Combien de questions ?</h3>${otSeg("pb-n",String(C.n),[["10","10"],["20","20"],["30","30"],["40","40"]],"Nombre de questions")}</div>
+   <div class="stack-sm"><h3>2. Combien de questions ?</h3>${otSeg("pb-n",String(C.n),[["10","10"],...["20","30","40"].map(x=>[x,premOn()?x:x+" "+PR_LOCK])],"Nombre de questions")}${premOn()?"":`<small class="ot-hint">Version gratuite : partiels de 10 questions. De 20 à 40 questions avec l'abonnement.</small>`}</div>
    <div class="stack-sm"><h3>3. Combien de temps ?</h3>${otSeg("pb-sec",String(C.sec),[["45","45 s"],["60","1 min"],["90","1 min 30"],["0","Libre"]],"Temps par question")}<small class="ot-hint">Temps par question${C.sec?` : ${exMmss(C.sec*1000*C.n)} au total`:" : sans chronomètre"}.</small></div>
    ${withCalc?`<label class="chk"><input type="checkbox" data-act="pb-calc" ${C.calc?"checked":""}><span>Inclure des calculs de doses</span></label>`:""}
    <button class="btn block" data-act="pb-start" ${C.scope&&n>=10?"":"disabled"}>${EX_IC.clock}Commencer le partiel blanc</button></section>
@@ -146,12 +146,12 @@ function vCxRun(){
 function cxHome(){
  const L=cxLv(),H=cxExams(),rule=cxRule(),best=H.length?Math.max(...H.map(x=>x.ok)):null,passed=H.some(x=>x.pass);
  return `<section class="stack-sm"><div class="section-title"><h2>Progresser pas à pas</h2><span class="muted">${CX_LV.filter((_,i)=>L[i]&&L[i].pass).length} / ${CX_LV.length} niveaux</span></div>
-  <div class="cx-lvs">${CX_LV.map(([n,d],i)=>{const v=L[i]||{},open=i===0||(L[i-1]&&L[i-1].pass)||v.best;return `<button class="cx-lv${v.pass?" ok":""}" data-act="cx-lv" data-k="${i}" ${open?"":"disabled"}><span class="cx-n">${v.pass?SVG.check:open?i+1:EX_IC.lock}</span><span><b>Niveau ${i+1} · ${esc(n)}</b><small>${esc(d)}${v.best?` · meilleur score ${v.best}/10`:""}</small></span></button>`;}).join("")}</div>
+  <div class="cx-lvs">${CX_LV.map(([n,d],i)=>{const v=L[i]||{},pl=!premOn()&&i>=PR.calculsNiv,open=!pl&&(i===0||(L[i-1]&&L[i-1].pass)||v.best);return `<button class="cx-lv${v.pass?" ok":""}${pl?" pr-locked":""}" data-act="cx-lv" data-k="${i}" ${open||pl?"":"disabled"}><span class="cx-n">${v.pass&&!pl?SVG.check:open?i+1:pl?PR_LOCK:EX_IC.lock}</span><span><b>Niveau ${i+1} · ${esc(n)}${pl?" "+prTag():""}</b><small>${esc(d)}${v.best?` · meilleur score ${v.best}/10`:""}</small></span></button>`;}).join("")}</div>
   <p class="ot-hint">10 calculs par niveau, correction après chaque réponse. 9 bonnes réponses débloquent le niveau suivant.</p></section>
   <section class="cd-card cx-exam"><div class="cd-top"><span class="eyebrow">Épreuve blanche</span>${passed?`<span class="tag done">Déjà réussie</span>`:""}</div><h2>10 calculs en 30 minutes</h2>
    <p class="muted">Tous les niveaux mélangés, sans correction avant la fin. ${rule==="0"?"Validée sans aucune erreur, comme dans de nombreux IFSI.":"Validée à partir de 8 calculs justes."}${best!=null?` Meilleur résultat : ${best}/10.`:""}</p>
    ${otSeg("cx-rule",rule,[["0","Zéro faute"],["8","8 sur 10"]],"Règle de validation")}
-   <button class="btn block" data-act="cx-exam">${EX_IC.clock}Commencer l'épreuve</button></section>
+   <button class="btn block" data-act="cx-exam">${premOn()?EX_IC.clock:PR_LOCK}${premOn()?"Commencer l'épreuve":"Réservé aux abonnés"}</button></section>
   <div class="section-title"><h2>Entraînement libre</h2></div>`;}
 
 /* ---------- Chronomètre commun ---------- */
@@ -197,7 +197,7 @@ function vProgression(){
 /* ---------- Actions ---------- */
 function exAct(b,a){const k=b.dataset.k;
  if(a==="pb-scope"){const C=pbCfg();C.scope=k;state.pbCfg=C;render();}
- else if(a==="pb-n"){const C=pbCfg();C.n=+k;state.pbCfg=C;render();}
+ else if(a==="pb-n"){if(!premOn()&&+k>PR.partielQ){toast("Partiels de 20 à 40 questions : réservés aux abonnés");return;}const C=pbCfg();C.n=+k;state.pbCfg=C;render();}
  else if(a==="pb-sec"){const C=pbCfg();C.sec=+k;state.pbCfg=C;render();}
  else if(a==="pb-calc"){const C=pbCfg();C.calc=!!b.checked;state.pbCfg=C;}
  else if(a==="pb-start")pbStart();
@@ -209,6 +209,7 @@ function exAct(b,a){const k=b.dataset.k;
  else if(a==="pb-quit"){if(state.pb&&!state.pb.res&&!b.dataset.armed){b.dataset.armed="1";b.textContent="Toucher pour abandonner";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent="Quitter";}},3000);return;}clearInterval(EX_T.iv);state.pb=null;render(true);}
  else if(a==="pb-again"){state.pb=null;render(true);}
  else if(a==="pb-cards"){const S=srsSet();k.split(",").forEach(c=>{if(!S.decks.includes("ue:"+c))S.decks.push("ue:"+c);});store.set("srsSet",S);srsStart(srsSelCards(),"Révision des UE à revoir");}
+ else if((a==="cx-lv"&&!premOn()&&+k>=PR.calculsNiv)||(a==="cx-exam"&&!premOn())){toast("Réservé aux abonnés : niveaux 2 à 4 et épreuve blanche");location.hash="compte";}
  else if(a==="cx-lv")cxStart("lv",+k);
  else if(a==="cx-exam")cxStart("exam");
  else if(a==="cx-rule"){store.set("calcRule",k);render();}

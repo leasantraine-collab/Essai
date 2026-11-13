@@ -153,7 +153,7 @@ function vSoin(id){
  if(mode==="recap"){
   const box=(t,a,n)=>a.length?`<div class="px-r"><span class="cv-lab">${t}</span><ul>${a.slice(0,n).map(x=>`<li>${pmd(x)}</li>`).join("")}</ul></div>`:"";
   body=`<div class="px-recap">
-   ${typeof VID!=="undefined"&&VID[id]?vdHtml(id,{steps:false}):""}
+   ${typeof VID!=="undefined"&&VID[id]&&!premLocked(o)?vdHtml(id,{steps:false}):""}
    ${typeof rvBlock==="function"?rvBlock(id):""}
    ${a4Cta("s",id,"Ce soin en une page : étapes, surveillance, pièges")}
    <div class="px-r def"><span class="cv-lab">${SVG.info}Définition</span><p>${pmd(o.d[0]||"")}</p>${badges}</div>
@@ -161,6 +161,7 @@ function vSoin(id){
    ${o.et.length?`<div class="px-r"><span class="cv-lab">Les étapes</span><ol class="so-mini">${o.et.map(x=>`<li>${pmd(x)}</li>`).join("")}</ol></div>`:""}
    <div class="px-grid">${box("Surveillance",o.surv.map(x=>soSplit(x)[0]&&/^(avant|pendant|apr)/i.test(soSplit(x)[0])?`**${soSplit(x)[0]}** : ${soSplit(x)[1]}`:x),5)}${box("Risques",o.ri,4)}${box("Erreurs à éviter",o.err,3)}${box("Traçabilité",o.tr,3)}</div>
    <button class="btn block" data-act="so-mode" data-k="cours">Lire le cours détaillé</button></div>`;
+ }else if(premLocked(o)){body=premCoursWall("de ce soin","so-mode");
  }else{
   toc=`<nav class="fv-toc" aria-label="Parties du cours">${secs.map((s,i)=>`<a href="#soin" data-sec="s-${i+1}"><b>${i+1}</b>${esc(s[0])}</a>`).join("")}</nav>`;
   body=(typeof VID!=="undefined"&&VID[id]?vdHtml(id):"")+(typeof rvBlock==="function"?rvBlock(id):"")+secs.map((s,i)=>`<section class="fv-sec" id="s-${i+1}"><div class="fv-sh"><span class="fv-num">${String(i+1).padStart(2,"0")}</span><h2>${s[0]}</h2></div>${s[1]}</section>`).join("")+

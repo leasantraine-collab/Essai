@@ -232,6 +232,6 @@ function a4Act(b,a){
  else if(a==="a4-print"){const S=a4Sheet(b.dataset.k,b.dataset.id);if(S)a4Print(S);}
 }
 /* Bouton d'accès depuis un cours ou une fiche récap. */
-const a4Cta=(k,id,sub)=>`<a class="a4-cta" href="#a4/${k}/${encodeURIComponent(id)}"><span class="a4-cta-ic">${A4_IC.grid}</span><span><b>Version A4</b><small>${esc(sub||"L'essentiel pour réviser vite, à lire ou à imprimer")}</small></span>${A4_IC.print}</a>`;
+const a4Cta=(k,id,sub)=>`<a class="a4-cta${typeof premRec==="function"&&!premOn()&&premLocked(premRec(k,id))?" pr-locked":""}" href="#a4/${k}/${encodeURIComponent(id)}"><span class="a4-cta-ic">${A4_IC.grid}</span><span><b>Version A4${typeof premRec==="function"&&!premOn()&&premLocked(premRec(k,id))?" "+PR_LOCK:""}</b><small>${esc(sub||"L'essentiel pour réviser vite, à lire ou à imprimer")}</small></span>${A4_IC.print}</a>`;
 /* Liste des fiches visuelles des cours d'une catégorie (Réviser › Fiches). */
 const a4List=(L,col)=>L.length?`<div class="list a4-list"><div class="a4-lh">${A4_IC.grid}<span>Fiches visuelles des cours · 1 page A4</span></div>${L.map(x=>`<a class="li" href="#a4/c/${x.id}" style="--c:${col}"><span class="bar"></span><span><span class="t">${esc(x.titre)}</span><span class="s">L'essentiel du cours en une page, à imprimer</span></span><span class="end"><span class="tag a4-tag">A4</span>${chev}</span></a>`).join("")}</div>`:"";

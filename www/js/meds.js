@@ -59,6 +59,7 @@ function vMed(id){
    <div class="px-grid">${box("Indications",o.ind,4)}${box("Effets indésirables graves",o.eg.length?o.eg:o.ef,4)}${box("Surveillance",[...o.sc.slice(0,3),...o.sb.slice(0,2)],5)}${box("Contre-indications",o.ci,3)}</div>
    ${o.r.length?`<div class="px-r md-r"><span class="cv-lab">${SVG.bulb}L'essentiel</span><ul>${o.r.map(x=>`<li>${pmd(x)}</li>`).join("")}</ul></div>`:""}
    <button class="btn block" data-act="md-mode" data-k="cours">Lire le cours détaillé</button></div>`;
+ }else if(premLocked(o)){body=premCoursWall("de cette classe","md-mode");
  }else{
   const all=secs;
   toc=`<nav class="fv-toc" aria-label="Parties de la fiche">${all.map((s,i)=>`<a href="#med" data-sec="s-${i+1}"><b>${i+1}</b>${esc(s[0])}</a>`).join("")}</nav>`;
