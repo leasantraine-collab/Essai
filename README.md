@@ -7,7 +7,7 @@ Elle reprend l'intégralité des contenus de l'artefact *Carnet IFSI* et les com
 - **197 fiches** récap, dont 116 fiches complètes illustrées
 - **32 cours complets** (chapitres, analogies, pièges, questions de vérification)
 - **Cartes de révision** à répétition espacée, et **cartes personnelles** que l'étudiant écrit lui-même
-- **Version gratuite et abonnement** : compte, codes d'accès, contenus réservés chiffrés
+- **Version gratuite et abonnement** : compte, abonnement mensuel par carte (Stripe, résiliable à tout moment), codes d'accès, contenus réservés chiffrés
 - **11 générateurs de calculs de dose** (débits, PSE, insuline, mg/kg/h, dilutions…)
 - **35 schémas** dessinés
 - Préparation aux **stages** : check-list, posture, objectifs, **18 services**
@@ -46,6 +46,7 @@ contenus/            sources complètes des contenus réservés (cours, patholog
                      soins, médicaments, images) et leur ordre de chargement
 scripts/premium.js   sépare gratuit et réservé, chiffre le paquet, vérifie
 supabase/schema.sql  comptes, abonnements, codes d'accès (à exécuter dans Supabase)
+supabase/functions/  paiement Stripe et réception des événements (fonctions Supabase)
   js/render.js       rendu des fiches, cours et schémas
   js/app.js          navigation, vues, progression, réglages
   css/content.css    styles des contenus

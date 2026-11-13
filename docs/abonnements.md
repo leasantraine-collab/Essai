@@ -9,7 +9,7 @@ Carnet IFSI a deux versions dans la même appli :
   - le niveau 1 des calculs et un schéma à compléter par spécialité ;
   - les outils Repères et normes, Projet de soins guidé, Bloc-notes et Chrono ;
   - pour le stage : compte à rebours, infos du stage, check-list, sac, posture, objectifs et 2 guides de services.
-- **Abonnés** : tout le reste (cours détaillés, « Comprendre en images », vidéos, cartes et partiels sans limite, tous les calculs, carnet de suivi, feuilles de travail, tous les outils, fiches A4).
+- **Abonnés** (abonnement mensuel par carte, ou code d'accès) : tout le reste (cours détaillés, « Comprendre en images », vidéos, cartes et partiels sans limite, tous les calculs, carnet de suivi, feuilles de travail, tous les outils, fiches A4).
 
 La répartition se règle dans deux fichiers :
 - `www/js/premium.js`, objet `PR` : outils gratuits, nombre de cartes par jour, etc.
@@ -58,6 +58,66 @@ La répartition se règle dans deux fichiers :
    - la garder hors du dépôt, par exemple dans un gestionnaire de mots de passe ;
    - à partir de ce moment, seuls les abonnés ouvrent les contenus réservés.
 6. Dans `www/js/qualite.js`, changer `QUAL_CGU_V` : le message d'accueil, avec les nouvelles conditions, réapparaît alors à chaque utilisateur.
+
+## Abonnement mensuel par carte (Stripe)
+
+L'abonnement se renouvelle automatiquement chaque mois, jusqu'à ce que l'abonné le résilie.
+- **Résiliation :** en quelques clics, depuis Réglages › Mon compte › Gérer mon abonnement. Elle prend effet à la fin du mois payé.
+- **Paiement :** sur la page sécurisée de Stripe. La carte, les factures et la résiliation passent par l'espace client Stripe.
+- **Le serveur :** deux fonctions Supabase.
+  - `supabase/functions/paiement` ouvre la page de paiement ou l'espace client.
+  - `supabase/functions/stripe-webhook` reçoit de Stripe les paiements, renouvellements, échecs et résiliations, et met à jour la date de fin d'accès.
+- **Paiement refusé :** l'accès est gardé 3 jours de plus, le temps que Stripe retente le prélèvement.
+- **Applis Android et iPhone :** l'achat se fait sur le site web, car les boutiques interdisent d'y vendre un abonnement payé ailleurs. Dans les applis, l'abonné se connecte simplement avec son compte, et les contenus s'ouvrent.
+
+### Mise en place (une fois)
+
+1. **Compte Stripe** sur [stripe.com](https://stripe.com) :
+   - activer le compte : identité, SIRET, IBAN pour recevoir les paiements ;
+   - tout tester d'abord en **mode test**, avec la carte 4242 4242 4242 4242.
+2. **Produit et prix**, dans *Catalogue de produits* :
+   - créer le produit « Carnet IFSI » avec un **prix récurrent mensuel**, par exemple 4,99 € ;
+   - noter l'identifiant du prix (`price_…`).
+3. **Conditions de vente**, dans *Paramètres*, puis *Informations publiques* : renseigner l'adresse des conditions d'utilisation, `https://…/Essai/#legal/cgu`. La page de paiement demande de les accepter, avec la demande d'accès immédiat.
+4. **Espace client**, dans *Paramètres*, puis *Billing*, puis *Portail client* :
+   - autoriser la résiliation, **« à la fin de la période de facturation »** ;
+   - autoriser la mise à jour du moyen de paiement et l'historique des factures.
+5. **Factures** :
+   - en micro-entreprise sans TVA, ajouter dans le pied de facture la mention « TVA non applicable, art. 293 B du CGI » ;
+   - activer l'envoi des reçus par e-mail.
+6. **Fonctions Supabase**, dans *Edge Functions*, puis *Deploy a new function*, puis *Via Editor* :
+   - créer `paiement` et y coller `supabase/functions/paiement/index.ts` ;
+   - créer `stripe-webhook` et y coller `supabase/functions/stripe-webhook/index.ts` ;
+   - pour `stripe-webhook`, **désactiver « Enforce JWT verification »** : Stripe n'a pas de compte, il signe ses envois et la fonction vérifie cette signature.
+7. **Webhook**, dans Stripe, *Développeurs*, puis *Webhooks*, puis *Ajouter une destination* :
+   - adresse : `https://<projet>.supabase.co/functions/v1/stripe-webhook` ;
+   - événements : `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`, `invoice.payment_failed` ;
+   - noter le **secret de signature** (`whsec_…`).
+8. **Secrets**, dans Supabase, *Edge Functions*, puis *Secrets* :
+
+   | Nom | Valeur |
+   |---|---|
+   | `STRIPE_SECRET_KEY` | clé secrète Stripe (`sk_test_…`, puis `sk_live_…`) |
+   | `STRIPE_PRICE_ID` | `price_…` |
+   | `STRIPE_WEBHOOK_SECRET` | `whsec_…` |
+   | `SITE_URL` | adresse du site web, par exemple `https://leasantraine-collab.github.io/Essai` |
+
+9. **Dans l'appli** :
+   - dans `www/js/compte-config.js`, mettre le prix affiché, identique à celui de Stripe : `var ABO_PRIX="4,99 €";` ;
+   - dans `www/js/qualite.js`, objet `QUAL`, renseigner le **médiateur de la consommation**, obligatoire pour vendre à des particuliers.
+10. **Essai complet en mode test**, avant de passer Stripe en mode réel avec les clés `live` :
+    - s'abonner sur le site avec la carte 4242… : les contenus s'ouvrent ;
+    - résilier dans « Gérer mon abonnement » : l'accès reste jusqu'à la fin du mois ;
+    - avec la carte 4000 0000 0000 0341 : le paiement est refusé.
+
+### Suivi
+
+```sql
+-- Abonnés mensuels et état
+select u.email, a.stripe_statut, a.stripe_resilie, a.stripe_jusqu_au
+from public.abonnements a join auth.users u on u.id = a.user_id
+where a.stripe_abonnement is not null order by a.stripe_jusqu_au desc;
+```
 
 ## Codes d'accès
 

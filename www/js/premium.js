@@ -26,7 +26,7 @@ function premWall(o={}){
  return `<section class="pr-wall" aria-label="${esc(t)}"><span class="pr-ic">${PR_LOCK}</span>
   <span class="eyebrow">Réservé aux abonnés</span><h2>${esc(t)}</h2>
   ${o.text?`<p>${o.text}</p>`:""}${o.teaser||""}
-  <div class="pr-btns"><a class="btn block" href="#compte">${AC_ON()&&acHasSession()?"J'ai un code d'accès":"Débloquer avec un abonnement"}</a>
+  <div class="pr-btns"><a class="btn block" href="#compte">${acWebPay()?`S'abonner · ${esc(ABO_PRIX)} par mois`:typeof isNative!=="undefined"&&isNative&&AC_ON()?"Se connecter ou activer un code":AC_ON()&&acHasSession()?"J'ai un code d'accès":"Débloquer avec un abonnement"}</a>
   ${o.free?(o.free.act?`<button class="link" data-act="${o.free.act}" data-k="${o.free.k}">${esc(o.free.l)}</button>`:`<a class="link" href="${o.free[0]}">${esc(o.free[1])}</a>`):""}</div></section>`;}
 
 /* Pages entières réservées : renvoie la page « réservé » ou null */

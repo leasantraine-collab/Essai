@@ -56,10 +56,40 @@ insert into public.secrets(nom, valeur)
 -- Fonctions appelées par l'appli (compte connecté)
 -- ---------------------------------------------------------------------------
 
--- Date de fin de l'abonnement du compte connecté (null : version gratuite)
+-- ---------------------------------------------------------------------------
+-- Abonnement mensuel payé par carte (Stripe) : renouvelé chaque mois sauf résiliation.
+-- L'accès va jusqu'à la plus tardive des deux dates : codes / jours offerts, ou fin de la période payée.
+-- ---------------------------------------------------------------------------
+alter table public.abonnements alter column jusqu_au drop not null;
+alter table public.abonnements add column if not exists stripe_abonnement text;
+alter table public.abonnements add column if not exists stripe_statut      text;
+alter table public.abonnements add column if not exists stripe_jusqu_au   timestamptz;
+alter table public.abonnements add column if not exists stripe_resilie    boolean not null default false;
+
+create table if not exists public.stripe_clients (
+  user_id  uuid primary key references auth.users(id) on delete cascade,
+  client   text not null unique
+);
+alter table public.stripe_clients enable row level security;   -- aucune règle : invisible depuis l'appli
+
+-- Date de fin de l'accès du compte connecté (null : version gratuite)
 create or replace function public.mon_acces() returns timestamptz
 language sql stable security definer set search_path = public as $$
-  select jusqu_au from public.abonnements where user_id = auth.uid();
+  select greatest(jusqu_au, stripe_jusqu_au) from public.abonnements where user_id = auth.uid();
+$$;
+
+-- État détaillé pour l'écran « Mon compte »
+create or replace function public.mon_abonnement() returns json
+language sql stable security definer set search_path = public as $$
+  select json_build_object(
+    'jusqu_au', greatest(a.jusqu_au, a.stripe_jusqu_au),
+    'codes_jusqu_au', a.jusqu_au,
+    'mensuel', a.stripe_abonnement is not null and a.stripe_statut in ('active','trialing','past_due') and a.stripe_jusqu_au > now(),
+    'statut', a.stripe_statut,
+    'periode_fin', a.stripe_jusqu_au,
+    'resilie', a.stripe_resilie,
+    'client', exists (select 1 from public.stripe_clients c where c.user_id = a.user_id))
+  from public.abonnements a where a.user_id = auth.uid();
 $$;
 
 -- Utiliser un code d'accès : ajoute ses jours à l'abonnement (à partir d'aujourd'hui ou de la fin en cours)
@@ -91,7 +121,7 @@ language plpgsql stable security definer set search_path = public as $$
 declare fin timestamptz;
 begin
   if auth.uid() is null then raise exception 'non_connecte'; end if;
-  select jusqu_au into fin from public.abonnements where user_id = auth.uid();
+  select greatest(jusqu_au, stripe_jusqu_au) into fin from public.abonnements where user_id = auth.uid();
   if fin is null or fin < now() then raise exception 'pas_abonne'; end if;
   return json_build_object('k', (select valeur from public.secrets where nom = 'cle_contenus'), 'u', fin);
 end $$;
@@ -101,10 +131,17 @@ create or replace function public.supprimer_mon_compte() returns void
 language plpgsql security definer set search_path = public, auth as $$
 begin
   if auth.uid() is null then raise exception 'non_connecte'; end if;
+  -- Un abonnement mensuel en cours doit d'abord être résilié (sinon les prélèvements continueraient)
+  if exists (select 1 from public.abonnements where user_id = auth.uid() and stripe_abonnement is not null
+             and stripe_statut in ('active','trialing','past_due') and not stripe_resilie) then
+    raise exception 'abonnement_actif';
+  end if;
   delete from auth.users where id = auth.uid();
 end $$;
 
 revoke all on function public.mon_acces()              from public, anon;
+revoke all on function public.mon_abonnement()         from public, anon;
+grant execute on function public.mon_abonnement()       to authenticated;
 revoke all on function public.utiliser_code(text)       from public, anon;
 revoke all on function public.cle_contenus()            from public, anon;
 revoke all on function public.supprimer_mon_compte()    from public, anon;
@@ -157,3 +194,46 @@ begin
   return fin;
 end $$;
 revoke all on function public.offrir_jours(text, int) from public, anon, authenticated;
+
+-- ---------------------------------------------------------------------------
+-- Réservé aux fonctions serveur (supabase/functions) : clé « service_role »
+-- ---------------------------------------------------------------------------
+
+-- Client Stripe d'un compte : le lit, ou l'enregistre s'il est fourni
+create or replace function public.client_stripe(p_user uuid, p_client text default null) returns text
+language plpgsql security definer set search_path = public as $$
+declare c text;
+begin
+  select client into c from public.stripe_clients where user_id = p_user;
+  if c is null and p_client is not null then
+    insert into public.stripe_clients(user_id, client) values (p_user, p_client)
+      on conflict (user_id) do update set client = excluded.client returning client into c;
+  end if;
+  return c;
+end $$;
+
+-- Compte d'un client Stripe
+create or replace function public.compte_stripe(p_client text) returns uuid
+language sql stable security definer set search_path = public as $$
+  select user_id from public.stripe_clients where client = p_client;
+$$;
+
+-- Mise à jour de l'abonnement mensuel à chaque événement Stripe (création, renouvellement, résiliation, échec de paiement)
+create or replace function public.maj_abonnement_stripe(p_user uuid, p_abonnement text, p_statut text, p_fin timestamptz, p_resilie boolean)
+returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not exists (select 1 from auth.users where id = p_user) then return; end if;
+  insert into public.abonnements(user_id, jusqu_au, stripe_abonnement, stripe_statut, stripe_jusqu_au, stripe_resilie)
+    values (p_user, null, p_abonnement, p_statut, p_fin, coalesce(p_resilie, false))
+    on conflict (user_id) do update
+      set stripe_abonnement = excluded.stripe_abonnement, stripe_statut = excluded.stripe_statut,
+          stripe_jusqu_au = excluded.stripe_jusqu_au, stripe_resilie = excluded.stripe_resilie, maj = now();
+end $$;
+
+revoke all on function public.client_stripe(uuid, text)                                   from public, anon, authenticated;
+revoke all on function public.compte_stripe(text)                                         from public, anon, authenticated;
+revoke all on function public.maj_abonnement_stripe(uuid, text, text, timestamptz, boolean) from public, anon, authenticated;
+grant execute on function public.client_stripe(uuid, text)                                   to service_role;
+grant execute on function public.compte_stripe(text)                                         to service_role;
+grant execute on function public.maj_abonnement_stripe(uuid, text, text, timestamptz, boolean) to service_role;
