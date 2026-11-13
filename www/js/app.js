@@ -41,7 +41,7 @@ const CAT_IC={
 };
 const catIc=id=>`<span class="ic" style="--c:${CAT[id].c}">${CAT_IC[id]||IC.sheet}</span>`;
 
-const APP_VERSION="1.57 · 13 novembre 2026";
+const APP_VERSION="1.58 · 13 novembre 2026";
 
 /* ---------- État ---------- */
 let state={fiche:null,cours:null,filter:"all",calcType:"gravite",ex:null,

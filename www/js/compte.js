@@ -108,7 +108,7 @@ function acPerks(){
  return `<section class="stack-sm"><h2>Avec l'abonnement</h2><ul class="ac-perks">${L.map(([t,s])=>`<li>${IC.check}<span><b>${t}</b>${s?` <small>${s}</small>`:""}</span></li>`).join("")}</ul></section>`;}
 function vCompte(){
  const st=acSt(),head=`${backBtn("Réglages")}${vh("Réglages","Mon compte",AC_ON()?"Votre compte sert seulement à l'abonnement : votre progression, votre carnet et vos notes restent sur cet appareil.":"")}`;
- if(!AC_ON())return `<div class="stack-lg">${head}${acStatusCard()}<div class="callout"><b>Les comptes arrivent bientôt.</b><p>Vous pourrez créer un compte et activer un abonnement avec un code d'accès.</p></div>${acPerks()}</div>`;
+ if(!AC_ON())return `<div class="stack-lg">${head}${acStatusCard()}<div class="callout"><b>Les comptes arrivent bientôt.</b><p>Vous pourrez créer un compte et vous abonner${typeof ABO_PRIX!=="undefined"&&ABO_PRIX?` pour ${esc(ABO_PRIX)} par mois, sans engagement,`:""} ou activer un code d'accès.</p></div>${acPerks()}</div>`;
  const msgAll=st.err?`<p class="ac-msg err" role="alert">${esc(st.err)}</p>`:st.msg?`<p class="ac-msg" role="status">${esc(st.msg)}</p>`:"";
  const msgAt=w=>(st.where||"form")===w?msgAll:"",msg=msgAt("form");
  const dis=st.busy?"disabled":"";
